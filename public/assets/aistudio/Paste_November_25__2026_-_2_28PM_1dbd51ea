@@ -1,0 +1,246 @@
+Follow your own execution-plan.md §13 rule: do not ask a coding agent to
+Build **NahaShield** (by NahaLabs) — a complete, production-structured, Render-deployable full-stack web application for South African life and funeral insurance fraud prevention, consent integrity, and post-payout financial recovery.
+
+Build the ENTIRE application now in one cohesive codebase ready to push to GitHub and deploy on **Render** (`render.yaml` included).
+
+---
+
+### 1. TECH STACK & RENDER DEPLOYMENT SETUP
+- **Framework:** Next.js 15 (App Router) + TypeScript (strict) + Tailwind CSS + Lucide Icons.
+- **Database:** PostgreSQL (Render Managed Postgres via `DATABASE_URL`) using Drizzle ORM or Prisma, with automatic schema migration and idempotent synthetic seeding on startup (`npm run build && npm start`).
+- **Environment Banner:** Show a clean, non-intrusive top bar:
+  `DEVELOPMENT / DEMO ENVIRONMENT (RENDER) · SYNTHETIC DATA ONLY · PRODUCTION REQUIRES SOUTH AFRICAN DATA RESIDENCY (POPIA)`
+- **Render Config (`render.yaml`):** Define 1 Web Service (`nahashield-web`) + 1 PostgreSQL database (`nahashield-db`) with zero manual setup steps.
+- **Role Switcher (Demo RBAC):** Allow instant role switching in the header (`Head of Forensics`, `Legal / Recoveries`, `Finance / CFO`, `Underwriter`, `Compliance / DPO`) and enforce permissions in API routes + log every read/write to `audit_log`.
+
+---
+
+### 2. HARD LEGAL & COMPLIANCE GUARDRAILS (MUST BE ENFORCED IN CODE)
+1. **No Auto-Decisions (`POPIA s71` / `PPR 2A.8`):** Never auto-decline a policy, auto-repudiate a claim, or auto-file litigation. Every decision endpoint MUST require `reviewer_id`, non-empty `objective_reasons[]`, and `decided_at`.
+2. **Evidence Tag Mandatory:** Every item in `evidence_items` must have `evidence_tag NOT NULL` from enum: `Verified Fact | Documented Allegation | Inference | Hypothesis | Unknown`.
+3. **Append-Only Hash-Chained Evidence Vault:** `evidence_items` must block updates/deletes and compute `chain_hash = SHA256(prev_chain_hash + content_hash + metadata)`. Include a working **"Run Tamper Check"** button and a **"Simulate Tamper Attack"** demo button that proves verification fails closed.
+4. **No Forced Parlour Settlement / No Score Escrow (`PPR Rule 2A.10`):** Only support *voluntary claimant-directed* parlour verification.
+5. **No Age-Only Consent Triggers (`PEPUDA`):** Consent escalation rules must NEVER inspect or trigger on age.
+6. **Tipping-Off Linter (`FIC Act s29(4) / s53`):** Outbound claimant/consent message templates must pass a linter rejecting banned words (`STR`, `suspicious transaction report`, `FIC`, `money laundering`, `murder suspect`, `police investigation`).
+7. **Single-Tenant Separation (`POPIA s57/58`):** All tables scoped by `org_id`. No cross-insurer ID matching enabled in v1 (show Phase 3 Cross-Insurer PSI as a clearly locked/approval-gated roadmap tile).
+8. **Simulated External Adapters:** Clearly badge all external checks (`DHA / WinDeed`, `Deeds / CIPC`, `BankservAfrica AVS-R`, `XTND / Astute`, `WhatsApp Gateway`) as **`SIMULATED ADAPTER (INSURER CREDENTIALS REQUIRED IN PROD)`**—never pretend live government/bank API access exists.
+
+---
+
+### 3. PURE DETERMINISTIC ENGINE (`src/lib/engine/`)
+Implement pure, unit-tested TypeScript functions for every calculation:
+
+#### A. Asset Recoverability & Legal Route Engine (`triage.ts`)
+Inputs: `original_payout`, `title_type` (`Freehold | Sectional | Communal / PTO | None`), `primary_residence` (`boolean`), `est_sale_proceeds`, `senior_bonds`, `municipal_arrears`, `legal_costs`, `employment` (`Salaried | Self-Employed | Unemployed | Incarcerated`), `ring_flag` (`boolean`), `forced_sale_discount` (`0.25` default).
+Formulas:
+- `accessible = (title_type === 'Communal / PTO' || title_type === 'None') ? 0 : 1`
+- `forced_sale_proceeds = accessible * est_sale_proceeds * (1 - forced_sale_discount)`
+- `conservative_equity = accessible * (forced_sale_proceeds - senior_bonds - municipal_arrears)`
+- `nrv_low = accessible * (forced_sale_proceeds - senior_bonds - municipal_arrears - legal_costs)`
+- `nrv_high = accessible * (est_sale_proceeds - senior_bonds - municipal_arrears - legal_costs)`
+- `practically_recoverable = Math.min(original_payout, Math.max(nrv_low, 0))`
+- `rule_46a_flag = (title_type === 'Freehold' || title_type === 'Sectional') && primary_residence`
+- `ipilra_pto_flag = title_type === 'Communal / PTO'`
+- `early_write_off = legal_costs > conservative_equity`
+- `futile_spend_avoided = early_write_off ? legal_costs : 0`
+- **Route Recommendation Order:**
+  1. If `early_write_off`: if `employment === 'Salaried'` → `"CPA s297 / Emoluments Attachment"`, else → `"Early Write-Off — halt litigation spend"`
+  2. Else if `nrv_low >= original_payout`: `"Civil Delict (Masindi check) + CPA s300 (asset-verified)"`
+  3. Else: `"Civil Delict (Masindi check) + Structured Settlement"`
+  4. If `rule_46a_flag` and NOT `early_write_off`: append `" | model Rule 46A reserve-price delay"`
+- **CPA s300 Guardrails (whenever route includes `s300`):**
+  - `s300_forum`: `original_payout <= 300000` → `"District (≤R300k)"`, `<= 1000000` → `"Regional (≤R1m)"`, else `"High Court"`
+  - `s300_warning`: `"60-day s300(5)(b) civil-bar warning — counsel to confirm before electing"`
+- **State Referral:** If `ring_flag`: `"Package for MLRO (FIC s29/s34) + NDPP/AFU (POCA s38) — state powers only"`
+
+#### B. Co-Signed Savings & Recovery Ledger Engine (`ledger.ts`)
+Rules enforced strictly by code:
+- Protected events: `Policy cancelled (unauthorised)`, `Claim repudiated`, `Claim withdrawn`, `Commission held/clawed back`.
+- **Live Protected (R):** Counts ONLY if `basis === 'Live'` AND `flagged_before_payout === true` AND `existing_controls_flagged === false` AND `human_confirmed === true` AND `forensics_signoff === true` AND `finance_signoff === true`. Value = `amount_at_stake * (event_type === 'Policy cancelled (unauthorised)' ? 0.10 : 1.0)`.
+- **Backtest (`Would have protected`):** Same conditions with `basis === 'Backtest'` (stored separately, NEVER added to Live Protected).
+- **Net Cash Recovered (R):** Counts ONLY if `basis === 'Live'` AND `event_type === 'Cash recovered'` AND `bank_reconciled === true` AND `forensics_signoff === true` AND `finance_signoff === true`. Value = `amount_at_stake - legal_costs`.
+- **Futile Spend Avoided (R):** Counts ONLY if `basis === 'Live'` AND `event_type === 'Futile spend avoided'` AND `human_confirmed === true` AND `forensics_signoff === true` AND `finance_signoff === true`.
+- **False-Positive Review Cost (R):** `cleared_fp ? review_hours * 250 : 0`.
+- **Anti-Puffery Rule:** Arrests, convictions, court judgments, and repayment promises NEVER count as recovered cash (`status = "n/a — not money"`).
+- **UI Language Lock:** Derive exact badge from data (`exposure` | `would have protected` | `protected / recovered` | `awaiting dual sign-off` | `no credit — existing controls`).
+
+#### C. Consent & Cover Integrity Engine (`consent.ts`)
+- `third_party = proposer_ne_assured || payer_ne_assured`
+- `contact_independence_status`: if `!third_party` → `"n/a"`, else if `independent_contact_on_file` → `"Independent contact on file"`, else `"Contact Independence Unverified — Escalate"`
+- `consent_tier`: if `!third_party` → `"n/a"`, else if `(proposer_ne_assured && payer_ne_assured) || cover_increase_12m || unrelated_lives_same_payer >= 3 || beneficiary_relationship === 'Non-immediate'` → `"Escalated"`, else `"Standard"` *(NEVER inspect age)*
+- `consent_gap_status`: if `!third_party` → `"OK"`, else if `!consent_record_exists` → `"CONSENT GAP"`, else if `!consent_via_independent_channel` → `"CHANNEL NOT INDEPENDENT"`, else `"OK"`
+- `exposure_at_gap`: if `consent_gap_status !== 'OK'` → `cover_amount * Math.max(accidental_multiplier, 1)`, else `0`
+
+#### D. SA Business-Day Clock (`timers.ts`)
+- Calculate South African business days excluding weekends and SA public holidays (`1 Jan`, `21 Mar`, `Good Friday`, `Family Day`, `27 Apr`, `1 May`, `16 Jun`, `9 Aug`, `24 Sep`, `16 Dec`, `25 Dec`, `26 Dec`, plus observed Mondays).
+- Track **PPR Rule 2A.8.1 (2 business days)** decision deadline and **Rule 2A.8.2 (14 business days)** dispute investigation deadline.
+
+---
+
+### 4. PRE-SEEDED SYNTHETIC SOUTH AFRICAN DATA (AUTO-LOADED ON STARTUP)
+Seed realistic synthetic cases (zero real PII) covering all **6 specialist problems**:
+1. **24 Confirmed-Fraud Recovery Cases (`SYN-RC-001` to `SYN-RC-024`):** Include mix of:
+   - Zero-asset / incarcerated fraudsters (`nulla bona` write-off).
+   - Rural `Communal / PTO` dwellings (non-executable).
+   - `Freehold` primary residences with high bonds + municipal arrears (`Uniform Rule 46A` reserve-price risk).
+   - Attachable high-NRV freehold / trust-linked / syndicate-ring cases (`POCA/AFU` & *Masindi* civil clawback).
+   - Salaried rogue agents/intermediaries (`CPA s297` / Emoluments Attachment).
+   - Cases exceeding R300k and R1m to demonstrate `s300` District/Regional/High Court forum selection + 60-day `s300(5)(b)` warning.
+2. **13 Ledger Entries (`SYN-001` to `SYN-013`):** Include examples of: valid dual-signed saves, bank-reconciled cash recovery, cancelled unauthorised policy at 10% booking factor, backtest-only rows, an entry caught by existing XTND/internal controls (`no credit`), a judgment/arrest/promise-to-pay (`n/a — not money`), an entry missing Finance sign-off (`awaiting sign-off`), and a cleared false-positive review cost.
+3. **30 Policy Consent Audit Rows (`SYN-POL-001` to `SYN-POL-030`):** Include standard first-party policies, missing-consent third-party policies, "burner SIM" (`CHANNEL NOT INDEPENDENT`) applications, cover-spike escalations, same-payer funding ≥3 unrelated lives, and 1 active **Silent Duress ("Not Me")** incident.
+4. **10 Funeral Claims (`SYN-CLM-001` to `SYN-CLM-010`) for Phase 2 Preview:** Include a living person declared dead via `BI-1663` box 2.4 (`Problem #2`), a cross-border re-registration cluster linked to one doctor/parlour, an `AVS-R` recipient bank mismatch, an agent early-lapse remuneration churn flag, and clean 48-hour green-lane claims.
+
+---
+
+### 5. REQUIRED UI PAGES & INTERACTIVE DEMOS
+Design a crisp, high-trust dark-slate/emerald executive forensic UI (`NahaShield`):
+
+1. **Executive Overview & Co-Signed Savings Ledger (`/`)**
+   - Top KPI cards strictly separating: `Confirmed Fraudulent Loss`, `Judgment / Order Value (Not Cash)`, `Agreed Repayment Plans`, `Legal Costs Spent`, `Futile Spend Avoided`, **`Bank-Reconciled Cash Actually Received`**, and `Incremental Protected Value (Live Dual-Signed)`.
+   - Interactive Ledger table with **Head of Forensics** and **Finance** toggle sign-offs that immediately update the language badge and counted Rand totals.
+   - One-click **"Export Phase 0 Executive Readout (CSV / Print Summary)"** showing `"R lost · R realistically collectable · R futile spend avoided · Consent exposure gap"`.
+
+2. **Recovery & Asset-Tenure Triage Desk (`/recovery`)**
+   - Filterable table of all 24+ recovery cases + **"Add / Import CSV Case"** modal that runs `triage.ts` instantly.
+   - Slide-over / detail page showing:
+     - **8-Layer Asset Profile** & live **NRV Sensitivity Sliders** (`Forced-Sale Discount %`, `Estimated Legal Cost`) recalculating `NRV Low / High` and `Recommended Route` in real time.
+     - Explicit `Rule 46A` / `IPILRA-PTO` / `CPA s300(5)(b) 60-Day Bar` warning banners.
+     - **"Generate Attorney / AFU Handover Pack"** preview + mandatory Human Decision & Counsel Review form (`reviewer_id` + `objective_reasons[]`).
+
+3. **Append-Only Evidence Vault (`/vault`)**
+   - Chronological evidence timeline per case with mandatory `Evidence Tag` badges (`Verified Fact`, `Documented Allegation`, `Inference`, `Hypothesis`, `Unknown`).
+   - Add Evidence form + live **SHA-256 Hash Chain Verifier** with **"Verify Chain"** and **"Simulate Tamper Attack"** buttons showing exact failed row detection.
+
+4. **Consent & Cover Integrity Desk + Live Simulator (`/consent`)**
+   - Portfolio consent-gap audit table (`30+` policies, exposure-at-gap, `Contact Independence Unverified`, `Escalated` vs `Standard`).
+   - **Interactive Life-Assured WhatsApp / USSD Simulator (Side-by-Side Phone Preview + Underwriter Queue):**
+     - Pick any third-party policy (or type a test application).
+     - Toggle `Independent Contact Found` vs `Burner SIM (Applicant-Supplied Only)`.
+     - Trigger the out-of-band message in English, isiZulu, isiXhosa, Sesotho, or Afrikaans.
+     - Click **`Confirm + Comprehension Answer`**, **`Decline`**, or **`Silent Duress ("Not Me")`** — when Silent Duress is clicked, the phone simulator displays a neutral `"System timeout — please try again later"` message while the Underwriter Queue turns red with a silent coercion alert + tamper-evident vault hash.
+
+5. **Claims Corroboration & Channel QA — Phase 2 Preview (`/claims`)**
+   - Shows `PPR Rule 2A.8` **2-day / 14-day business-day countdown timers**, `BI-1663` lag/metadata flags, `Doctor/Parlour` link cluster view, `AVS-R` bank-match badge, `AgentShield` churn alert, voluntary `Rule 2A.10` claimant-directed parlour invoice check, and a **Basdeo-Compliant Neutral Deferment Notice Generator** validated by the Tipping-Off Linter.
+
+6. **Compliance, Guardrails & Audit Log (`/compliance`)**
+   - Live status view of all compliance guardrails (`POPIA s26/s57/s71`, `PPR 2A.8/2A.10`, `FIC s29/s53`, `CPA s300(5)(b)`, `Rule 46A`) + live `audit_log` stream + Phase 3 Cross-Insurer PSI **(LOCKED — Requires POPIA s57/58 Prior Authorisation)** card.
+
+### 6. DELIVERABLE CHECKLIST
+Write clean, production-grade code, include Vitest tests covering all formulas (`triage`, `ledger`, `consent`, `timers`, `tipping-off lint`, `hash-chain tamper fail`), run all tests until 100% pass, verify `npm run build` succeeds with zero TypeScript errors, and confirm `render.yaml` is ready for immediate Render deployment.
+
+PROMPT 1 — Foundation, Append-Only Vault & Golden-Tested Engine (Sprints S0 + S1)
+
+You are a senior TypeScript systems engineer building **NahaShield** (by NahaLabs), an integration-first South African insurance integrity, consent, and recovery-intelligence platform.
+
+Before writing code, read these three source-of-truth files in `docs/`:
+1. `docs/plan.md` (architecture, data model, pure engine specs, repo layout, hard compliance rules)
+2. `docs/execution-plan.md` (Sprints S0–S1 deliverables, acceptance criteria, §12 Definition of Done)
+3. `docs/spec/NahaShield_ROI_Evidence_Model_v1.0.xlsx` (the executable specification and golden test fixtures)
+
+### STRICT RULES (NON-NEGOTIABLE)
+- **Zero invention:** Do not invent statutes, external APIs, or shortcuts. Every calculation, status, warning, and label must match `NahaShield_ROI_Evidence_Model_v1.0.xlsx` verbatim.
+- **No real PII:** Use synthetic fixtures only. Never hardcode real names, IDs, or credentials.
+- **No auto-decisions (`POPIA s71`):** No database table or code path may allow a decline, dispute, repudiation, or litigation route decision without `reviewer_id`, `objective_reasons[]`, and `decided_at`.
+- **Evidence tag mandatory:** Every record in `evidence_items` must enforce `NOT NULL` enum: `Verified Fact | Documented Allegation | Inference | Hypothesis | Unknown`.
+- **Pure engine:** `packages/engine/` must contain pure TypeScript functions with zero I/O, zero DB calls, and zero LLM calls.
+- **No cross-insurer joins (`POPIA s57/58`):** Single-tenant isolation per insurer (`org_id` + Postgres RLS). No cross-tenant matching in code.
+
+### STEP 1 — REPOSITORY, ADRs & GOLDEN FIXTURES (SPRINT S0)
+Create the monorepo structure from `plan.md` §12:
+- `nahashield/`
+  - `docs/adr/` → Create `ADR-001-hosting-and-residency.md` (placeholder requiring SA-region compute/DB verification before PII) and `ADR-002-single-tenant-isolation.md` (single-tenant deployment per insurer + Postgres RLS defence in depth).
+  - `fixtures/` → Write a build script that parses `docs/spec/NahaShield_ROI_Evidence_Model_v1.0.xlsx` and exports exact JSON/CSV golden fixtures:
+    1. `fixtures/recovery_triage_24.json` (all 24 synthetic cases `SYN-RC-001`..`024` + expected outputs + summary totals)
+    2. `fixtures/ledger_13.json` (all 13 synthetic rows `SYN-001`..`013` + expected labels, counted amounts, rejection reasons, and summary totals)
+    3. `fixtures/consent_audit_30.json` (all 30 synthetic policies `SYN-POL-001`..`030` + expected tiering, independence status, gap status, exposure, and summary totals)
+  - `packages/engine/`, `packages/rules/`, `packages/api/`, `packages/adapters/`, `packages/console/`, `db/migrations/`, `db/seeds/`, `ops/`
+  - Set up TypeScript strict mode, linting, test runner (Vitest), and CI workflow.
+
+### STEP 2 — DATABASE SCHEMA v0 & APPEND-ONLY EVIDENCE VAULT (`db/`)
+Write SQL migrations for PostgreSQL (with RLS enabled on every tenant table):
+1. Core tables per `plan.md` §5: `org_config`, `users`, `roles`, `data_sources`, `evidence_items`, `entities`, `entity_links`, `loss_register`, `asset_profiles`, `nrv_runs`, `route_recommendations`, `recovery_events`, `ledger_entries`, `ledger_signoffs`, `policy_events`, `consent_requests`, `consent_certificates`, `contact_verifications`, `claims`, `claim_timers`, `dispute_notices`, `doc_hashes`, `flags`, `reason_codes`, `decisions`, `audit_log`.
+2. **Enforce at schema level:**
+   - `evidence_items` is **append-only** (revoke/block `UPDATE` and `DELETE` via DB trigger).
+   - Each row stores `sha256_content`, `prev_chain_hash`, `chain_hash = SHA256(prev_chain_hash || sha256_content || canonical_metadata)`, `evidence_tag NOT NULL`, `uploader_id`, `access_authority`, `custody_log`, `created_at`.
+   - `decisions` requires `reviewer_id NOT NULL`, `objective_reasons NOT NULL` (non-empty array check), `decided_at NOT NULL`.
+3. Write an automated **tamper test** that inserts 3 evidence items, mutates a byte or deletes/modifies an earlier record directly in DB, and proves the chain verifier **fails closed**.
+
+### STEP 3 — PURE ENGINE (`packages/engine/`) + VERSIONED RULES (`packages/rules/`) + CLI (SPRINT S1)
+Implement pure deterministic functions and versioned rule YAML/JSON configs (`rules/v1/`) that reproduce the Excel workbook **with zero discrepancies**:
+
+1. **NRV & Route Triage (`engine/triage.ts`) — must match all 24 rows of `Recovery_Triage`:**
+   - `accessible = 0` if `title_type ∈ {'Communal / PTO', 'None'}` else `1`
+   - `forced_sale_proceeds = accessible * sale_proceeds * (1 - forced_sale_discount)` (`0.25` default from config)
+   - `conservative_equity = accessible * (sale_proceeds * (1 - fsd) - senior_bonds - municipal_arrears)`
+   - `nrv_low = accessible * (sale_proceeds * (1 - fsd) - senior_bonds - municipal_arrears - legal_costs)`
+   - `nrv_high = accessible * (sale_proceeds - senior_bonds - municipal_arrears - legal_costs)`
+   - `practically_recoverable = min(original_payout, max(nrv_low, 0))`
+   - Flags: `Rule 46A` if `title_type ∈ {'Freehold', 'Sectional'}` and `primary_residence == true`; `IPILRA / PTO` if `title_type == 'Communal / PTO'`
+   - `early_write_off = legal_costs > conservative_equity`
+   - Route decision order:
+     - If `early_write_off`: `Salaried` → `CPA s297 / Emoluments Attachment`; else `Early Write-Off — halt litigation spend`
+     - Else if `nrv_low >= original_payout`: `Civil Delict (Masindi check) + CPA s300 (asset-verified)`
+     - Else: `Civil Delict (Masindi check) + Structured Settlement`
+     - Append ` | model 46A reserve-price delay` whenever `Rule 46A` flag is set
+   - Whenever route contains `s300`:
+     - `s300_forum`: `<= 300000` → `District (≤R300k)`; `<= 1000000` → `Regional (≤R1m)`; else `High Court`
+     - `s300_warning`: `60-day s300(5)(b) civil-bar warning — counsel to confirm before electing`
+   - If `ring_flag == true`: `state_referral_pack = 'Package for MLRO (FIC s29/s34) + NDPP/AFU (POCA s38) — state powers only'`
+   - `futile_spend_avoided = legal_costs` if `early_write_off` else `0`
+
+2. **Co-Signed Ledger Rules (`engine/ledger.ts`) — must match all 13 rows of `Ledger`:**
+   - Enforce exact formula logic for: `Protected (live, signed)` (applying `booking_factor = 0.10` for `Policy cancelled (unauthorised)`), `Would have protected (backtest)`, `Net cash recovered` (`bank_reconciled == true` and both sign-offs, minus costs), `Futile spend avoided`, `False-positive review cost` (`review_hours * 250`), exact `language_label` (`exposure` / `would have protected` / `protected / recovered` / `no credit — existing controls` / `n/a — not money` / `friction logged`), and exact `why_not_counted` status strings.
+   - Add **property-based tests** proving no input combination can ever count an arrest, conviction, judgment, repayment promise, non-bank-reconciled cash receipt, existing-controls save, unconfirmed outcome, or single-signature live entry.
+
+3. **Consent Tiering & Audit (`engine/consent.ts`) — must match all 30 rows of `Consent_Audit`:**
+   - `third_party = proposer_ne_assured OR payer_ne_assured`
+   - `contact_independence_status`: `n/a` if not third-party; `Independent contact on file` if `independent_contact_on_file == true`; else `Contact Independence Unverified — Escalate`
+   - `consent_tier`: `n/a` if not third-party; `Escalated` if `(proposer_ne_assured AND payer_ne_assured) OR cover_increase_12m OR unrelated_lives_same_payer >= 3 OR beneficiary_relationship == 'Non-immediate'`; else `Standard` **(NEVER use age)**
+   - `consent_gap_status`: `CONSENT GAP` if no consent record; `CHANNEL NOT INDEPENDENT` if consent not obtained via independent channel; else `OK`
+   - `exposure_at_gap = cover_amount * max(accidental_multiplier, 1)` when gap exists
+
+4. **Business-Day Timer Service (`engine/timers.ts`) & Tipping-Off Linter (`engine/lint.ts`):**
+   - South African business-day calculator incorporating SA public holidays (including observed Monday holidays) for **PPR 2A.8 (2 + 14 business days)** and advisory **FIC s29 (15 working days)** clocks.
+   - Tipping-off phrase linter that blocks banned words (`STR`, `suspicious transaction report`, `FIC`, `money laundering`, `murder suspect`, `police investigation`) in outbound claimant/consent templates.
+
+5. **CLI & Phase 0 Readout Generator (`packages/api/src/cli.ts`):**
+   - `nahashield triage <cases.csv>` → outputs per-case triage + Phase 0 summary (`"R Xm lost, R Ym realistically collectable, R Zm of legal spend currently aimed at uncollectable targets"`) in <5 seconds.
+   - `nahashield consent-audit <policies.csv>` → outputs consent-gap %, unverified-channel %, escalated count, and exposure summary.
+   - `nahashield ledger-verify <ledger.csv>` → validates all counting rules and outputs executive totals.
+
+### ACCEPTANCE GATES BEFORE FINISHING
+Run all unit tests, property tests, timer holiday tests, tipping-off lint tests, fairness tests (confirming identical consent tiers across age bands), and DB vault tamper tests. Do not write UI screens yet—stop and report exact test results against all 24 `Recovery_Triage`, 13 `Ledger`, and 30 `Consent_Audit` golden rows.
+
+PROMPT 2 — Build the Phase 1A & 1B Product UI, API & Workflow (Sprints S2–S8)
+
+(Run this only after Prompt 1 passes 100% of golden-file and tamper tests.)
+
+Prompt 1's pure engine, DB schema, and golden tests are passing. Now build the **Phase 1A Recovery Desk (`M1 + C1`)** and **Phase 1B Consent & Cover Integrity (`M2`)** API (`packages/api/`) and Web Console (`packages/console/`) per `docs/plan.md` §4–7 and `docs/execution-plan.md` Sprints S2–S8.
+
+### DELIVERABLES TO BUILD
+1. **API Service (`packages/api/`):**
+   - Tenant-isolated REST/JSON endpoints using Supabase/PostgreSQL RLS + RBAC (`investigator`, `recovery`, `underwriter`, `assessor`, `compliance`, `finance`, `exec`) + mandatory `audit_log` on every sensitive read/write.
+   - **M1 Endpoints:** CSV/XLSX batch loss-register import (reconciling totals on upload); evidence upload into append-only `evidence_items` with mandatory `evidence_tag`; NRV & route evaluation calling `packages/engine`; counsel decision endpoint requiring `reviewer_id` and `objective_reasons[]`; recovery events (demands, court milestones, `s300`/`s297`/civil/AFU referrals, bank receipts, legal costs) with `s300(5)(b)` 60-day deadline alerts.
+   - **C1 Ledger Endpoints:** Dual sign-off workflow (`Head of Forensics` + `Finance`) + bank-reconciliation import + executive JSON/CSV readout enforcing the `Ledger` language labels (`exposure` / `would have protected` / `protected / recovered` — never overclaiming).
+   - **M2 Consent Endpoints:** Policy-event webhook (`proposer ≠ assured`, `payer ≠ assured`, cover increase, multiplier addition, beneficiary change) → independent contact verification (`CRM` / mock KYC adapter returning `Contact Independence Unverified — Escalate` when missing) → outbound WhatsApp/USSD adapter interface + **Silent Duress ("Not Me") flow** (must render an identical generic technical-error response externally while logging a high-priority internal underwriting alert) → tamper-evident Consent Certificate stored in `evidence_items` → own-book stacking & `PPR 2A.8.3` question-checklist audit view.
+   - **Mocked / Fixture-Backed Adapters (`packages/adapters/`):** Create clean TypeScript adapter interfaces + synthetic fixture implementations for WinDeed/Deeds/CIPC, BankservAfrica AVS-R/DebiCheck, Astute/XTND exports, and WhatsApp Business API (all tagged `MOCK_ADAPTER`—never claim live integration without insurer-sponsored credentials).
+
+2. **Web Console (`packages/console/`):**
+   - Clean, high-trust forensic UI with 5 core views:
+     1. **Recovery Triage Queue & Case Detail (`M1`):** Shows the 8 value layers, NRV range vs. projected legal cost, `Rule 46A` / `IPILRA-PTO` badges, `s300(5)(b)` 60-day warning banner, state-referral pack generator, and mandatory human counsel sign-off form.
+     2. **Evidence Vault & Chronology (`C1`):** Upload/view documents with `Verified Fact / Documented Allegation / Inference / Hypothesis / Unknown` badges and live hash-chain verification status indicator.
+     3. **Co-Signed Savings & Recovery Ledger (`C1` + `CFO View`):** Separates `Confirmed Fraudulent Loss`, `Judgment/Order Value`, `Agreed Repayment`, `Legal Costs`, `Futile Spend Avoided`, and `Bank-Reconciled Cash Received`, with Forensics + Finance sign-off buttons.
+     4. **Consent & Cover Integrity Desk (`M2`):** Shows independent-contact provenance, two-tier Consent Ladder status, silent-duress alerts, own-book stacking flags, and a live interactive simulator of the **Life-Assured WhatsApp/USSD Consent & Silent Duress Flow** for insurer demos.
+     5. **Phase 0 Readout & Compliance View:** One-click export of `"R lost / R collectable / R wasted"` + the 20-item `Compliance` guardrail status register.
+
+3. **Verification:**
+   - Add Playwright/end-to-end tests proving: (a) RBAC blocks unauthorised roles, (b) UI cannot save evidence without `evidence_tag` or finalise a decision without `reviewer_id`, (c) silent-duress response looks identical to an ordinary error externally, (d) ledger cannot display `"protected / recovered"` without both Forensics and Finance sign-offs, and (e) synthetic seed loads cleanly for an immediate live demo.
+
+One Practical Tip Before You Run This
+
+In your execution-plan.md §14, five small decisions are still marked open
+(ADR-001 hosting region, NahaLabs entity cross-border setup, 6-week Phase 0, 10%
+booking factor, first design partner). Keep Prompt 1 running on synthetic
+fixtures (db/seeds/) right away while you settle those five items with Lawrence
+and counsel—none of them block building and testing the Phase 0 + Phase 1A
+engine today.

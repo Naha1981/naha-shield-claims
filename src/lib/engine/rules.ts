@@ -1,0 +1,86 @@
+export const RULES_VERSION = 'v1.0.0' as const;
+
+export const DEFAULT_ORG_RULES = {
+  version: RULES_VERSION,
+  forced_sale_discount: 0.25,
+  booking_factor_unauthorised: 0.10,
+  fp_hourly_cost_zar: 250,
+  unrelated_lives_escalation_threshold: 3,
+  s300_district_max_zar: 300_000,
+  s300_regional_max_zar: 1_000_000,
+  s300_civil_bar_days: 60,
+  ppr_initial_business_days: 2,
+  ppr_dispute_business_days: 14,
+  fic_advisory_working_days: 15,
+  no_auto_decisions: true,
+  pepuda_age_free_consent_tiering: true,
+  phase3_psi_locked: true,
+} as const;
+
+export interface RuleCatalogueItem {
+  rule_id: string;
+  module: 'M1' | 'M2' | 'M3' | 'C1';
+  title: string;
+  description: string;
+  statute_ref: string;
+  configurable_threshold: string;
+}
+
+export const RULE_CATALOGUE_V1: RuleCatalogueItem[] = [
+  {
+    rule_id: 'M1-TENURE-01',
+    module: 'M1',
+    title: 'Communal / PTO & No-Asset Non-Executability',
+    description: 'Marks Communal / PTO (IPILRA) and zero-asset estates legally inaccessible for civil attachment.',
+    statute_ref: 'IPILRA 31 of 1996',
+    configurable_threshold: 'title_type ∈ {Communal / PTO, None}',
+  },
+  {
+    rule_id: 'M1-RULE46A-02',
+    module: 'M1',
+    title: 'Primary Residence Reserve-Price Delay',
+    description: 'Flags Freehold or Sectional primary residences for Uniform Rule 46A judicial oversight and reserve-price modelling.',
+    statute_ref: 'Uniform Rule 46A',
+    configurable_threshold: 'primary_residence == true',
+  },
+  {
+    rule_id: 'M1-S300-03',
+    module: 'M1',
+    title: 'CPA s300 Forum & 60-Day Civil-Bar Guardrail',
+    description: 'Selects District/Regional/High Court forum and attaches mandatory 60-day s300(5)(b) counsel confirmation warning.',
+    statute_ref: 'Criminal Procedure Act s300(5)(b)',
+    configurable_threshold: '≤R300k District · ≤R1m Regional',
+  },
+  {
+    rule_id: 'M2-CONTACT-01',
+    module: 'M2',
+    title: 'Independent Contact Provenance Check',
+    description: 'Rejects applicant-supplied burner SIM numbers when no independent CRM/KYC/bureau number is on file.',
+    statute_ref: 'PPR Rule 2A / ASISA Mar 2026',
+    configurable_threshold: 'independent_contact_on_file == true',
+  },
+  {
+    rule_id: 'M2-TIER-02',
+    module: 'M2',
+    title: 'Age-Free Structural Consent Escalation',
+    description: 'Escalates consent verification only on structural risk triggers; explicitly excludes policyholder age.',
+    statute_ref: 'PEPUDA / POPIA s26',
+    configurable_threshold: 'unrelated_lives_same_payer >= 3',
+  },
+  {
+    rule_id: 'M3-PPR-01',
+    module: 'M3',
+    title: 'PPR 2 + 14 Business-Day Claims Clock',
+    description: 'Enforces 2-business-day initial decision clock and 14-business-day Basdeo-compliant dispute investigation window.',
+    statute_ref: 'PPR Rule 2A.8.1 & 2A.8.2',
+    configurable_threshold: '2 / 14 SA business days',
+  },
+  {
+    rule_id: 'C1-LEDGER-01',
+    module: 'C1',
+    title: 'Dual-Signed Anti-Puffery Ledger Gate',
+    description: 'Requires Forensics + Finance sign-offs, bank reconciliation for cash, and excludes arrests/judgments/promises.',
+    statute_ref: 'IFRS / CFO Governance',
+    configurable_threshold: 'booking_factor = 0.10 (unauthorised)',
+  },
+];
