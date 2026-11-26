@@ -896,7 +896,8 @@ async function startServer() {
     }
   });
 
-  // Server-Side Gemini AI Regulatory Search (Google Search Grounding via gemini-4-hydrogen)
+  // Server-side regulatory research model is configurable without changing other AI features.
+  const regulatoryResearchModel = process.env.GEMINI_RESEARCH_MODEL?.trim() || 'gemini-3.5-flash-lite';
   app.post('/api/ai/regulatory-search', async (req, res) => {
     const actor = getActorContext(req);
     const query = String(req.body?.query || '').trim();
@@ -908,7 +909,7 @@ async function startServer() {
     try {
       const ai = getGeminiClient();
       const response = await ai.models.generateContent({
-        model: 'gemini-4-hydrogen',
+        model: regulatoryResearchModel,
         contents: `You are a South African insurance regulatory research assistant supporting compliance and legal recovery specialists. Answer concisely with accurate SA statutory citations (POPIA, PPR Rules 2A.8/2A.10, FIC Act s29/s53, Uniform Rule 46A, IPILRA, CPA s300, ASISA). Never decide a claim or recommend automated declines. Query: ${query}`,
         config: {
           tools: [{ googleSearch: {} }],
@@ -927,12 +928,12 @@ async function startServer() {
         actor_id: actor.userId,
         action: 'AI_REGULATORY_SEARCH_EXECUTED',
         object_type: 'ai_assistant',
-        object_id: 'gemini-4-hydrogen',
+        object_id: regulatoryResearchModel,
       });
 
       res.json({
         ok: true,
-        model: 'gemini-4-hydrogen',
+        model: regulatoryResearchModel,
         text: response.text ?? 'No response text returned.',
         sources,
       });
