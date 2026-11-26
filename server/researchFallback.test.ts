@@ -27,3 +27,9 @@ test('HTML errors never become official evidence', async () => {
   try { await assert.rejects(fetchOfficialResearch('POPIA'), /could not be fetched/); }
   finally { globalThis.fetch = original; }
 });
+
+test('raw query and personal details never form the outgoing question',async()=>{
+ const {safeResearchQuestion}=await import('./researchFallback');
+ const q=safeResearchQuestion('POPIA section 71. My name is Example Person, email example@test.invalid, claim 12345.');
+ assert.ok(q.includes('section 71'));assert.ok(!/Example|example@|12345|My name/.test(q));
+});

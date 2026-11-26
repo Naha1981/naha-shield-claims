@@ -38,3 +38,35 @@ export async function fetchOfficialResearch(query: string) {
   if (!sources.length) throw new Error('Official sources could not be fetched. No unsourced research answer was generated. Try again later.');
   return { sources, parts };
 }
+
+export async function extractResearchText(parts: Array<{ inlineData: { mimeType: string; data: string } }>, query: string) {
+  const { getDocument } = await import('pdfjs-dist/legacy/build/pdf.mjs');
+  const terms = query.toLowerCase().match(/[a-z]{4,}|\b\d{1,3}\b/g) || [];
+  const passages: Array<{ text: string; score: number }> = [];
+  for (const [documentIndex, part] of parts.entries()) {
+    const loading = getDocument({ data: new Uint8Array(Buffer.from(part.inlineData.data, 'base64')), useSystemFonts: true, useWorkerFetch: false });
+    const pdf = await loading.promise;
+    try {
+      for (let pageNo = 1; pageNo <= Math.min(pdf.numPages, 260); pageNo++) {
+        const page = await pdf.getPage(pageNo);
+        const content = await page.getTextContent();
+        const text = content.items.map((item) => 'str' in item ? item.str : '').join(' ');
+        for (let start = 0; start < text.length; start += 1800) {
+          const passage = text.slice(start, start + 2600);
+          const lower = passage.toLowerCase();
+          const score = terms.reduce((n, term) => n + (lower.includes(term) ? (/^\d+$/.test(term) ? (new RegExp('(?:^|\\s)' + term + '\\s').test(passage) ? 12 : 1) : (term === 'automated' || term === 'decisions' ? 5 : 1)) : 0), 0);
+          passages.push({ text: `Source manifest item ${documentIndex + 1}, page ${pageNo}: ${passage}`, score });
+        }
+      }
+    } finally { await loading.destroy(); }
+  }
+  return passages.sort((a, b) => b.score - a.score).slice(0, 5).map((p) => p.text).join('\n\n').slice(0, 14000);
+}
+
+// Never transmit raw user text to a free provider. Only a catalogue topic and optional statutory section leave the server.
+export function safeResearchQuestion(query: string) {
+  const topics = selectOfficialSources(query).map(s => s.title);
+  if (!topics.length) throw new Error('No supported official topic found.');
+  const section = query.match(/\b(?:section|s)\s*(\d{1,3})\b/i)?.[1];
+  return 'Summarise the statutory requirements in ' + topics.join('; ') + (section ? ', section ' + Number(section) : '') + '. Research only, with citations and limitations. Do not decide a claim.';
+}

@@ -146,10 +146,10 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
         <section className="rounded-md bg-[#131C31] border border-slate-800 p-5 space-y-3">
           <div className="border-b border-slate-800 pb-2.5">
             <h2 className="font-display text-base font-semibold text-white">
-              SA Insurance Regulatory Research (Search Grounding)
+              SA Insurance Regulatory Research (Free Provider Chain)
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Queries live South African statutory & NFO guidance via server-side Gemini Search Grounding (research only, never decides claims).
+              Selects an official topic and optional section number from your query. Only that topic, section and official text go to free models, not your query. Demo research only; do not enter personal or claim data. Published versions may omit later amendments.
             </p>
           </div>
           <form onSubmit={handleRegulatorySearch} className="flex gap-2">
