@@ -13,6 +13,8 @@ import {
   UserCheck,
   Menu,
   X,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import type { AnomalyAlertRecord } from '../lib/engine/anomaly';
 import type { RoleId } from '../lib/engine/types';
@@ -99,6 +101,15 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
   onOpenReadout,
   children,
 }) => {
+  const [theme, setTheme] = React.useState<'dark' | 'light'>(() => {
+    try { return localStorage.getItem('nahashield-theme') === 'light' ? 'light' : 'dark'; }
+    catch { return 'dark'; }
+  });
+  React.useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.documentElement.dataset.theme = theme;
+    try { localStorage.setItem('nahashield-theme', theme); } catch { /* Storage may be unavailable. */ }
+  }, [theme]);
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [alertsOpen, setAlertsOpen] = React.useState(false);
   const [ackBusyId, setAckBusyId] = React.useState<string | null>(null);
@@ -205,6 +216,16 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
 
         {/* Zone 3: Persistent Anomaly Alert Badge + Primary Action */}
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+          <button
+            type="button"
+            onClick={() => setTheme((value) => value === 'dark' ? 'light' : 'dark')}
+            aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+            className="inline-flex items-center gap-1.5 rounded-md border border-slate-700 px-2 py-1.5 text-xs text-slate-300 hover:bg-slate-800"
+          >
+            {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+            <span className="hidden sm:inline">{theme === 'dark' ? 'Light' : 'Dark'}</span>
+          </button>
           <div ref={alertMenuRef} className="relative">
             <button
               type="button"
