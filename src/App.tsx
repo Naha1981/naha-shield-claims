@@ -77,7 +77,8 @@ function parseRouteFromLocation(): NavRoute {
     '/claims',
     '/compliance','/workforce','/network','/leakage',
   ];
-  return valid.includes(path) ? path : '/';
+  if (valid.includes(path)) return path;
+  return import.meta.env.VITE_STATIC_PREVIEW ? '/leakage' : '/';
 }
 
 export default function App() {

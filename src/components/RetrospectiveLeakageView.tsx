@@ -1,5 +1,6 @@
 import React from 'react';
 import {formatZar} from '../utils/format';
+import {analyseLeakage,demoCsv} from '../lib/engine/leakageEngine';
 import type {Finding} from '../../server/retrospectiveLeakage';
 
 type Row=Record<string,string>;
@@ -15,9 +16,8 @@ function evidenceCsv(f:Finding){const cols=[...new Set(f.evidence_rows.flatMap(r
 
 export function RetrospectiveLeakageView(){
  const[data,setData]=React.useState<Analysis|null>(null),[error,setError]=React.useState(''),[busy,setBusy]=React.useState(false),[ruleFilter,setRuleFilter]=React.useState('all');
- const load=(p:Promise<Response>)=>{setBusy(true);setError('');p.then(r=>{if(!r.ok)return r.json().then(j=>Promise.reject(new Error(j.error||'Analysis failed')));return r.json()}).then(setData).catch(e=>setError(e.message)).finally(()=>setBusy(false));};
- const demo=()=>load(fetch('/api/leakage/demo'));
- const onFile=(e:React.ChangeEvent<HTMLInputElement>)=>{const f=e.target.files?.[0];if(!f)return;f.text().then(csv=>load(fetch('/api/leakage/analyse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({csv,file_name:f.name})})))};
+ const demo=()=>{setBusy(true);setError('');fetch('/api/leakage/demo').then(r=>{if(!r.ok)throw Error('api unavailable');return r.json()}).then(setData).catch(()=>{try{setData({file_name:'synthetic-6-month-claims-demo.csv',synthetic:true,...analyseLeakage(demoCsv())})}catch(e){setError((e as Error).message)}}).finally(()=>setBusy(false));};
+ const onFile=(e:React.ChangeEvent<HTMLInputElement>)=>{const f=e.target.files?.[0];if(!f)return;f.text().then(csv=>{setBusy(true);setError('');fetch('/api/leakage/analyse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({csv,file_name:f.name})}).then(r=>{if(!r.ok)throw Error('api unavailable');return r.json()}).then(setData).catch(()=>{try{setData({file_name:f.name,synthetic:false,...analyseLeakage(csv)})}catch(err){setError('Could not parse CSV: '+(err as Error).message)}}).finally(()=>setBusy(false));})};
  const groups=React.useMemo(()=>{const m=new Map<string,Finding[]>();for(const f of data?.findings??[])if(ruleFilter==='all'||f.rule===ruleFilter){if(!m.has(f.rule))m.set(f.rule,[]);m.get(f.rule)!.push(f);}return m;},[data,ruleFilter]);
  return <div className="network-page"><header><span className="network-kicker">SYNTHETIC RESEARCH PREVIEW</span><h2>Past-claims leakage review</h2><p>Give it a claims file. It marks the claims a human investigator should open first, with the evidence rows attached.</p><p className="network-muted">Read-only: uploaded files are analysed in memory and discarded. Findings are leads, not proof of fraud. No claim, payment or recovery action is taken.</p></header>
  <div role="note" className="network-note"><strong>Built for the retrospective assignment: find leakage in past claims, prove it, then recover.</strong><p>Duplicates, shared accounts, reused documents, repeat beneficiaries, early claims and originator concentration are flagged with their amounts. Post-payment findings become ranked recovery candidates. Every amount comes from the supplied file only.</p></div>
