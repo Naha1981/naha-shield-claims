@@ -1,3 +1,4 @@
+import {reviewerGate} from './server/reviewerGate';
 import {workspaceIsolation} from './server/workspaceIsolation';
 import {insuranceTeamRoutes} from './server/insuranceTeam';
 import React from'react';
@@ -76,7 +77,8 @@ function getActorContext(req: express.Request): {
   userId: string;
   displayName: string;
 } {
-  const rawRole = String(req.header('x-nahashield-role') || 'head_of_forensics');
+  const named=(req as any).namedReviewer as {id:string;role:RoleId}|undefined;
+  const rawRole = named?.role || String(req.header('x-nahashield-role') || 'head_of_forensics');
   const role: RoleId = VALID_ROLES.has(rawRole as RoleId)
     ? (rawRole as RoleId)
     : 'head_of_forensics';
@@ -84,8 +86,8 @@ function getActorContext(req: express.Request): {
     SYNTHETIC_USERS.find((u) => u.role === role) ?? SYNTHETIC_USERS[0];
   return {
     role,
-    userId: matchedUser.user_id,
-    displayName: matchedUser.display_name,
+    userId: named?.id || matchedUser.user_id,
+    displayName: named?.id || matchedUser.display_name,
   };
 }
 
@@ -132,6 +134,11 @@ async function startServer() {
   app.use('/api/workforce/chat', synthChatRoutes(synthChat, { authorize: (req) => workforce.principal(req) }));
   app.use('/api/workforce/telecom',telecomRoutes(req=>workforce.principal(req),store));
   app.use('/api/workforce/hosted',hostedExecutorRoutes(req=>workforce.principal(req),store,(q,s)=>workforce.hostedSkills(q,s)));
+
+  // Original reviewer records require the named authenticated principal, never a role header.
+  app.use('/api',reviewerGate(isolation.current,workforce.principal));
+
+  app.post('/api/demo-view-audit',async(req,res)=>{const role=String(req.body?.role||'');if(!VALID_ROLES.has(role as RoleId))return res.status(400).json({error:'Unknown demo view'});await store.logAudit({actor_role:'head_of_forensics',actor_id:'demo-view-session',action:'DEMO_VIEW_FILTER_CHANGED_NOT_AUTHORITY',object_type:'claim',object_id:'SYN-DEMO-VIEW',details:{selected_view:role,permission_changed:false}});res.json({ok:true,permission_changed:false})});
 
   // Health endpoint for Render & monitoring
   app.get('/api/health', (_req, res) => {
@@ -981,9 +988,10 @@ async function startServer() {
     async (req, res) => {
       const actor = getActorContext(req);
       const { claimId, proposalId } = req.params;
-      const decision =
-        req.body?.decision === 'reject' ? 'reject' : 'approve';
+      if(!['approve','reject'].includes(req.body?.decision))return res.status(400).json({error:'Choose an explicit review action.'});
+      const decision=req.body.decision as 'approve'|'reject';
       const reviewerNote = String(req.body?.reviewer_note || '').trim();
+      if(!reviewerNote||reviewerNote.length>1000)return res.status(400).json({error:'A human review reason is required (1-1000 characters).'});
 
       if (!canRoleApproveAgentProposal(actor.role)) {
         await store.logAudit({
@@ -1356,7 +1364,7 @@ async function startServer() {
     app.get(['/', '/workforce','/recovery','/vault','/consent','/claims','/compliance','/review','/review/:module'],(req,res)=>{
       const module=req.params.module||readable[req.path]||'workforce';
       const snapshot=renderToString(React.createElement(PublicReview,{module}));
-      const html=readFileSync(path.join(distDir,'index.html'),'utf8').replace('<div id="root"></div>','<div id="root">'+snapshot+'</div>');
+      const html=readFileSync(path.join(distDir,'index.html'),'utf8').replace('<html lang="en">','<html lang="en" data-theme="light">').replace('<div id="root"></div>','<div id="root">'+snapshot+'</div>');
       res.setHeader('Cache-Control','no-store');res.type('html').send(html);
     });
     app.use(express.static(distDir,{index:false}));

@@ -1,3 +1,4 @@
+import {AgentText} from './AgentText';
 import React from 'react';
 import { AlertTriangle, Plus, Scale, Sparkles, X } from 'lucide-react';
 import {
@@ -152,12 +153,12 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
       .filter(Boolean);
 
     if (!reviewerId.trim()) {
-      setDecisionError('POPIA s71 requires a named human reviewer ID.');
+      setDecisionError('A named human reviewer ID is required by this demo control.');
       return;
     }
     if (reasons.length === 0) {
       setDecisionError(
-        'POPIA s71 requires at least one documented objective reason.',
+        'At least one objective review reason is required.',
       );
       return;
     }
@@ -231,9 +232,9 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white tracking-tight">
+          <h2 className="font-display text-2xl font-bold text-white tracking-tight">
             Recovery & Asset-Tenure Triage Desk
-          </h1>
+          </h2>
           <p className="text-sm text-slate-400 mt-1">
             Separates paper ownership from legally accessible cash across 8 asset layers before litigation spend is committed.
           </p>
@@ -249,7 +250,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
       </div>
 
       {/* Portfolio Summary Strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="recovery-metrics grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-3.5 rounded-md bg-[#131C31] border border-slate-800">
           <div className="text-xs text-slate-400">Portfolio Loss ({portfolio.case_count})</div>
           <div className="font-mono text-lg font-semibold text-white mt-1 tabular-nums">
@@ -257,7 +258,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
           </div>
         </div>
         <div className="p-3.5 rounded-md bg-[#131C31] border border-emerald-500/30">
-          <div className="text-xs text-emerald-300">Practically Recoverable</div>
+          <div className="text-xs text-emerald-300">Potentially recoverable · modelled</div>
           <div className="font-mono text-lg font-semibold text-emerald-400 mt-1 tabular-nums">
             {formatZar(portfolio.total_collectable)}
           </div>
@@ -277,9 +278,9 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
       </div>
 
       {/* Main Split: Case Table + Detail Triage Panel */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 min-[1600px]:grid-cols-12 gap-6 items-start">
         {/* Left: Filterable Table */}
-        <div className="xl:col-span-7 rounded-md bg-[#131C31] border border-slate-800 overflow-hidden">
+        <div className="min-[1600px]:col-span-7 rounded-md bg-[#131C31] border border-slate-800 overflow-hidden">
           <div className="p-3.5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
             <input
               type="search"
@@ -332,7 +333,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
                   return (
                     <tr
                       key={item.case_id}
-                      onClick={() => setSelectedCase(item)}
+                      onClick={() => {setSelectedCase(item);setTimeout(()=>document.getElementById('recovery-case-detail')?.scrollIntoView({behavior:'smooth',block:'start'}),50)}}
                       className={`cursor-pointer transition-colors ${
                         active
                           ? 'bg-emerald-500/10'
@@ -342,18 +343,18 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
                       <td className="py-2.5 px-3 align-top whitespace-nowrap">
                         <button
                           type="button"
-                          onClick={() => setSelectedCase(item)}
+                          onClick={() => {setSelectedCase(item);setTimeout(()=>document.getElementById('recovery-case-detail')?.scrollIntoView({behavior:'smooth',block:'start'}),50)}}
                           className="text-left font-mono font-semibold text-emerald-300 hover:underline"
                         >
                           {item.case_id}
                         </button>
-                        <div className="text-[11px] text-slate-300">
+                        <div className="text-[13px] text-slate-300">
                           {item.defendant_alias}
                         </div>
                       </td>
                       <td className="py-2.5 px-3 align-top">
                         <div className="text-slate-200">{item.title_type}</div>
-                        <div className="text-[11px] text-slate-400 mt-0.5">
+                        <div className="text-[13px] text-slate-400 mt-0.5">
                           {[
                             triage.rule_46a_flag ? 'Rule 46A' : null,
                             triage.ipilra_pto_flag ? 'IPILRA/PTO' : null,
@@ -376,7 +377,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
                         >
                           {formatZar(triage.practically_recoverable)}
                         </div>
-                        <div className="text-[11px] text-slate-400">
+                        <div className="text-[13px] text-slate-400">
                           NRV: {formatZar(triage.nrv_low)}
                         </div>
                       </td>
@@ -385,7 +386,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
                           {triage.recommended_route}
                         </div>
                         {triage.s300_forum && (
-                          <div className="text-[11px] text-sky-300 font-mono mt-0.5">
+                          <div className="text-[13px] text-sky-300 font-mono mt-0.5">
                             {triage.s300_forum}
                           </div>
                         )}
@@ -400,7 +401,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
 
         {/* Right: 8-Layer Detail, Sensitivity Sliders & Mandatory Counsel Decision */}
         {selectedCase && liveTriage && (
-          <div className="xl:col-span-5 rounded-md bg-[#131C31] border border-slate-800 p-5 space-y-5">
+          <div id="recovery-case-detail" className="scroll-mt-24 min-[1600px]:col-span-5 rounded-md bg-[#131C31] border border-slate-800 p-5 space-y-5">
             <div className="flex items-start justify-between gap-3 border-b border-slate-800 pb-3">
               <div>
                 <div className="flex items-center gap-2 text-xs font-mono text-emerald-400">
@@ -412,10 +413,10 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
                   {selectedCase.defendant_alias}
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  {selectedCase.fraud_basis} · Payout {formatZar(selectedCase.original_payout)} ({selectedCase.payout_date})
+                  Synthetic recorded basis: {selectedCase.fraud_basis} · Example payout {formatZar(selectedCase.original_payout)} ({selectedCase.payout_date})
                 </p>
               </div>
-              <span className="text-[11px] px-2 py-0.5 rounded border border-slate-700 bg-slate-900 text-slate-300 whitespace-nowrap">
+              <span className="text-[13px] px-2 py-0.5 rounded border border-slate-700 bg-slate-900 text-slate-300 whitespace-nowrap">
                 {selectedCase.status || 'Triaged'}
               </span>
             </div>
@@ -459,43 +460,43 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
                 <h3 className="text-xs font-semibold text-slate-200">
                   8-Layer Asset & Tenure Profile
                 </h3>
-                <span className="text-[11px] font-mono text-slate-400">
+                <span className="text-[13px] font-mono text-slate-400">
                   SIMULATED ADAPTER (WinDeed / CIPC)
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="p-2.5 rounded bg-slate-900/80 border border-slate-800">
-                  <div className="text-[11px] text-slate-400">1. Registered Owner</div>
+                  <div className="text-[13px] text-slate-400">1. Registered Owner</div>
                   <div className="text-slate-200 font-medium truncate">
                     {liveTriage.eight_layers.registered_owner}
                   </div>
                 </div>
                 <div className="p-2.5 rounded bg-slate-900/80 border border-slate-800">
-                  <div className="text-[11px] text-slate-400">2–3. Legal / Beneficial</div>
+                  <div className="text-[13px] text-slate-400">2–3. Legal / Beneficial</div>
                   <div className="text-slate-200 font-medium truncate">
                     {liveTriage.eight_layers.beneficial_owner}
                   </div>
                 </div>
                 <div className="p-2.5 rounded bg-slate-900/80 border border-slate-800">
-                  <div className="text-[11px] text-slate-400">4. Est. Market Value</div>
+                  <div className="text-[13px] text-slate-400">4. Est. Market Value</div>
                   <div className="font-mono text-slate-200 tabular-nums">
                     {formatZar(liveTriage.eight_layers.market_value)}
                   </div>
                 </div>
                 <div className="p-2.5 rounded bg-slate-900/80 border border-slate-800">
-                  <div className="text-[11px] text-slate-400">5. Forced-Sale ({sliderDiscountPct}% disc.)</div>
+                  <div className="text-[13px] text-slate-400">5. Forced-Sale ({sliderDiscountPct}% disc.)</div>
                   <div className="font-mono text-slate-200 tabular-nums">
                     {formatZar(liveTriage.eight_layers.forced_sale_value)}
                   </div>
                 </div>
                 <div className="p-2.5 rounded bg-slate-900/80 border border-slate-800">
-                  <div className="text-[11px] text-slate-400">6. NRV Low / High</div>
+                  <div className="text-[13px] text-slate-400">6. NRV Low / High</div>
                   <div className="font-mono text-slate-200 tabular-nums">
                     {formatZar(liveTriage.nrv_low)} / {formatZar(liveTriage.nrv_high)}
                   </div>
                 </div>
                 <div className="p-2.5 rounded bg-slate-900/80 border border-emerald-500/30">
-                  <div className="text-[11px] text-emerald-300">7–8. Accessible & Recoverable</div>
+                  <div className="text-[13px] text-emerald-300">7–8. Accessible & Recoverable</div>
                   <div className="font-mono text-emerald-400 font-semibold tabular-nums">
                     {liveTriage.accessible === 1 ? 'YES' : 'NO'} · {formatZar(liveTriage.practically_recoverable)}
                   </div>
@@ -577,7 +578,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
                   <strong>Claimant Insurer:</strong> Synthetic Partner · <strong>Defendant:</strong> {selectedCase.defendant_alias} · <strong>Loss:</strong> {formatZar(selectedCase.original_payout)}
                 </p>
                 <p className="text-slate-300 leading-relaxed">
-                  <strong>Tenure & Equity:</strong> {selectedCase.title_type} (Bonds: {formatZar(selectedCase.senior_bonds)}, Arrears: {formatZar(selectedCase.municipal_arrears)}). Practically recoverable: {formatZar(liveTriage.practically_recoverable)}.
+                  <strong>Tenure & Equity:</strong> {selectedCase.title_type} (Bonds: {formatZar(selectedCase.senior_bonds)}, Arrears: {formatZar(selectedCase.municipal_arrears)}). Modelled recoverable: {formatZar(liveTriage.practically_recoverable)}.
                 </p>
                 <p className="text-slate-300 leading-relaxed">
                   <strong>Counsel Route Draft:</strong> {liveTriage.recommended_route}
@@ -594,10 +595,10 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
             )}
             {aiBrief && (
               <div className="p-3.5 rounded bg-slate-950 border border-emerald-500/30 text-xs text-slate-200 whitespace-pre-wrap max-h-60 overflow-y-auto">
-                <div className="text-[11px] font-mono text-emerald-400 mb-2">
-                  DRAFT FOR HUMAN COUNSEL REVIEW — POPIA s71
+                <div className="text-[13px] font-mono text-emerald-400 mb-2">
+                  DRAFT FOR HUMAN REVIEW · Legal references require counsel validation
                 </div>
-                {aiBrief}
+                <AgentText text={aiBrief}/>
               </div>
             )}
 
@@ -608,9 +609,9 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
             >
               <div className="flex items-center justify-between">
                 <h3 className="text-xs font-semibold text-white">
-                  Human Counsel Decision (POPIA s71 Mandatory)
+                  Human review control · legal basis to be confirmed
                 </h3>
-                <span className="text-[11px] text-slate-400">
+                <span className="text-[13px] text-slate-400">
                   No auto-litigation permitted
                 </span>
               </div>
@@ -619,7 +620,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
                 <div>
                   <label
                     htmlFor="decision-reviewer"
-                    className="block text-[11px] text-slate-400 mb-1"
+                    className="block text-[13px] text-slate-400 mb-1"
                   >
                     Named Reviewer ID
                   </label>
@@ -634,9 +635,9 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
                 <div>
                   <label
                     htmlFor="decision-action"
-                    className="block text-[11px] text-slate-400 mb-1"
+                    className="block text-[13px] text-slate-400 mb-1"
                   >
-                    Approved Route / Action
+                    Recorded human route / action
                   </label>
                   <input
                     id="decision-action"
@@ -651,7 +652,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
               <div>
                 <label
                   htmlFor="decision-reasons"
-                  className="block text-[11px] text-slate-400 mb-1"
+                  className="block text-[13px] text-slate-400 mb-1"
                 >
                   Objective Reasons (one per line — required)
                 </label>
@@ -668,7 +669,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
               <div>
                 <label
                   htmlFor="decision-note"
-                  className="block text-[11px] text-slate-400 mb-1"
+                  className="block text-[13px] text-slate-400 mb-1"
                 >
                   Counsel Note (Optional)
                 </label>
@@ -697,18 +698,18 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
                 type="submit"
                 className="w-full py-2 px-4 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition-colors"
               >
-                Record Signed Human Decision
+                Record reviewer decision
               </button>
 
               {caseDecisions.length > 0 && (
                 <div className="pt-2 space-y-1.5">
-                  <div className="text-[11px] text-slate-400 font-medium">
+                  <div className="text-[13px] text-slate-400 font-medium">
                     Recorded Decisions ({caseDecisions.length})
                   </div>
                   {caseDecisions.map((d) => (
                     <div
                       key={d.decision_id}
-                      className="p-2.5 rounded bg-slate-900 border border-slate-800 text-[11px] text-slate-300"
+                      className="p-2.5 rounded bg-slate-900 border border-slate-800 text-[13px] text-slate-300"
                     >
                       <div className="font-semibold text-emerald-300">
                         {d.selected_action}
@@ -754,7 +755,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
               </button>
             </div>
 
-            <div className="p-2.5 rounded bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 text-[11px]">
+            <div className="p-2.5 rounded bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 text-[13px]">
               <span className="text-slate-400">
                 Optional: load single-row CSV (case_id, policy_ref, alias, payout, title_type, proceeds, bonds, arrears, costs, employment)
               </span>

@@ -1,3 +1,4 @@
+import {WorkforceView} from './components/WorkforceView';
 import{WorkforceTabs}from'./components/WorkforceTabs';
 import React from 'react';
 import { LayoutShell, type NavRoute } from './components/LayoutShell';
@@ -133,9 +134,9 @@ export default function App() {
 
   function handleChangeRole(nextRole: RoleId) {
     setActiveRole(nextRole);
-    apiFetch('/api/audit/view', nextRole, {
+    apiFetch('/api/demo-view-audit', nextRole, {
       method: 'POST',
-      body: JSON.stringify({ view: `role_switch:${nextRole}` }),
+      body: JSON.stringify({ role: nextRole }),
     }).catch(() => {});
   }
 
@@ -280,7 +281,7 @@ export default function App() {
           className="px-4 py-2 text-xs font-semibold rounded bg-emerald-600 text-white"
         >
           Retry Connection
-        </button>
+        </button><a href="/review" className="underline">Open the public synthetic review</a><div className="w-full max-w-2xl"><WorkforceView onRecorded={()=>void loadState(activeRole)}/></div>
       </div>
     );
   }

@@ -6,6 +6,7 @@ import App from './App.tsx';
 import {ErrorBoundary} from './components/ErrorBoundary.tsx';
 import './index.css';
 
+try { const theme=localStorage.getItem('nahashield-theme')==='dark'?'dark':'light';document.documentElement.dataset.theme=theme;document.documentElement.classList.toggle('dark',theme==='dark'); } catch {document.documentElement.dataset.theme='light';}
 async function mount(){
 await fetch('/api/workspace');
 createRoot(document.getElementById('root')!).render(

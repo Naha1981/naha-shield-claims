@@ -130,11 +130,11 @@ export const EvidenceVaultView: React.FC<EvidenceVaultViewProps> = ({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white tracking-tight">
-            Append-Only Evidence Vault & Chain of Custody
-          </h1>
+          <h2 className="font-display text-2xl font-bold text-white tracking-tight">
+            Evidence records & chain of custody
+          </h2>
           <p className="text-sm text-slate-400 mt-1">
-            Insert-only SHA-256 hash chain. Updates and deletes are blocked at the database layer; any payload alteration fails verification closed.
+            SHA-256 checks detect changes to stored content or links. This synthetic local store is not an independently immutable evidence system.
           </p>
         </div>
 
@@ -190,7 +190,7 @@ export const EvidenceVaultView: React.FC<EvidenceVaultViewProps> = ({
           <div>
             <div className="text-sm font-semibold">
               {verification.valid
-                ? `HASH CHAIN VERIFIED — ${verification.checked_count} of ${items.length} records sealed`
+                ? `HASH CHAIN VALID — ${verification.checked_count} of ${items.length} records sealed`
                 : `TAMPER DETECTED (FAILED CLOSED) — ${verification.failed_evidence_id}`}
             </div>
             <div className="text-xs opacity-90 mt-0.5">
@@ -201,7 +201,7 @@ export const EvidenceVaultView: React.FC<EvidenceVaultViewProps> = ({
           </div>
         </div>
         <div className="font-mono text-xs shrink-0">
-          Status: {verification.valid ? 'ADMISSIBLE' : 'QUARANTINED'}
+          Status: {verification.valid ? 'INTEGRITY CHECK PASSED · not legal admissibility' : 'QUARANTINED'}
         </div>
       </div>
 
@@ -373,12 +373,12 @@ export const EvidenceVaultView: React.FC<EvidenceVaultViewProps> = ({
                       </span>
                       <span className="text-slate-600">·</span>
                       <span
-                        className={`px-2 py-0.5 rounded border text-[11px] font-medium ${tagStyle}`}
+                        className={`px-2 py-0.5 rounded border text-[13px] font-medium ${tagStyle}`}
                       >
                         {item.evidence_tag}
                       </span>
                     </div>
-                    <span className="font-mono text-[11px] text-slate-400">
+                    <span className="font-mono text-[13px] text-slate-400">
                       {item.created_at.replace('T', ' ').slice(0, 19)}Z
                     </span>
                   </div>
@@ -396,7 +396,12 @@ export const EvidenceVaultView: React.FC<EvidenceVaultViewProps> = ({
                     </div>
                   )}
 
-                  <div className="pt-1 flex flex-wrap gap-x-6 gap-y-1 text-[11px] font-mono text-slate-400">
+                  <details className="rounded bg-slate-900 p-3 text-sm">
+                    <summary className="cursor-pointer">Original provenance and custody history</summary>
+                    <dl className="mt-3 space-y-2"><div><dt className="font-semibold">Uploaded by</dt><dd>{item.uploader_id} at {item.created_at}</dd></div><div><dt className="font-semibold">Access authority recorded</dt><dd>{item.access_authority || 'Not recorded. Human verification required.'}</dd></div><div><dt className="font-semibold">Original file SHA-256</dt><dd className="break-all">{item.attachment_meta?.binary_sha256 || 'No original file attached. Content-summary hash is not a file hash.'}</dd></div><div><dt className="font-semibold">Content-summary SHA-256</dt><dd className="break-all">{item.sha256_content}</dd></div><div><dt className="font-semibold">Chain SHA-256</dt><dd className="break-all">{item.chain_hash}</dd></div></dl>
+                    <h3 className="font-semibold mt-4">Recorded custody events</h3><ol className="list-decimal pl-5 mt-2 space-y-2">{item.custody_log.map((event,index)=><li key={index}>{event.action} by {event.actor} at {event.ts}</li>)}</ol><p className="mt-3">Current chain check: {verification.valid?'stored chain valid':'chain check failed'}. This is not external source verification. Individual read-access history is not complete in this demo. Review source originals before relying on the evidence tag.</p>
+                  </details>
+                  <div className="pt-1 flex flex-wrap gap-x-6 gap-y-1 text-[13px] font-mono text-slate-400">
                     <span>Source: {item.source_adapter}</span>
                     {item.attachment_meta && (
                       <span>

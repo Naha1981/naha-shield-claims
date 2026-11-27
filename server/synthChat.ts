@@ -17,7 +17,8 @@ export type MsgState =
   | 'blocked_lint'
   | 'approved_in_test_inbox'
   | 'rejected'
-  | 'human_posted';
+  | 'human_posted'
+  | 'escalated';
 export type HumanRole = 'head_of_forensics' | 'legal_recoveries' | 'underwriter' | 'compliance_dpo';
 /** Read-only principals may GET only (e.g. CFO). Never approvers. */
 export type Principal = { id: string; role: HumanRole | 'finance_cfo' };
@@ -37,6 +38,7 @@ export interface SynthMessage {
   in_reply_to?: string;
   decided_by?: string;
   decided_at?: string;
+  decision_reason?: string;
   created_at: string;
   /** Fixed. Test inbox only. */
   delivery: { status: 'test_inbox_only'; external_sent: false };
@@ -49,6 +51,7 @@ export interface SynthThread {
   agent_ids: string[];
   humans: { id: string; role: HumanRole; joined_at: string }[];
   created_at: string;
+  priority?: 'normal'|'high'|'urgent';
 }
 export interface AuditRow { seq: number; at: string; action: string; object_id: string; details: Record<string, unknown>; previous_hash: string; hash: string }
 export type Responder = (ctx: { thread: SynthThread; inbound: SynthMessage; agent_id: string }) => string | Promise<string>;
@@ -90,7 +93,8 @@ export class SynthChat {
     }
     return { valid: true, count: this.audit.length, head: prev };
   }
-  listThreads() { return [...this.threads.values()].map((t) => ({ ...t, message_count: [...this.messages.values()].filter((m) => m.thread_id === t.id).length })); }
+  listThreads() { return [...this.threads.values()].map((t) => {const ms=[...this.messages.values()].filter(m=>m.thread_id===t.id);return {...t,message_count:ms.length,last_activity:ms.at(-1)?.decided_at||ms.at(-1)?.created_at||t.created_at,pending_reviews:ms.filter(m=>m.state==='draft_pending_approval').length,status:ms.some(m=>m.state==='escalated')?'escalated':ms.some(m=>m.state==='draft_pending_approval')?'awaiting_review':'under_review'};}); }
+  async setPriority(thread_id:string,human:{id:string;role:HumanRole},priority:string,reason:string){const t=this.thread(thread_id);if(!APPROVER_ROLES.includes(human.role)||!t.humans.some(h=>h.id===human.id))throw Error('Join as an authorised reviewer first');if(!['normal','high','urgent'].includes(priority)||!reason?.trim()||reason.length>500)throw Error('Valid priority and reason required');t.priority=priority as any;await this.log('SYNTH_PRIORITY_CHANGED',t.id,human.id,{priority,reason});return t;}
   private thread(id: string) { const t = this.threads.get(id); if (!t) throw Error('Unknown thread'); return t; }
   private nextSeq(thread_id: string) { return [...this.messages.values()].filter((m) => m.thread_id === thread_id).length + 1; }
   private mk(t: SynthThread, m: Pick<SynthMessage, 'author_kind' | 'author_id' | 'text' | 'state'> & Partial<SynthMessage>): SynthMessage {
@@ -157,7 +161,8 @@ export class SynthChat {
     return m;
   }
   /** Approve/reject binds to the exact digest the human saw. Single use. Group drafts need a joined human. */
-  async decide(message_id: string, human: { id: string; role: HumanRole }, decision: 'approve' | 'reject', digest: string) {
+  async decide(message_id: string, human: { id: string; role: HumanRole }, decision: 'approve' | 'reject' | 'escalate', digest: string, reason='' ) {
+    if(!['approve','reject','escalate'].includes(decision)||!reason.trim()||reason.length>500)throw Error('Review action and reason required');
     const m = this.messages.get(message_id);
     if (!m) throw Error('Unknown message');
     const t = this.thread(m.thread_id);
@@ -170,9 +175,10 @@ export class SynthChat {
       const lint = lintOutboundMessage(m.text);
       if (!lint.ok) throw Error('Blocked by tipping-off lint');
     }
-    m.state = decision === 'approve' ? 'approved_in_test_inbox' : 'rejected';
+    m.state = decision === 'approve' ? 'approved_in_test_inbox' : decision==='escalate'?'escalated':'rejected';
+    m.decision_reason=reason;
     m.decided_by = human.id; m.decided_at = this.now();
-    await this.log(decision === 'approve' ? 'SYNTH_DRAFT_APPROVED_TEST_INBOX' : 'SYNTH_DRAFT_REJECTED', m.id, human.id, { thread_id: t.id, role: human.role, digest: m.digest });
+    await this.log(decision === 'approve' ? 'SYNTH_DRAFT_ACCEPTED_FOR_HANDOFF' : decision==='escalate'?'SYNTH_DRAFT_ESCALATED':'SYNTH_DRAFT_RETURNED', m.id, human.id, { thread_id: t.id, role: human.role, digest: m.digest,reason });
     return m;
   }
   /** Only approved agent messages and human posts count. Drafts, rejected and blocked never do. */
@@ -205,8 +211,9 @@ export function synthChatRoutes(engine: SynthChat, opts: { authorize: (req: expr
   r.post('/threads/:id/join', wrap((q) => engine.join(String(q.params.id), who(q))));
   r.post('/threads/:id/inbound', wrap((q) => engine.inbound(String(q.params.id), q.body)));
   r.post('/threads/:id/human', wrap((q) => engine.humanPost(String(q.params.id), who(q).id, q.body?.text)));
+  r.post('/threads/:id/priority',wrap(q=>engine.setPriority(String(q.params.id),who(q),q.body?.priority,q.body?.reason)));
   r.get('/threads/:id', wrap(async (q) => engine.transcript(String(q.params.id))));
-  r.post('/messages/:id/decision', wrap((q) => engine.decide(String(q.params.id), who(q), q.body?.decision, q.body?.digest)));
+  r.post('/messages/:id/decision', wrap((q) => engine.decide(String(q.params.id), who(q), q.body?.decision, q.body?.digest,q.body?.reason)));
   r.get('/audit', wrap(async () => ({ rows: engine.audit, verification: engine.verifyAudit() })));
   return r;
 }

@@ -13,11 +13,11 @@ test('whatsapp_sim: agent drafts do not count until a human approves the exact d
   assert.equal(drafts.length, 1);
   assert.equal(drafts[0].state, 'draft_pending_approval');
   assert.ok(!c.transcript(t.id).counted.some((m) => m.author_kind === 'agent'));
-  await assert.rejects(c.decide(drafts[0].id, H, 'approve', 'f'.repeat(64)), /Digest mismatch/);
-  const ok = await c.decide(drafts[0].id, H, 'approve', drafts[0].digest);
+  await assert.rejects(c.decide(drafts[0].id, H, 'approve', 'f'.repeat(64), 'Synthetic reviewer checked source'), /Digest mismatch/);
+  const ok = await c.decide(drafts[0].id, H, 'approve', drafts[0].digest, 'Synthetic reviewer checked source');
   assert.equal(ok.state, 'approved_in_test_inbox');
   assert.deepEqual(ok.delivery, { status: 'test_inbox_only', external_sent: false });
-  await assert.rejects(c.decide(drafts[0].id, H, 'approve', drafts[0].digest), /not decidable/);
+  await assert.rejects(c.decide(drafts[0].id, H, 'approve', drafts[0].digest, 'Synthetic reviewer checked source'), /not decidable/);
   assert.ok(c.transcript(t.id).counted.some((m) => m.id === drafts[0].id));
   assert.ok(sunk.every((e) => e.details.external_sent === false && e.details.synthetic_only === true));
   assert.equal(c.verifyAudit().valid, true);
@@ -46,7 +46,7 @@ test('tipping-off lint blocks agent drafts and human posts', async () => {
   const { drafts } = await c.inbound(g.id, { text: 'hello' });
   assert.equal(drafts.length, 2);
   assert.ok(drafts.every((d) => d.state === 'blocked_lint' && d.lint_violations.includes('STR')));
-  await assert.rejects(c.decide(drafts[0].id, H, 'approve', drafts[0].digest), /not decidable/);
+  await assert.rejects(c.decide(drafts[0].id, H, 'approve', drafts[0].digest, 'Synthetic reviewer checked source'), /not decidable/);
   await assert.rejects(c.humanPost(g.id, H.id, 'this is a tipping-off test'), /lint/);
 });
 
@@ -55,12 +55,12 @@ test('group: human must join to post or approve; bot drafts from several agents;
   const g = await c.createThread({ channel: 'group_sim', case_id: 'SYN-4', claimant_handle: 'syn-d', agent_ids: ['investigator_lead', 'document_evidence_analyst'] });
   await assert.rejects(c.humanPost(g.id, H.id, 'hi'), /Join/);
   const { drafts } = await c.inbound(g.id, { text: 'docs attached' });
-  await assert.rejects(c.decide(drafts[0].id, H, 'approve', drafts[0].digest), /joined/);
+  await assert.rejects(c.decide(drafts[0].id, H, 'approve', drafts[0].digest, 'Synthetic reviewer checked source'), /joined/);
   await assert.rejects(c.join(g.id, { id: 'x', role: 'finance_cfo' as any }), /approver role/);
   await c.join(g.id, H);
   await c.humanPost(g.id, H.id, 'Reviewing now.');
-  await c.decide(drafts[0].id, H, 'approve', drafts[0].digest);
-  const rej = await c.decide(drafts[1].id, H, 'reject', drafts[1].digest);
+  await c.decide(drafts[0].id, H, 'approve', drafts[0].digest, 'Synthetic reviewer checked source');
+  const rej = await c.decide(drafts[1].id, H, 'reject', drafts[1].digest, 'Synthetic reviewer checked source');
   assert.equal(rej.state, 'rejected');
   const tr = c.transcript(g.id);
   assert.equal(tr.counted.filter((m) => m.author_kind !== 'synthetic_claimant').length, 2);
@@ -86,7 +86,7 @@ test('router: fails closed, same-origin on writes, approve over HTTP', async () 
     const inb = await (await req(`threads/${t.id}/inbound`, { text: 'hello' })).json();
     const d = inb.drafts[0];
     assert.equal((await req(`messages/${d.id}/decision`, { decision: 'approve', digest: 'bad' })).status, 400);
-    const ok = await (await req(`messages/${d.id}/decision`, { decision: 'approve', digest: d.digest })).json();
+    const ok = await (await req(`messages/${d.id}/decision`, { decision: 'approve', digest: d.digest, reason: 'Synthetic source reviewed' })).json();
     assert.equal(ok.state, 'approved_in_test_inbox');
     const a = await (await req('audit')).json();
     assert.equal(a.verification.valid, true);
@@ -126,3 +126,5 @@ test('auth: shared reviewer session only; x-role header ignored; CFO read-only; 
     assert.equal((await req('/api/workforce/chat/threads', undefined, cookie)).status, 200);
   } finally { globalThis.fetch = original; await new Promise<void>((r) => s.close(() => r())); }
 });
+
+test('review reasons, escalation and thread priority record explicit human receipts; delivery cannot be claimed',async()=>{const c=new SynthChat();const t=await c.createThread({channel:'group_sim',case_id:'SYN-UX-01',claimant_handle:'syn-ux',agent_ids:['investigator_lead']});await c.join(t.id,H);const{drafts}=await c.inbound(t.id,{text:'SYNTHETIC / FICTIONAL TEST DATA. Unsigned form.'});await assert.rejects(c.decide(drafts[0].id,H,'escalate',drafts[0].digest,''),/reason/);await c.decide(drafts[0].id,H,'escalate',drafts[0].digest,'Needs specialist review');assert.equal(drafts[0].state,'escalated');assert.equal(drafts[0].decision_reason,'Needs specialist review');assert.equal(c.listThreads()[0].status,'escalated');await c.setPriority(t.id,H,'urgent','Unresolved synthetic evidence');assert.equal(c.listThreads()[0].priority,'urgent');assert.equal(c.transcript(t.id).counted.some(m=>m.id===drafts[0].id),false);assert.equal(drafts[0].delivery.external_sent,false);assert.equal(c.verifyAudit().valid,true);assert(c.audit.some(a=>a.details.reason==='Needs specialist review'))});

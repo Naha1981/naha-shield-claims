@@ -69,7 +69,7 @@ type LedgerFilter = 'all' | 'counted' | 'awaiting' | 'excluded' | 'backtest';
 
 const FILTER_LABELS: Record<LedgerFilter, string> = {
   all: 'All Rows',
-  counted: 'Counted (Live)',
+  counted: 'Counted (synthetic)',
   awaiting: 'Awaiting Sign-Off',
   excluded: 'Excluded / Not Money',
   backtest: 'Backtest',
@@ -238,9 +238,9 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white tracking-tight">
-            Executive Overview & Co-Signed Savings Ledger
-          </h1>
+          <h2 className="font-display text-2xl font-bold text-white tracking-tight">
+            Synthetic financial overview
+          </h2>
           <p className="text-sm text-slate-400 mt-1">
             Arrests, judgments, and repayment promises are excluded from Rand totals. Only bank-reconciled cash and dual-signed incremental saves count.
           </p>
@@ -256,7 +256,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
             className="px-3.5 py-1.5 text-xs font-semibold rounded-md border border-emerald-500/40 bg-emerald-950/50 hover:bg-emerald-900/60 text-emerald-300 inline-flex items-center gap-2 transition-colors whitespace-nowrap"
           >
             <FileDown className="w-3.5 h-3.5" />
-            {pdfBusy ? 'Generating PDF...' : 'Export POPIA PDF'}
+            {pdfBusy ? 'Generating PDF...' : 'Export synthetic PDF'}
           </button>
         </div>
       </div>
@@ -269,13 +269,13 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
         >
           <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
           <div className="flex-1">
-            <span className="font-semibold">POPIA-Compliant PDF Exported: </span>
+            <span className="font-semibold">Synthetic PDF exported: </span>
             <span className="font-mono">{pdfConfirmation.filename}</span> (Report ID{' '}
             <span className="font-mono">{pdfConfirmation.reportId}</span>,{' '}
             <span className="font-mono tabular-nums">
               {pdfConfirmation.noteCount}
             </span>{' '}
-            audit note(s) attached, de-identified &amp; logged to immutable audit trail).
+            audit note(s) attached and recorded in the local audit trail. Review privacy and disclosure before real use).
           </div>
           <button
             type="button"
@@ -309,58 +309,58 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
       )}
 
       {/* Strictly Separated Executive KPI Strip */}
-      <section aria-label="Separated financial metrics" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="executive-summary"><section aria-label="Separated financial metrics" className="financial-metrics grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="p-4 rounded-md bg-[#131C31] border border-slate-800">
-          <div className="text-xs text-slate-400">Confirmed Fraudulent Loss</div>
+          <div className="text-xs text-slate-400">Exposure in scope</div>
           <div className="font-mono text-xl font-semibold text-white mt-1.5 tabular-nums">
             {formatZar(summary.confirmed_fraudulent_loss)}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">
+          <div className="text-[13px] text-slate-400 mt-1">
             {recoverySummary.case_count} registered loss cases
           </div>
         </div>
 
         <div className="p-4 rounded-md bg-[#131C31] border border-emerald-500/40">
           <div className="text-xs text-emerald-300 font-medium">
-            Bank-Reconciled Cash Actually Received
+            Reconciled cash · example
           </div>
           <div className="font-mono text-xl font-semibold text-emerald-400 mt-1.5 tabular-nums">
             {formatZar(summary.bank_reconciled_cash_received)}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">
+          <div className="text-[13px] text-slate-400 mt-1">
             Net of legal & tracing costs · dual-signed
           </div>
         </div>
 
         <div className="p-4 rounded-md bg-[#131C31] border border-emerald-500/30">
           <div className="text-xs text-emerald-300 font-medium">
-            Incremental Protected Value (Live Dual-Signed)
+            Protected value · example
           </div>
           <div className="font-mono text-xl font-semibold text-white mt-1.5 tabular-nums">
             {formatZar(summary.incremental_protected_live)}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">
+          <div className="text-[13px] text-slate-400 mt-1">
             10% booking factor applied to cancelled policies
           </div>
         </div>
 
         <div className="p-4 rounded-md bg-[#131C31] border border-slate-800">
-          <div className="text-xs text-slate-400">Futile Spend Avoided (Dual-Signed)</div>
+          <div className="text-xs text-slate-400">Avoided spend · example</div>
           <div className="font-mono text-xl font-semibold text-slate-100 mt-1.5 tabular-nums">
             {formatZar(summary.futile_spend_avoided)}
           </div>
-          <div className="text-[11px] text-slate-400 mt-1">
+          <div className="text-[13px] text-slate-400 mt-1">
             Litigation halted on PTO / nulla bona targets
           </div>
         </div>
-      </section>
+      </section><aside className="insights-rail"><div className="context-label">Review insights</div><h3>Financial evidence first</h3><p>{entries.length} synthetic entries. Values remain separate by evidence and review state.</p><dl><div><dt>Source basis</dt><dd>Seeded ledger and case records</dd></div><div><dt>Required control</dt><dd>Finance and forensic sign-off</dd></div><div><dt>Actual cash collected by this app</dt><dd className="insight-value">R 0</dd></div></dl><a href="#financial-ledger" className="text-sky-300 underline">Inspect underlying records ↓</a></aside></div>
 
       {/* Non-Cash & Friction Separation Strip */}
       <section aria-label="Non-cash and operational metrics" className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-3.5 rounded-md bg-[#0F172A] border border-slate-800 flex items-center justify-between gap-4">
           <div>
             <div className="text-xs text-slate-400">Judgment / Order Value (Not Cash)</div>
-            <div className="text-[11px] text-slate-500">Excluded from cash totals</div>
+            <div className="text-[13px] text-slate-500">Excluded from cash totals</div>
           </div>
           <div className="font-mono text-base font-semibold text-slate-200 tabular-nums">
             {formatZar(summary.judgment_order_value)}
@@ -370,7 +370,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
         <div className="p-3.5 rounded-md bg-[#0F172A] border border-slate-800 flex items-center justify-between gap-4">
           <div>
             <div className="text-xs text-slate-400">Agreed Repayment Plans (Not Cash)</div>
-            <div className="text-[11px] text-slate-500">Counts only when EFT clears</div>
+            <div className="text-[13px] text-slate-500">Counts only when EFT clears</div>
           </div>
           <div className="font-mono text-base font-semibold text-slate-200 tabular-nums">
             {formatZar(summary.agreed_repayment_plans)}
@@ -380,7 +380,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
         <div className="p-3.5 rounded-md bg-[#0F172A] border border-slate-800 flex items-center justify-between gap-4">
           <div>
             <div className="text-xs text-slate-400">Legal Costs Spent · Cleared FP Friction</div>
-            <div className="text-[11px] text-slate-500">
+            <div className="text-[13px] text-slate-500">
               {summary.cleared_fp_count} FP review(s) · {formatZar(summary.fp_review_cost_total)}
             </div>
           </div>
@@ -466,7 +466,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
             {(
               [
                 ['all', 'All Rows'],
-                ['counted', 'Counted (Live)'],
+                ['counted', 'Counted (synthetic)'],
                 ['awaiting', `Awaiting Sign-Off (${summary.awaiting_signoff_count})`],
                 ['excluded', 'Excluded / Not Money'],
                 ['backtest', 'Backtest'],
@@ -489,7 +489,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
+          <table id="financial-ledger" className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-900/60 text-slate-400">
                 <th className="py-2.5 px-4 font-medium">Entry</th>
@@ -526,7 +526,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
                   >
                     <td className="py-3 px-4 align-top font-mono text-slate-200 whitespace-nowrap">
                       <div>{entry.entry_id}</div>
-                      <div className="text-[11px] text-slate-400">{entry.case_ref}</div>
+                      <div className="text-[13px] text-slate-400">{entry.case_ref}</div>
                     </td>
                     <td className="py-3 px-4 align-top max-w-md">
                       <div className="font-semibold text-slate-100">
@@ -536,14 +536,14 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
                         {entry.description}
                       </div>
                       {evalOut.why_not_counted && (
-                        <div className="text-[11px] text-amber-300/90 mt-1">
+                        <div className="text-[13px] text-amber-300/90 mt-1">
                           {evalOut.why_not_counted}
                         </div>
                       )}
                     </td>
                     <td className="py-3 px-4 align-top whitespace-nowrap text-slate-300">
                       <div>{entry.basis}</div>
-                      <div className="text-[11px] text-slate-500 font-mono">
+                      <div className="text-[13px] text-slate-500 font-mono">
                         {entry.event_date}
                       </div>
                     </td>
@@ -552,7 +552,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
                         {formatZar(entry.amount_at_stake)}
                       </div>
                       {entry.legal_costs > 0 && (
-                        <div className="text-[11px] text-slate-400">
+                        <div className="text-[13px] text-slate-400">
                           Costs: {formatZar(entry.legal_costs)}
                         </div>
                       )}
@@ -566,19 +566,19 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
                         {formatZar(countedAmount)}
                       </div>
                       {evalOut.would_have_protected > 0 && (
-                        <div className="text-[11px] text-sky-300">
+                        <div className="text-[13px] text-sky-300">
                           Backtest: {formatZar(evalOut.would_have_protected)}
                         </div>
                       )}
                       {evalOut.fp_review_cost > 0 && (
-                        <div className="text-[11px] text-amber-300">
+                        <div className="text-[13px] text-amber-300">
                           FP cost: {formatZar(evalOut.fp_review_cost)}
                         </div>
                       )}
                     </td>
                     <td className="py-3 px-4 align-top whitespace-nowrap">
                       <span
-                        className={`inline-block px-2 py-0.5 rounded border text-[11px] font-medium ${labelStyle}`}
+                        className={`inline-block px-2 py-0.5 rounded border text-[13px] font-medium ${labelStyle}`}
                       >
                         {evalOut.language_label}
                       </span>
@@ -589,19 +589,19 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
                         const verified = isLedgerEntryVerified(wf);
                         return verified ? (
                           <div>
-                            <div className="text-[11px] font-semibold text-emerald-400">
+                            <div className="text-[13px] font-semibold text-emerald-400">
                               Verified
                             </div>
-                            <div className="text-[10px] font-mono text-slate-400 tabular-nums">
+                            <div className="text-[13px] font-mono text-slate-400 tabular-nums">
                               Cert: {wf.verification_certificate_hash?.slice(0, 10)}
                             </div>
                           </div>
                         ) : (
                           <div>
-                            <div className="text-[11px] font-medium text-amber-300">
+                            <div className="text-[13px] font-medium text-amber-300">
                               {wf?.workflow_status ?? 'Pending Dual-Factor'}
                             </div>
-                            <div className="text-[10px] text-slate-500">
+                            <div className="text-[13px] text-slate-500">
                               2FA dual sign-off required
                             </div>
                           </div>
@@ -620,7 +620,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
                             !entry.forensics_signoff,
                           )
                         }
-                        className={`px-2.5 py-1 rounded border text-[11px] font-medium inline-flex items-center gap-1 transition-colors ${
+                        className={`px-2.5 py-1 rounded border text-[13px] font-medium inline-flex items-center gap-1 transition-colors ${
                           entry.forensics_signoff
                             ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/60'
                             : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500'
@@ -642,7 +642,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
                             !entry.finance_signoff,
                           )
                         }
-                        className={`px-2.5 py-1 rounded border text-[11px] font-medium inline-flex items-center gap-1 transition-colors ${
+                        className={`px-2.5 py-1 rounded border text-[13px] font-medium inline-flex items-center gap-1 transition-colors ${
                           entry.finance_signoff
                             ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-300 hover:bg-emerald-900/60'
                             : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-500'

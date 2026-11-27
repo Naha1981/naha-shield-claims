@@ -280,11 +280,11 @@ export const KpiSummaryWidget: React.FC<KpiSummaryWidgetProps> = ({
             KPI Summary
           </h2>
           <p className="text-xs text-slate-400">
-            Live cross-module telemetry derived from Recovery NRV, Consent Integrity, and SHA-256 Vault custody state.
+            Synthetic cross-module calculations from recovery estimates, consent simulation and stored evidence checks.
           </p>
         </div>
         <span className="text-[11px] font-mono text-slate-400 whitespace-nowrap">
-          REAL-TIME ENGINE VIEW · NOT BOOKED CASH
+          SYNTHETIC ENGINE VIEW · NOT BOOKED CASH
         </span>
       </div>
 
@@ -492,7 +492,7 @@ export const KpiSummaryWidget: React.FC<KpiSummaryWidgetProps> = ({
                     vaultStats.valid ? 'text-emerald-400' : 'text-red-400'
                   }`}
                 >
-                  {vaultStats.valid ? 'CHAIN VERIFIED' : 'TAMPER DETECTED'}
+                  {vaultStats.valid ? 'CHAIN VALID' : 'TAMPER DETECTED'}
                 </div>
                 <div className="text-[11px] text-slate-400 font-mono tabular-nums mt-0.5">
                   {vaultStats.intactLinks}/{vaultStats.totalLinks} SHA-256 links intact

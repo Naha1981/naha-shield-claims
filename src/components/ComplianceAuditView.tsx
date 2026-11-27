@@ -1,3 +1,5 @@
+import {GovernanceReadiness} from './GovernanceReadiness';
+import {AgentText} from './AgentText';
 import React from 'react';
 import { Lock, Search, ShieldCheck, ExternalLink } from 'lucide-react';
 import type {
@@ -77,14 +79,15 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
   return (
     <div className="space-y-6">
       <div className="border-b border-slate-800 pb-4">
-        <h1 className="font-display text-2xl font-bold text-white tracking-tight">
-          Compliance Guardrails, Adapter Inventory & Audit Log
-        </h1>
+        <h2 className="font-display text-2xl font-bold text-white tracking-tight">
+          Controls, connectors and review history
+        </h2>
         <p className="text-sm text-slate-400 mt-1">
-          Real-time enforcement status for POPIA, PPR Rules 2A.8/2A.10, FIC Act, PEPUDA, Uniform Rule 46A, and CPA s300(5)(b).
+          Recorded synthetic controls and action receipts. Legal references guide review; this is not compliance certification.
         </p>
       </div>
 
+      <GovernanceReadiness/>
       {/* Phase 3 Cross-Insurer PSI Locked Gate */}
       <div className="p-4 rounded-md bg-slate-900/90 border border-amber-600/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start gap-3">
@@ -94,12 +97,12 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
               Phase 3 Cross-Insurer Private Set Intersection (PSI) — LOCKED
             </div>
             <p className="text-xs text-slate-300 mt-0.5">
-              Zero cross-insurer ID matching or tenant joins exist in v1. Unlock requires written Information Regulator POPIA s57/s58 prior authorisation and ASISA Competition Act governance sign-off.
+              No cross-insurer matching or tenant joins are enabled. Owner unassigned. Activation needs case-specific legal review, required authorisations, agreements and security testing. No authority is recorded.
             </p>
           </div>
         </div>
         <span className="px-3 py-1 rounded border border-amber-500/40 bg-amber-950/40 text-amber-300 font-mono text-xs font-semibold whitespace-nowrap shrink-0">
-          LOCKED · POPIA s57/58
+          LOCKED · NOT AUTHORISED
         </span>
       </div>
 
@@ -116,7 +119,7 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
       <section className="rounded-md bg-[#131C31] border border-slate-800 overflow-hidden">
         <div className="p-4 border-b border-slate-800 flex items-center justify-between">
           <h2 className="font-display text-base font-semibold text-white">
-            Active Legal & Compliance Guardrails ({guardrails.length})
+            Demonstrated rule checks ({guardrails.length})
           </h2>
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
         </div>
@@ -127,12 +130,12 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
                 <span className="font-mono text-xs text-emerald-300 font-semibold">
                   {g.id} · {g.statute}
                 </span>
-                <span className="text-[11px] font-mono text-slate-300">
-                  {g.status}
+                <span className="text-[13px] font-mono text-slate-300">
+                  Synthetic rule demo
                 </span>
               </div>
               <div className="text-xs font-semibold text-white">{g.title}</div>
-              <p className="text-xs text-slate-400 leading-relaxed">{g.detail}</p>
+              <p className="text-xs text-slate-400 leading-relaxed">{g.id==='CG-03'?'Stored content and links can be checked with SHA-256. Current demo file storage is not an independently immutable evidence system.':g.id==='CG-10'?'Separate synthetic browser workspaces with a named reviewer workspace. Production company identity, tenant RLS and account provisioning are not established by this demo.':g.detail}</p>
             </div>
           ))}
         </div>
@@ -152,11 +155,11 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="font-semibold text-slate-100">{a.name}</span>
-                  <span className="font-mono text-[10px] px-2 py-0.5 rounded border border-amber-500/40 bg-amber-950/30 text-amber-200">
+                  <span className="font-mono text-[13px] px-2 py-0.5 rounded border border-amber-500/40 bg-amber-950/30 text-amber-200">
                     {a.badge}
                   </span>
                 </div>
-                <div className="text-[11px] text-slate-400">
+                <div className="text-[13px] text-slate-400">
                   Lawful basis: {a.lawful_basis} · Degrades to: {a.degrades_to}
                 </div>
               </div>
@@ -201,11 +204,11 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
           {searchResult && (
             <div className="p-3 rounded bg-slate-950 border border-slate-800 text-xs text-slate-200 space-y-2 max-h-60 overflow-y-auto">
               <div className="whitespace-pre-wrap leading-relaxed">
-                {searchResult.text}
+                <AgentText text={searchResult.text}/>
               </div>
               {searchResult.sources.length > 0 && (
                 <div className="pt-2 border-t border-slate-800 space-y-1">
-                  <div className="text-[11px] font-semibold text-slate-400">
+                  <div className="text-[13px] font-semibold text-slate-400">
                     Grounded Sources
                   </div>
                   {searchResult.sources.map((s) => (
@@ -214,7 +217,7 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
                       href={s.uri}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center gap-1 text-[11px] text-emerald-400 hover:underline truncate"
+                      className="flex items-center gap-1 text-[13px] text-emerald-400 hover:underline truncate"
                     >
                       <ExternalLink className="w-3 h-3 shrink-0" />
                       {s.title || s.uri}
@@ -233,7 +236,7 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
               {RULE_CATALOGUE_V1.map((r) => (
                 <div
                   key={r.rule_id}
-                  className="text-[11px] text-slate-400 flex justify-between gap-2 border-b border-slate-800/60 pb-1"
+                  className="text-[13px] text-slate-400 flex justify-between gap-2 border-b border-slate-800/60 pb-1"
                 >
                   <span className="font-mono text-slate-200">{r.rule_id}</span>
                   <span className="truncate flex-1">{r.title}</span>
@@ -251,7 +254,7 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
       <section className="rounded-md bg-[#131C31] border border-slate-800 overflow-hidden">
         <div className="p-4 border-b border-slate-800">
           <h2 className="font-display text-base font-semibold text-white">
-            Immutable Audit Log ({auditLog.length} recent events)
+            Recorded audit events ({auditLog.length} recent events)
           </h2>
         </div>
         <div className="overflow-x-auto max-h-80 overflow-y-auto">
@@ -265,7 +268,7 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
                 <th className="py-2 px-4 font-medium">Details</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/80 font-mono text-[11px]">
+            <tbody className="divide-y divide-slate-800/80 font-mono text-[13px]">
               {auditLog.map((a) => (
                 <tr key={a.audit_id} className="hover:bg-slate-800/30">
                   <td className="py-2 px-4 text-slate-400 whitespace-nowrap">
@@ -280,8 +283,8 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
                   <td className="py-2 px-4 text-slate-300 whitespace-nowrap">
                     {a.object_type}:{a.object_id}
                   </td>
-                  <td className="py-2 px-4 text-slate-400 truncate max-w-xs">
-                    {JSON.stringify(a.details)}
+                  <td className="py-2 px-4 text-slate-400 max-w-sm">
+                    <details><summary>View receipt details</summary><pre className="whitespace-pre-wrap break-words mt-2 max-w-sm">{JSON.stringify(a.details,null,2)}</pre></details>
                   </td>
                 </tr>
               ))}

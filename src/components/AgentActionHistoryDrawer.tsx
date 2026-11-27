@@ -336,7 +336,7 @@ export const AgentActionHistoryDrawer: React.FC<
         {/* Drawer Footer */}
         <div className="px-5 py-3 border-t border-slate-800 bg-[#0B1120] flex flex-wrap items-center justify-between gap-3">
           <span className="text-[11px] text-slate-400">
-            POPIA s71 Human-in-the-Loop Enforced · Automated outputs remain advisory
+            Human review recorded for this synthetic workflow · Automated outputs remain advisory
           </span>
           <div className="flex items-center gap-2 shrink-0">
             <button

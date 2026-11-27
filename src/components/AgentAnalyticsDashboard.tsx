@@ -175,7 +175,7 @@ export const AgentAnalyticsDashboard: React.FC<
             </h2>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Transparent telemetry across integrated Claims-Agents: claims volume processed, time-to-insight latency, and POPIA s71 manual override frequency.
+            Synthetic seeded runs plus activity in this workspace. Not real insurer productivity, fraud accuracy or compliance evidence.
           </p>
         </div>
 

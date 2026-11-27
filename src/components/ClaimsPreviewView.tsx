@@ -54,7 +54,7 @@ export const ClaimsPreviewView: React.FC<ClaimsPreviewViewProps> = ({
         },
       );
       setDispatchOk(
-        `Basdeo-compliant neutral notice recorded for ${selectedClaim.claim_id}. 14-business-day SLA clock opened.`,
+        `Synthetic neutral notice draft recorded for ${selectedClaim.claim_id}. 14-business-day SLA clock opened.`,
       );
       await onRefresh();
     } catch (err) {
@@ -70,25 +70,27 @@ export const ClaimsPreviewView: React.FC<ClaimsPreviewViewProps> = ({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white tracking-tight">
-            Claims Corroboration & Channel QA (Phase 2 Preview)
-          </h1>
+          <h2 className="font-display text-2xl font-bold text-white tracking-tight">
+            Claims review queue
+          </h2>
           <p className="text-sm text-slate-400 mt-1">
-            PPR Rule 2A.8 (2 + 14 SA business-day timers), BI-1663 death triangulation, AVS-R pre-EFT gate, voluntary Rule 2A.10 parlour check, and AgentShield.
+            Choose a claim to inspect its supporting documents, timing and simulated bank-check indicators.
           </p>
         </div>
-        <span className="text-[11px] font-mono text-slate-400 shrink-0">
+        <span className="text-[13px] font-mono text-slate-400 shrink-0">
           SIMULATED ADAPTER (DHA / VerifyNow · AVS-R · XTND / Astute)
         </span>
       </div>
 
+      <section aria-label="Claims portfolio metrics" className="claims-metrics grid sm:grid-cols-3 gap-4"><article><p className="context-label">Claims in review</p><p className="metric-value">{claims.length}</p><p className="text-sm text-slate-400">Synthetic queue · select a record below</p></article><article><p className="context-label">Selected exposure</p><p className="metric-value">{formatZar(selectedClaim?.claim_amount||0)}</p><p className="text-sm text-slate-400">Illustrative claim amount, not authorised</p></article><article><p className="context-label">Payments released</p><p className="metric-value">R 0</p><p className="text-sm text-slate-400">No live payment connector</p></article></section>
+      <section className="rounded-xl bg-slate-900 border border-slate-800 p-5 space-y-3" aria-label="Selected synthetic claim summary"><div className="flex flex-wrap gap-3 items-center justify-between"><h3 className="font-semibold">Case intelligence</h3><label className="text-sm">Claim<select aria-label="Choose synthetic claim" className="ml-2 bg-slate-800 rounded p-2" value={selectedClaimId} onChange={e=>setSelectedClaimId(e.target.value)}>{claims.map(c=><option key={c.claim_id}>{c.claim_id}</option>)}</select></label></div>{selectedClaim&&<><dl className="grid sm:grid-cols-3 gap-4 text-sm"><div><dt className="text-slate-400">Claim and policy</dt><dd className="font-semibold mt-1">{selectedClaim.claim_id} · {selectedClaim.policy_ref}</dd></div><div><dt className="text-slate-400">Claim state</dt><dd className="font-semibold mt-1">{selectedClaim.status}</dd></div><div><dt className="text-slate-400">Illustrative amount</dt><dd className="font-semibold mt-1">{formatZar(selectedClaim.claim_amount)}</dd></div><div><dt className="text-slate-400">Assigned human</dt><dd className="mt-1">Not assigned in this fixture</dd></div><div><dt className="text-slate-400">Timing reference</dt><dd className="mt-1">Fixed simulation at {referenceNowIso}. Not a live SLA.</dd></div><div><dt className="text-slate-400">Decision authority</dt><dd className="mt-1">Named human required. No payment connector.</dd></div></dl><p className="text-sm text-amber-200">All identity, bank and risk indicators below are synthetic. They do not prove fraud or establish payout eligibility.</p></>}</section>
       {/* Main Claims Workspace + Agent Interaction Sidebar */}
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_380px] gap-5 items-start">
+      <div className="grid grid-cols-1 min-[1600px]:grid-cols-[minmax(0,1fr)_360px] gap-5 items-start">
         <div className="space-y-6 min-w-0">
           {/* Claims Table */}
           <section className="rounded-md bg-[#131C31] border border-slate-800 overflow-hidden">
             <div className="overflow-x-auto" data-testid="claims-table-container">
-              <table className="w-full text-left border-collapse text-[11px]">
+              <table className="w-full text-left border-collapse text-[13px]">
                 <thead>
                   <tr className="border-b border-slate-800 bg-slate-900/60 text-slate-400">
                     <th className="py-2.5 px-2.5 font-medium">Claim & Policy</th>
@@ -119,10 +121,10 @@ export const ClaimsPreviewView: React.FC<ClaimsPreviewViewProps> = ({
                           >
                             {clm.claim_id}
                           </button>
-                          <div className="text-[11px] text-slate-300 leading-snug">
+                          <div className="text-[13px] text-slate-300 leading-snug">
                             {clm.deceased_alias}
                           </div>
-                          <div className="text-[10px] text-slate-500 font-mono">
+                          <div className="text-[13px] text-slate-500 font-mono">
                             {clm.policy_ref}
                           </div>
                         </td>
@@ -137,7 +139,7 @@ export const ClaimsPreviewView: React.FC<ClaimsPreviewViewProps> = ({
                             <Clock className="w-3 h-3 shrink-0 mt-0.5" />
                             <span>{timer.clock_label}</span>
                           </div>
-                          <div className="text-[10px] text-slate-400 font-mono mt-0.5 leading-snug">
+                          <div className="text-[13px] text-slate-400 font-mono mt-0.5 leading-snug">
                             2d: {timer.initial_deadline_iso}
                             {timer.dispute_deadline_iso
                               ? ` · 14d: ${timer.dispute_deadline_iso}`
@@ -145,7 +147,7 @@ export const ClaimsPreviewView: React.FC<ClaimsPreviewViewProps> = ({
                           </div>
                         </td>
                         <td className="py-2.5 px-2.5 align-top max-w-[145px]">
-                          <div className="flex flex-wrap gap-1 text-[10px]">
+                          <div className="flex flex-wrap gap-1 text-[13px]">
                             {clm.living_person_signal && (
                               <span className="px-1.5 py-0.5 rounded border border-red-500/50 bg-red-950/50 text-red-200 font-semibold whitespace-nowrap">
                                 Living-Person
@@ -178,7 +180,7 @@ export const ClaimsPreviewView: React.FC<ClaimsPreviewViewProps> = ({
                         </td>
                         <td className="py-2.5 px-2.5 align-top max-w-[155px]">
                           <div
-                            className={`font-mono text-[11px] font-semibold whitespace-nowrap ${
+                            className={`font-mono text-[13px] font-semibold whitespace-nowrap ${
                               clm.avs_r_status === 'MATCHED'
                                 ? 'text-emerald-400'
                                 : clm.avs_r_status === 'MISMATCH'
@@ -188,7 +190,7 @@ export const ClaimsPreviewView: React.FC<ClaimsPreviewViewProps> = ({
                           >
                             AVS-R: {clm.avs_r_status}
                           </div>
-                          <div className="text-[10px] text-slate-400 mt-0.5 leading-snug">
+                          <div className="text-[13px] text-slate-400 mt-0.5 leading-snug">
                             {clm.parlour_name}{' '}
                             {clm.voluntary_parlour_elected
                               ? '· Vol 2A.10'

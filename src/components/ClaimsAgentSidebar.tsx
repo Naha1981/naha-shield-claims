@@ -1,3 +1,4 @@
+import {AgentText} from './AgentText';
 import React from 'react';
 import {
   AlertTriangle,
@@ -182,11 +183,8 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
     if (!claimId) return;
     setReviewError(null);
     setActionFeedback(null);
-    const note =
-      (reviewNotes[proposal.proposal_id] ?? '').trim() ||
-      (decision === 'approve'
-        ? `Reviewed synthetic evidence and approved ${proposalTypeLabel(proposal.proposal_type)} for ${claimId}.`
-        : `Declined proposed agent action following manual claim review.`);
+    const note=(reviewNotes[proposal.proposal_id]??'').trim();
+    if(!note){setReviewError('Record your review reason before accepting or returning a proposal.');return;}
 
     setReviewBusyId(proposal.proposal_id);
     try {
@@ -208,8 +206,8 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
       setContext(res.context);
       setActionFeedback(
         decision === 'approve'
-          ? `Approved & committed "${proposal.title}"${res.proposal.committed_ref ? ` (Ref: ${res.proposal.committed_ref})` : ''}.`
-          : `Rejected "${proposal.title}" — logged to claim audit trail.`,
+          ? `Decision recorded for synthetic action "${proposal.title}"${res.proposal.committed_ref ? ` (Ref: ${res.proposal.committed_ref})` : ''}.`
+          : `Returned for revision "${proposal.title}" — logged to claim audit trail.`,
       );
       await onCommittedChange();
     } catch (err) {
@@ -251,7 +249,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
                 Agent Interaction
               </h2>
             </div>
-            <p className="text-[11px] text-slate-400 mt-0.5">
+            <p className="text-[13px] text-slate-400 mt-0.5">
               {claim
                 ? `${claim.claim_id} · ${claim.policy_ref} · Synthetic Data Only`
                 : 'Select a claim row to inspect'}
@@ -262,7 +260,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
             onClick={() => void fetchAgentContext(claimId, true)}
             disabled={loadingContext || !claimId}
             aria-label="Refresh NahaShield claim context"
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-slate-700 bg-slate-900 text-[11px] font-medium text-slate-200 hover:bg-slate-800 disabled:opacity-50 whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-slate-700 bg-slate-900 text-[13px] font-medium text-slate-200 hover:bg-slate-800 disabled:opacity-50 whitespace-nowrap shrink-0"
           >
             <RefreshCw
               className={`w-3 h-3 ${loadingContext ? 'animate-spin' : ''}`}
@@ -273,7 +271,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
 
         {/* Scoped NahaShield Data Snapshot */}
         {context && (
-          <div className="grid grid-cols-3 gap-2 pt-1 text-[11px]">
+          <div className="grid grid-cols-3 gap-2 pt-1 text-[13px]">
             <div className="rounded bg-slate-900/90 border border-slate-800 px-2.5 py-1.5">
               <div className="text-slate-400">Vault Items</div>
               <div className="font-mono font-semibold text-white tabular-nums">
@@ -315,7 +313,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
             <History className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
             <span>Agent Action History</span>
           </span>
-          <span className="font-mono text-[11px] text-slate-300 tabular-nums whitespace-nowrap">
+          <span className="font-mono text-[13px] text-slate-300 tabular-nums whitespace-nowrap">
             {actionHistory.length}{' '}
             {actionHistory.length === 1 ? 'action' : 'actions'}
           </span>
@@ -348,7 +346,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
               </option>
             ))}
           </select>
-          <p className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+          <p className="text-[13px] text-slate-400 mt-1 leading-relaxed">
             {selectedAgent.scope_summary}
           </p>
         </div>
@@ -376,7 +374,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
             type="button"
             onClick={() => setShowGuardrails((v) => !v)}
             aria-expanded={showGuardrails}
-            className="text-[11px] text-slate-400 hover:text-slate-200 underline underline-offset-2"
+            className="text-[13px] text-slate-400 hover:text-slate-200 underline underline-offset-2"
           >
             {showGuardrails ? 'Hide Agent Guardrails' : 'View 9 Agent Guardrails'}
           </button>
@@ -391,7 +389,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
         </div>
 
         {showGuardrails && (
-          <div className="p-2.5 rounded bg-slate-900/90 border border-slate-800 space-y-1 text-[11px] text-slate-300">
+          <div className="p-2.5 rounded bg-slate-900/90 border border-slate-800 space-y-1 text-[13px] text-slate-300">
             <div className="font-semibold text-white">
               Claims-Agents Non-Negotiable Rules (POPIA s71)
             </div>
@@ -454,7 +452,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
             role="tab"
             aria-selected={activeTab === 'brief'}
             onClick={() => setActiveTab('brief')}
-            className={`px-2 py-1.5 text-[11px] font-medium rounded transition-colors whitespace-nowrap ${
+            className={`px-2 py-1.5 text-[13px] font-medium rounded transition-colors whitespace-nowrap ${
               activeTab === 'brief'
                 ? 'bg-[#131C31] text-white border border-slate-700'
                 : 'text-slate-400 hover:text-slate-200'
@@ -467,7 +465,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
             role="tab"
             aria-selected={activeTab === 'approvals'}
             onClick={() => setActiveTab('approvals')}
-            className={`px-2 py-1.5 text-[11px] font-medium rounded transition-colors whitespace-nowrap font-mono tabular-nums ${
+            className={`px-2 py-1.5 text-[13px] font-medium rounded transition-colors whitespace-nowrap font-mono tabular-nums ${
               activeTab === 'approvals'
                 ? 'bg-[#131C31] text-white border border-slate-700'
                 : 'text-slate-400 hover:text-slate-200'
@@ -480,7 +478,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
             role="tab"
             aria-selected={activeTab === 'audit'}
             onClick={() => setActiveTab('audit')}
-            className={`px-2 py-1.5 text-[11px] font-medium rounded transition-colors whitespace-nowrap font-mono tabular-nums ${
+            className={`px-2 py-1.5 text-[13px] font-medium rounded transition-colors whitespace-nowrap font-mono tabular-nums ${
               activeTab === 'audit'
                 ? 'bg-[#131C31] text-white border border-slate-700'
                 : 'text-slate-400 hover:text-slate-200'
@@ -505,7 +503,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
                   Click <strong className="text-slate-200">Run Agent Analysis</strong> to inspect NahaShield SLA clocks, hash-chained Evidence Vault items, living-person/cluster signals, AVS-R status, and generate human-gated proposals.
                 </p>
                 {context && (
-                  <div className="pt-1 text-[11px] text-slate-400 font-mono">
+                  <div className="pt-1 text-[13px] text-slate-400 font-mono">
                     Current SLA: {context.timer.clock_label}
                   </div>
                 )}
@@ -513,11 +511,11 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
             ) : (
               <div className="space-y-3" data-testid="agent-case-brief">
                 {/* Advisory Boundary & Run Metadata */}
-                <div className="p-2.5 rounded bg-amber-950/30 border border-amber-600/40 text-[11px] text-amber-200">
+                <div className="p-2.5 rounded bg-amber-950/30 border border-amber-600/40 text-[13px] text-amber-200">
                   {latestRun.brief.advisory_disclaimer}
                 </div>
 
-                <div className="text-[11px] text-slate-400 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono">
+                <div className="text-[13px] text-slate-400 flex flex-wrap items-center gap-x-2 gap-y-1 font-mono">
                   <span className="text-emerald-300 font-semibold">
                     {latestRun.agent_name}
                   </span>
@@ -530,7 +528,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
                 {latestRun.brief.prompt_injection_warnings.length > 0 && (
                   <div
                     role="alert"
-                    className="p-2.5 rounded bg-red-950/40 border border-red-600/50 text-[11px] text-red-200 flex items-start gap-2"
+                    className="p-2.5 rounded bg-red-950/40 border border-red-600/50 text-[13px] text-red-200 flex items-start gap-2"
                   >
                     <ShieldAlert className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
                     <div>
@@ -546,23 +544,23 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
 
                 {/* Narrative Summary */}
                 <div className="p-3 rounded bg-slate-900/90 border border-slate-800 space-y-1">
-                  <div className="text-[11px] font-semibold text-slate-300">
+                  <div className="text-[13px] font-semibold text-slate-300">
                     1. Case Reference & Synthesis
                   </div>
-                  <div className="text-[11px] font-mono text-slate-400">
+                  <div className="text-[13px] font-mono text-slate-400">
                     {latestRun.brief.case_reference}
                   </div>
-                  <p className="text-xs text-slate-200 leading-relaxed pt-1">
-                    {latestRun.brief.narrative_summary}
-                  </p>
+                  <div className="text-xs text-slate-200 leading-relaxed pt-1">
+                    <AgentText text={latestRun.brief.narrative_summary}/>
+                  </div>
                 </div>
 
                 {/* 2. Purpose & Checks Run */}
                 <div className="space-y-1">
-                  <h3 className="text-[11px] font-semibold text-slate-300">
+                  <h3 className="text-[13px] font-semibold text-slate-300">
                     2. Checks Run
                   </h3>
-                  <ul className="space-y-1 text-[11px] text-slate-400 list-disc pl-4">
+                  <ul className="space-y-1 text-[13px] text-slate-400 list-disc pl-4">
                     {latestRun.brief.purpose_and_checks_run.map((chk) => (
                       <li key={chk}>{chk}</li>
                     ))}
@@ -571,7 +569,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
 
                 {/* 3. Evidence-Tagged Findings */}
                 <div className="space-y-2">
-                  <h3 className="text-[11px] font-semibold text-slate-300">
+                  <h3 className="text-[13px] font-semibold text-slate-300">
                     3. Tagged Findings ({latestRun.brief.findings.length})
                   </h3>
                   <div className="space-y-2">
@@ -580,7 +578,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
                         key={f.finding_id}
                         className="p-2.5 rounded bg-slate-900/80 border border-slate-800 space-y-1"
                       >
-                        <div className="flex items-center justify-between gap-2 text-[11px] font-mono">
+                        <div className="flex items-center justify-between gap-2 text-[13px] font-mono">
                           <span className="text-emerald-300 font-semibold">
                             {f.reason_code}
                           </span>
@@ -588,14 +586,14 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
                             {f.evidence_tag} · {f.coverage_status}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-200 leading-relaxed">
-                          {f.summary}
-                        </p>
-                        <div className="text-[10px] font-mono text-slate-500">
+                        <div className="text-xs text-slate-200 leading-relaxed">
+                          <AgentText text={f.summary}/>
+                        </div>
+                        <div className="text-[13px] font-mono text-slate-500">
                           Source: {f.source_ref} · {f.evidence_type}
                         </div>
                         {f.visual_record_disclaimer && (
-                          <div className="p-1.5 rounded bg-amber-950/40 border border-amber-500/40 text-[10px] text-amber-200 font-medium">
+                          <div className="p-1.5 rounded bg-amber-950/40 border border-amber-500/40 text-[13px] text-amber-200 font-medium">
                             {DATED_VISUAL_RECORD_DISCLAIMER}
                           </div>
                         )}
@@ -607,44 +605,44 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
                 {/* 4 & 5. Missing Info + Innocent Explanations */}
                 <div className="space-y-2 pt-1 border-t border-slate-800">
                   <div>
-                    <h3 className="text-[11px] font-semibold text-slate-300">
+                    <h3 className="text-[13px] font-semibold text-slate-300">
                       4. Conflicting or Missing Information
                     </h3>
-                    <ul className="mt-1 space-y-1 text-[11px] text-slate-400 list-disc pl-4">
+                    <ul className="mt-1 space-y-1 text-[13px] text-slate-400 list-disc pl-4">
                       {latestRun.brief.conflicting_or_missing_info.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
                   </div>
                   <div>
-                    <h3 className="text-[11px] font-semibold text-slate-300">
+                    <h3 className="text-[13px] font-semibold text-slate-300">
                       5. Innocent Explanations & False-Positive Checks
                     </h3>
-                    <ul className="mt-1 space-y-1 text-[11px] text-slate-400 list-disc pl-4">
+                    <ul className="mt-1 space-y-1 text-[13px] text-slate-400 list-disc pl-4">
                       {latestRun.brief.innocent_explanations.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
                   </div>
                   <div>
-                    <h3 className="text-[11px] font-semibold text-slate-300">
+                    <h3 className="text-[13px] font-semibold text-slate-300">
                       6. What Would Resolve It
                     </h3>
-                    <ul className="mt-1 space-y-1 text-[11px] text-slate-400 list-disc pl-4">
+                    <ul className="mt-1 space-y-1 text-[13px] text-slate-400 list-disc pl-4">
                       {latestRun.brief.what_would_resolve.map((item) => (
                         <li key={item}>{item}</li>
                       ))}
                     </ul>
                   </div>
                   <div className="p-2.5 rounded bg-slate-900 border border-slate-800 space-y-1">
-                    <h3 className="text-[11px] font-semibold text-emerald-300">
+                    <h3 className="text-[13px] font-semibold text-emerald-300">
                       7. Advisory Next Human Step
                     </h3>
-                    <p className="text-xs text-slate-200 leading-relaxed">
+                    <div className="text-xs text-slate-200 leading-relaxed">
                       {latestRun.brief.suggested_next_human_step}
-                    </p>
+                    </div>
                   </div>
-                  <div className="text-[10px] font-mono text-slate-500 break-words">
+                  <div className="text-[13px] font-mono text-slate-500 break-words">
                     8. Audit Refs: {latestRun.brief.audit_references.join(' · ')}
                   </div>
                 </div>
@@ -667,7 +665,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
         {activeTab === 'approvals' && (
           <div className="space-y-3" data-testid="agent-approvals-panel">
             {!roleCanApprove && (
-              <div className="p-2.5 rounded bg-amber-950/40 border border-amber-500/40 text-[11px] text-amber-200 flex items-start gap-2">
+              <div className="p-2.5 rounded bg-amber-950/40 border border-amber-500/40 text-[13px] text-amber-200 flex items-start gap-2">
                 <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                 <span>
                   Active role is <strong>{ROLE_LABELS[activeRole]}</strong>. Separation of Duties blocks Finance / CFO from approving claim investigation write-backs.
@@ -691,7 +689,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <div className="text-[10px] font-mono text-amber-300">
+                          <div className="text-[13px] font-mono text-amber-300">
                             PENDING HUMAN APPROVAL · {proposalTypeLabel(prop.proposal_type)}
                           </div>
                           <h4 className="text-xs font-semibold text-white mt-0.5">
@@ -700,38 +698,38 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
                         </div>
                       </div>
 
-                      <p className="text-[11px] text-slate-300 leading-relaxed">
-                        {prop.rationale}
-                      </p>
+                      <div className="text-[13px] text-slate-300 leading-relaxed">
+                        <AgentText text={prop.rationale}/>
+                      </div>
 
                       {prop.proposed_payload.evidence_summary && (
-                        <div className="p-2 rounded bg-[#0B1120] border border-slate-800 text-[11px] text-slate-300 space-y-1">
-                          <div className="font-mono text-[10px] text-emerald-300">
+                        <div className="p-2 rounded bg-[#0B1120] border border-slate-800 text-[13px] text-slate-300 space-y-1">
+                          <div className="font-mono text-[13px] text-emerald-300">
                             Tag: {prop.proposed_payload.evidence_tag}
                           </div>
                           <div className="leading-relaxed">
-                            {prop.proposed_payload.evidence_summary}
+                            <AgentText text={prop.proposed_payload.evidence_summary}/>
                           </div>
                         </div>
                       )}
 
                       {prop.proposed_payload.notice_text && (
-                        <div className="p-2 rounded bg-[#0B1120] border border-slate-800 text-[11px] text-slate-300 space-y-1">
-                          <div className="font-mono text-[10px] text-emerald-300">
+                        <div className="p-2 rounded bg-[#0B1120] border border-slate-800 text-[13px] text-slate-300 space-y-1">
+                          <div className="font-mono text-[13px] text-emerald-300">
                             FIC Linter: {prop.lint_ok ? 'CLEAN' : `BLOCKED (${prop.lint_violations.join(', ')})`}
                           </div>
                           <div className="leading-relaxed">
-                            {prop.proposed_payload.notice_text}
+                            <AgentText text={prop.proposed_payload.notice_text}/>
                           </div>
                         </div>
                       )}
 
                       {prop.proposed_payload.suggested_status && (
-                        <div className="p-2 rounded bg-[#0B1120] border border-slate-800 text-[11px] text-slate-300 space-y-1">
-                          <div className="font-mono text-[10px] text-amber-300">
+                        <div className="p-2 rounded bg-[#0B1120] border border-slate-800 text-[13px] text-slate-300 space-y-1">
+                          <div className="font-mono text-[13px] text-amber-300">
                             Target Status: {prop.proposed_payload.suggested_status}
                           </div>
-                          <ul className="list-disc pl-4 text-[11px] text-slate-400">
+                          <ul className="list-disc pl-4 text-[13px] text-slate-400">
                             {(prop.proposed_payload.objective_reasons ?? []).map(
                               (r) => (
                                 <li key={r}>{r}</li>
@@ -744,7 +742,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
                       <div>
                         <label
                           htmlFor={`reviewer-note-${prop.proposal_id}`}
-                          className="block text-[11px] text-slate-400 mb-1"
+                          className="block text-[13px] text-slate-400 mb-1"
                         >
                           Human Reviewer Note / Objective Reason (POPIA s71)
                         </label>
@@ -773,7 +771,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
                           className="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-xs font-semibold text-white whitespace-nowrap"
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>{busy ? 'Saving...' : 'Approve & Commit'}</span>
+                          <span>{busy ? 'Saving...' : 'Record reviewed test action'}</span>
                         </button>
                         <button
                           type="button"
@@ -784,7 +782,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
                           className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded border border-slate-700 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-xs font-medium text-slate-200 whitespace-nowrap"
                         >
                           <XCircle className="w-3.5 h-3.5" />
-                          <span>Reject</span>
+                          <span>Return for revision</span>
                         </button>
                       </div>
                     </div>
@@ -793,13 +791,13 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
 
                 {reviewedProposals.length > 0 && (
                   <div className="space-y-2 pt-2 border-t border-slate-800">
-                    <div className="text-[11px] font-semibold text-slate-400">
+                    <div className="text-[13px] font-semibold text-slate-400">
                       Reviewed Decisions ({reviewedProposals.length})
                     </div>
                     {reviewedProposals.map((prop) => (
                       <div
                         key={prop.proposal_id}
-                        className="p-2.5 rounded bg-slate-900/60 border border-slate-800 text-[11px] space-y-1"
+                        className="p-2.5 rounded bg-slate-900/60 border border-slate-800 text-[13px] space-y-1"
                       >
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-semibold text-slate-200">
@@ -812,13 +810,13 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
                                 : 'text-red-300'
                             }`}
                           >
-                            {prop.status}
+                            {prop.status==='approved'?'Decision Recorded':'Returned for Revision'}
                           </span>
                         </div>
                         <div className="text-slate-400">
                           {prop.reviewer_note}
                         </div>
-                        <div className="font-mono text-[10px] text-slate-500">
+                        <div className="font-mono text-[13px] text-slate-500">
                           {prop.reviewed_by_name} (
                           {prop.reviewed_by_role
                             ? ROLE_LABELS[prop.reviewed_by_role]
@@ -839,7 +837,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
 
         {activeTab === 'audit' && (
           <div className="space-y-2.5" data-testid="agent-audit-panel">
-            <div className="flex items-center justify-between text-[11px] text-slate-400">
+            <div className="flex items-center justify-between text-[13px] text-slate-400">
               <span className="flex items-center gap-1.5 font-semibold text-slate-300">
                 <History className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Claim Audit Trail ({claimId})</span>
@@ -858,7 +856,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
                 {auditTrail.map((log) => (
                   <div
                     key={log.audit_id}
-                    className="p-2.5 rounded bg-slate-900/80 border border-slate-800 text-[11px] space-y-1"
+                    className="p-2.5 rounded bg-slate-900/80 border border-slate-800 text-[13px] space-y-1"
                   >
                     <div className="flex items-center justify-between gap-2 font-mono">
                       <span className="text-emerald-300 font-semibold">
@@ -872,7 +870,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
                       Actor: {ROLE_LABELS[log.actor_role]} ({log.actor_id}) · Object:{' '}
                       <span className="font-mono">{log.object_id}</span>
                     </div>
-                    <div className="text-[10px] font-mono text-slate-500">
+                    <div className="text-[13px] font-mono text-slate-500">
                       {formatShortIso(log.created_at)}
                     </div>
                   </div>
@@ -882,21 +880,21 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
 
             {context && context.related_evidence.length > 0 && (
               <div className="pt-2 border-t border-slate-800 space-y-1.5">
-                <div className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
+                <div className="text-[13px] font-semibold text-slate-300 flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Linked Vault Custody ({context.related_evidence.length})</span>
                 </div>
                 {context.related_evidence.map((ev) => (
                   <div
                     key={ev.evidence_id}
-                    className="p-2 rounded bg-slate-900/60 border border-slate-800 text-[11px] space-y-0.5"
+                    className="p-2 rounded bg-slate-900/60 border border-slate-800 text-[13px] space-y-0.5"
                   >
-                    <div className="flex items-center justify-between font-mono text-[10px]">
+                    <div className="flex items-center justify-between font-mono text-[13px]">
                       <span className="text-emerald-300">{ev.evidence_id}</span>
                       <span className="text-slate-400">{ev.evidence_tag}</span>
                     </div>
                     <div className="text-slate-200 font-medium">{ev.title}</div>
-                    <div className="font-mono text-[10px] text-slate-500">
+                    <div className="font-mono text-[13px] text-slate-500">
                       Chain: {shortHash(ev.chain_hash)}
                     </div>
                   </div>

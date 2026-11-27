@@ -138,17 +138,19 @@ export const ConsentDeskView: React.FC<ConsentDeskViewProps> = ({
 
   return (
     <div className="space-y-6">
+      {selectedPolicy&&<section className="rounded-xl border border-slate-700 bg-slate-900 p-5" aria-label="Selected policy evidence"><h3>Policy evidence context</h3><div className="grid sm:grid-cols-3 gap-4 text-sm mt-3"><p><span className="text-slate-400">Policy</span><br/><strong>{selectedPolicy.policy_id}</strong></p><p><span className="text-slate-400">Source</span><br/>Synthetic policy fixture only</p><p><span className="text-slate-400">Purpose</span><br/>Review consent gaps, not claim eligibility</p></div><details className="mt-3 text-sm"><summary>Lawful basis and human decision boundary</summary><p className="mt-2">This screen models consent evidence and safe contact checks. It is not a case-specific lawful-processing register. An unsigned form, third-party payer or missing independent contact is a review indicator, not proof of fraud. No real consent request is delivered.</p><p className="mt-2">Reviewer must check original signed records, the applicable lawful basis, purpose and any other authority before processing real personal information.</p></details></section>}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-white tracking-tight">
+          <h2 className="font-display text-2xl font-bold text-white tracking-tight">
             Consent & Cover Integrity Desk (M2)
-          </h1>
+          </h2>
           <p className="text-sm text-slate-400 mt-1">
             Independent out-of-band proof that the life assured consented to third-party cover. PEPUDA-compliant: consent tiers never inspect age.
           </p>
         </div>
-        <span className="text-[11px] font-mono text-slate-400 shrink-0">
+        <span className="text-[13px] font-mono text-slate-400 shrink-0">
           SIMULATED ADAPTER (WhatsApp / USSD Gateway · KYC Contact Lookup)
         </span>
       </div>
@@ -264,7 +266,7 @@ export const ConsentDeskView: React.FC<ConsentDeskViewProps> = ({
 
           {/* Side-by-side Handset Screen Preview */}
           <div className="rounded-lg bg-slate-950 border border-slate-800 p-4 space-y-3">
-            <div className="flex items-center justify-between text-[11px] font-mono text-slate-400 border-b border-slate-800 pb-2">
+            <div className="flex items-center justify-between text-[13px] font-mono text-slate-400 border-b border-slate-800 pb-2">
               <span>HANDSET PREVIEW · {simLanguage.toUpperCase()}</span>
               <span
                 className={
@@ -356,18 +358,18 @@ export const ConsentDeskView: React.FC<ConsentDeskViewProps> = ({
                         <AlertOctagon className="w-3.5 h-3.5" />
                         SILENT DURESS ALERT · {alertPolicy.policy_id}
                       </span>
-                      <span className="font-mono text-[11px] text-red-200">
+                      <span className="font-mono text-[13px] text-red-200">
                         HIGH PRIORITY
                       </span>
                     </div>
                     <div className="text-xs text-slate-200">
                       Assured: {alertPolicy.assured_alias} · Proposer: {alertPolicy.proposer_alias} · Cover {formatZar(alertPolicy.cover_amount)} ({alertPolicy.accidental_multiplier}x)
                     </div>
-                    <div className="text-[11px] text-red-200/90">
+                    <div className="text-[13px] text-red-200/90">
                       Coerced handset received neutral timeout screen. Policy issuance paused pending specialist human intervention (POPIA s71).
                     </div>
                     {alertPolicy.cert_hash && (
-                      <div className="text-[11px] font-mono text-slate-300">
+                      <div className="text-[13px] font-mono text-slate-300">
                         Vault Seal: {alertPolicy.cert_hash}
                       </div>
                     )}
@@ -387,7 +389,7 @@ export const ConsentDeskView: React.FC<ConsentDeskViewProps> = ({
             )}
           </div>
 
-          <div className="p-3 rounded bg-slate-900 border border-slate-800 text-[11px] text-slate-400 leading-relaxed">
+          <div className="p-3 rounded bg-slate-900 border border-slate-800 text-[13px] text-slate-400 leading-relaxed">
             <strong className="text-slate-200">PPR Rule 2A.8.3 & PEPUDA Safeguard:</strong> Escalated consent adds recorded callback or opt-in liveness with mandatory non-biometric fallback. Age never triggers escalation.
           </div>
         </div>
@@ -440,7 +442,7 @@ export const ConsentDeskView: React.FC<ConsentDeskViewProps> = ({
                 <tr key={policy.policy_id} className="hover:bg-slate-800/35">
                   <td className="py-2.5 px-4 font-mono text-slate-200 whitespace-nowrap">
                     <div>{policy.policy_id}</div>
-                    <div className="text-[11px] text-slate-400">
+                    <div className="text-[13px] text-slate-400">
                       {policy.preferred_language}
                     </div>
                   </td>
@@ -448,7 +450,7 @@ export const ConsentDeskView: React.FC<ConsentDeskViewProps> = ({
                     <div className="font-medium text-slate-100">
                       {policy.product_type}
                     </div>
-                    <div className="text-[11px] text-slate-400">
+                    <div className="text-[13px] text-slate-400">
                       {evalOut.third_party
                         ? `${policy.proposer_alias} → ${policy.assured_alias} (${policy.beneficiary_relationship})`
                         : 'First-party cover'}
@@ -464,13 +466,13 @@ export const ConsentDeskView: React.FC<ConsentDeskViewProps> = ({
                     >
                       {evalOut.contact_independence_status}
                     </div>
-                    <div className="text-[11px] text-slate-500">
+                    <div className="text-[13px] text-slate-500">
                       Source: {policy.contact_source}
                     </div>
                   </td>
                   <td className="py-2.5 px-4 whitespace-nowrap">
                     <span
-                      className={`px-2 py-0.5 rounded border text-[11px] font-medium ${
+                      className={`px-2 py-0.5 rounded border text-[13px] font-medium ${
                         evalOut.consent_tier === 'Escalated'
                           ? 'border-amber-500/40 bg-amber-950/40 text-amber-300'
                           : 'border-slate-700 bg-slate-900 text-slate-300'
@@ -481,13 +483,13 @@ export const ConsentDeskView: React.FC<ConsentDeskViewProps> = ({
                   </td>
                   <td className="py-2.5 px-4 whitespace-nowrap">
                     {policy.duress_alert ? (
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-red-500/60 bg-red-950/60 text-red-200 text-[11px] font-semibold">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-red-500/60 bg-red-950/60 text-red-200 text-[13px] font-semibold">
                         <ShieldAlert className="w-3 h-3" />
                         SILENT DURESS
                       </span>
                     ) : (
                       <span
-                        className={`px-2 py-0.5 rounded border text-[11px] font-medium ${
+                        className={`px-2 py-0.5 rounded border text-[13px] font-medium ${
                           evalOut.consent_gap_status === 'OK'
                             ? 'border-emerald-500/40 bg-emerald-950/40 text-emerald-300'
                             : 'border-red-500/40 bg-red-950/40 text-red-300'
