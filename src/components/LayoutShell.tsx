@@ -51,40 +51,40 @@ const NAV_ITEMS: Array<{
   sublabel: string;
   icon: React.ComponentType<{ className?: string }>;
 }> = [
- {route:'/workforce',label:'AI team',sublabel:'Synthetic uploads · Human review',icon:ShieldCheck},
+ {route:'/workforce',label:'AI Workforce',sublabel:'Synthetic uploads · Human review',icon:ShieldCheck},
   {
     route: '/',
-    label: 'Savings',
+    label: 'Savings & Leakage',
     sublabel: 'Review example amounts',
     icon: FileSpreadsheet,
   },
   {
     route: '/recovery',
-    label: 'Recovery',
+    label: 'Recovery Operations',
     sublabel: 'Assess recovery options',
     icon: Scale,
   },
   {
     route: '/vault',
-    label: 'Evidence',
+    label: 'Evidence Management',
     sublabel: 'Sources and evidence history',
     icon: FolderLock,
   },
   {
     route: '/consent',
-    label: 'Consent',
+    label: 'Consent & Permissions',
     sublabel: 'Review consent evidence',
     icon: UserCheck,
   },
   {
     route: '/claims',
-    label: 'Claims',
+    label: 'Claims Quality Assurance',
     sublabel: 'Timing and payment checks',
     icon: ShieldAlert,
   },
   {
     route: '/compliance',
-    label: 'Audit',
+    label: 'Governance & Audit',
     sublabel: 'Review actions and safeguards',
     icon: ShieldCheck,
   },
@@ -454,7 +454,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
                         : 'text-slate-300 hover:bg-slate-800/60 border border-transparent'
                     }`}
                   >
-                    <span className="visual-nav-icon"><Icon className="w-6 h-6 shrink-0" /></span>
+                    <Icon className="w-4 h-4 mt-0.5 shrink-0" />
                     <div className={collapsed?'lg:hidden min-w-0':'min-w-0'}>
                       <div className="text-sm font-semibold whitespace-normal">
                         {item.label}
@@ -469,7 +469,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
             </nav><a href="/map-preview" className="mt-3 flex rounded-lg border border-emerald-700 bg-emerald-800 px-4 py-3 font-semibold text-white">Maps &amp; address evidence</a>
 
             {/* Vault Integrity & Phase 3 Locked Status */}
-            <details><summary className="text-sm cursor-pointer">Evidence & safeguards</summary><div className="pt-4 border-t border-slate-800 space-y-3">
+            <div className="pt-4 border-t border-slate-800 space-y-3">
               <div className="px-3 py-2.5 rounded-md bg-slate-900/80 border border-slate-800">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-400">Evidence hash chain</span>
@@ -492,7 +492,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
                   LOCKED. Owner: designated compliance/legal reviewer, not assigned in this demo. Activation requires case-specific legal review of POPIA s57/58, lawful basis, agreements and tested security controls. No authorisation is recorded.
                 </p>
               </div>
-            </div></details>
+            </div>
           </div>
 
           <div className="p-4 border-t border-slate-800 text-[13px] text-slate-500">

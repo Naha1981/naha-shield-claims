@@ -4,36 +4,24 @@ import {VoiceCommandPanel} from './VoiceCommandPanel';
 import {WorkforceIntroduction} from './WorkforceIntroduction';
 import{TelecomRiskPanel}from'./TelecomRiskPanel';
 import React from 'react';
-import {Bot, FileText, Mail, Globe, MapPin, Smartphone, Mic, ChevronLeft, MessageCircle} from 'lucide-react';
 import{HostedExecutionPanel}from'./HostedExecutionPanel';
 import { WorkforceView } from './WorkforceView';
 import { SynthMessagesPanel } from './SynthMessagesPanel';
 
 /** Sub-tabs. The Documents tab renders the existing WorkforceView unchanged (PDF/Excel flows untouched). */
 export function WorkforceTabs({ onRecorded, activeRole }: { onRecorded: () => void; activeRole: string }) {
-  const [tab, setTab] = React.useState<'docs' | 'messages' | 'browser' | 'maps' | 'telecom' | 'voice' | 'home' | 'chat'>('home');
+  const [tab, setTab] = React.useState<'docs' | 'messages' | 'browser' | 'maps' | 'telecom' | 'voice'>('docs');
   const b = (on: boolean) => `px-4 py-2 rounded-t-lg text-sm ${on ? 'bg-slate-900 text-white border border-b-0 border-slate-700' : 'text-slate-400 hover:text-slate-200'}`;
-  const tasks = [
-    ['docs','Read a file','PDF & spreadsheets',FileText,'#e2f2ff'],
-    ['chat','Ask the team','12 AI helpers',MessageCircle,'#eee8ff'],
-    ['maps','Check an address','Public map & images',MapPin,'#dcf5ec'],
-    ['messages','Read messages','Test inbox',Mail,'#fff0d9'],
-    ['browser','Run a browser task','Hosted test tools',Globe,'#e1f1ff'],
-    ['telecom','Check a SIM','SIM / RICA tools',Smartphone,'#ffe7ec'],
-    ['voice','Use your voice','Commands & samples',Mic,'#eeeaff'],
-  ] as const;
-  return <div className="visual-workspace">
-    {tab === 'home' ? <>
-      <section className="visual-welcome" aria-label="Choose a task">
-        <div><span className="visual-eyebrow">YOUR AI WORKSPACE · DESIGN PREVIEW</span><h2>What shall we check?</h2><p>Pick a task. You stay in charge.</p><span className="visual-safety">Synthetic examples only · Human review</span></div>
-        <div className="friendly-bot" aria-hidden="true"><div className="bot-antenna"/><div className="bot-face"><span/><span/><i/></div><div className="bot-body"><Bot size={32}/></div><span className="bot-star">✦</span></div>
-      </section>
-      <div className="visual-task-grid">{tasks.map(([id,title,hint,Icon,color])=><button key={id} className="visual-task" onClick={()=>setTab(id)}><span className="visual-task-icon" style={{background:color}}><Icon size={34} strokeWidth={1.8}/></span><strong>{title}</strong><small>{hint}</small><span className="visual-task-arrow" aria-hidden="true">↗</span></button>)}</div>
-      <div className="visual-footer"><a href="/review">Try the guided demo ↗</a><details><summary>How it works & safeguards</summary><WorkforceIntroduction/><GovernanceReadiness/></details></div>
-    </> : <>
-      <button className="visual-back" onClick={()=>setTab('home')}><ChevronLeft size={18}/> All tasks</button>
-      <div role="tablist" aria-label="Work tools" className="flex flex-wrap gap-1 mb-4">{tasks.map(([id,title,,Icon])=><button key={id} role="tab" aria-selected={tab===id} className={b(tab===id)} onClick={()=>setTab(id)}><Icon className="inline-block mr-2" size={16}/>{title}</button>)}</div>
-    {tab === 'chat'? <WorkforceIntroduction/> : tab === 'maps'?<><PublicMapPreview embedded/></>:tab === 'voice' ? <VoiceCommandPanel/> : tab === 'telecom' ? <TelecomRiskPanel activeRole={activeRole}/> : tab === 'browser' ? activeRole==='finance_cfo'?<p className="p-5 text-amber-200">Browser actions disabled in CFO demo view.</p>:<HostedExecutionPanel key="browser"/> : tab === 'docs' ? <WorkforceView onRecorded={onRecorded} /> : <div className="text-slate-100">{activeRole==='finance_cfo'?<p role="note" className="p-5 rounded border border-amber-600">Messages are disabled in the CFO demo view. The private reviewer sign-in is the named owner account, not a CFO identity. This role selector is a demo filter, not account authentication.</p>:<SynthMessagesPanel />}</div>}
-    <details className="mt-6 rounded-lg border p-4"><summary>How it works & safeguards</summary><GovernanceReadiness/></details></>}
+  return <div><a href="/review" className="inline-block mb-3 text-sky-300 underline text-sm">Visitor? Open the public synthetic review, no sign-in needed</a>
+    <a href="#workforce-tools" className="inline-block mb-3 ml-3 text-sky-300 underline text-sm">Already have test files? Open document tools</a><div id="workforce-tools" role="tablist" className="flex flex-wrap gap-1 mb-4">
+      <button role="tab" aria-selected={tab === 'docs'} className={b(tab === 'docs')} onClick={() => setTab('docs')}>Documents</button>
+      <button role="tab" aria-selected={tab === 'messages'} className={b(tab === 'messages')} onClick={() => setTab('messages')}>Messages (test inbox)</button>
+      <button role="tab" aria-selected={tab === 'browser'} className={b(tab === 'browser')} onClick={() => setTab('browser')}>Browser tasks</button>
+      <button role="tab" aria-selected={tab === 'maps'} className={b(tab === 'maps')} onClick={() => setTab('maps')}>Maps</button>
+      <button role="tab" aria-selected={tab === 'telecom'} className={b(tab === 'telecom')} onClick={() => setTab('telecom')}>SIM / RICA</button>
+      <button role="tab" aria-selected={tab === 'voice'} className={b(tab === 'voice')} onClick={() => setTab('voice')}>Voice commands</button>
+    </div>
+    {tab === 'maps'?<><PublicMapPreview embedded/></>:tab === 'voice' ? <VoiceCommandPanel/> : tab === 'telecom' ? <TelecomRiskPanel activeRole={activeRole}/> : tab === 'browser' ? activeRole==='finance_cfo'?<p className="p-5 text-amber-200">Browser actions disabled in CFO demo view.</p>:<HostedExecutionPanel key="browser"/> : tab === 'docs' ? <WorkforceView onRecorded={onRecorded} /> : <div className="text-slate-100">{activeRole==='finance_cfo'?<p role="note" className="p-5 rounded border border-amber-600">Messages are disabled in the CFO demo view. The private reviewer sign-in is the named owner account, not a CFO identity. This role selector is a demo filter, not account authentication.</p>:<SynthMessagesPanel />}</div>}
+    <div className="mt-6"><WorkforceIntroduction/><GovernanceReadiness/></div>
   </div>;
 }
