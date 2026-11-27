@@ -117,7 +117,7 @@ async function startServer() {
   app.use('/api/workforce',workforce);
   const synthChat=new SynthChat({sink:e=>store.logAudit({actor_role:'head_of_forensics',actor_id:e.actor_id,action:e.action,object_type:'claim',object_id:e.object_id,details:e.details})});
   app.use('/api/workforce/chat',synthChatRoutes(synthChat,{authorize:req=>workforce.principal(req)}));
-  app.use('/api/workforce/hosted',hostedExecutorRoutes(req=>workforce.principal(req)));
+  app.use('/api/workforce/hosted',hostedExecutorRoutes(req=>workforce.principal(req),store));
   app.use('/api/execution',executionRoutes(store));
 
   // Health endpoint for Render & monitoring

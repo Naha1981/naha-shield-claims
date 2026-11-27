@@ -14,5 +14,5 @@ let child,completed=false;try{
  }else{
   for(const [label,zoom]of[['wide',13],['close',17]])steps.push(await tool('capture_url',{url:'http://127.0.0.1:4311/map-preview?lat=-26.1885859&lon=28.0425438&zoom='+zoom,name:'map-'+label+'.png',wait_ms:5000}));
  }
- fs.writeFileSync(path.join(output,'batch-result.json'),JSON.stringify({request_id:request,kind,status:'awaiting_human_review',synthetic_case:'SYN-RC-004',human_approved_dispatch:true,test_driver_approvals:false,submitted:false,external_sent:false,claim_status_changed:false,steps,completed_at:new Date().toISOString()},null,2));console.log('SYNTHETIC_BATCH_COMPLETE',request,kind,'submitted:false');completed=true;
+ fs.writeFileSync(path.join(output,'batch-result.json'),JSON.stringify({request_id:request,kind,status:'awaiting_human_review',synthetic_case:'SYN-RC-004',human_approved_dispatch:true,test_driver_approvals:false,submitted:false,external_sent:false,claim_status_changed:false,skills:kind==='portal_draft'?fs.readdirSync(path.join(root,'skills')).filter(n=>/^auto-[a-z0-9-]+\.json$/.test(n)).map(n=>JSON.parse(fs.readFileSync(path.join(root,'skills',n),'utf8'))):[],steps,completed_at:new Date().toISOString()},null,2));console.log('SYNTHETIC_BATCH_COMPLETE',request,kind,'submitted:false');completed=true;
 }finally{child?.kill();app.kill();if(completed)process.exit(0)}
