@@ -142,17 +142,26 @@ step list (`goto` portal-relative path, `click_text`, `click_button`, `fill`,
 - **Auto-save**: every successful `save_checkpoint` also writes
   `auto-<case>-<digest8>` from the exact tool calls of that session.
 - `list_skills` — id, creator (`recorded`/`auto`), step count, digest.
-- `replay_skill {skill_id, approval_token}` — **approval-bound**. Gates in
-  order: `SKILL_ID_DENIED`, `SKILL_NOT_FOUND`, `SKILL_DIGEST_MISMATCH`
-  (digest recomputed from the file, never trusted), `SKILL_APPROVAL_REQUIRED`
-  (a consumed, unexpired `SKILL_REPLAY` token whose type + claim_ref +
-  recomputed digest all match, read from the reviewer token store),
-  `SKILL_STEP_DENIED` (`goto` must be a portal-relative path on
-  `PORTAL_ORIGIN`; any step whose button name or text matches
-  `/record signed human decision|submit|send|final/i` is denied even with a
-  valid approval). Returns `REPLAY_COMPLETED`, `submitted: false`, the
-  per-step and final screenshots (SHA-256-hashed), and `audit_head_hash`.
-  Every replay step is appended to the hash-chained audit log.
+- `replay_skill {skill_id, approval_token}` — **approval-bound, one execution
+  per approval**. Gates in order: `SKILL_ID_DENIED`, `SKILL_NOT_FOUND`,
+  `SKILL_DIGEST_MISMATCH` (digest recomputed from the file, never trusted),
+  then a **static allowlist pass** over every step (`SKILL_STEP_DENIED`):
+  `goto` only to the synthetic recovery page `/recovery` on `PORTAL_ORIGIN`;
+  `click_text` only an assigned `SYN-*` case ref; `click_button` only a
+  registered safe preview button (`PORTAL_RUNNER_SAFE_BUTTONS`); `fill` only
+  a registered draft field (`PORTAL_RUNNER_DRAFT_FIELDS`). This is an
+  allowlist, not a submit-word blacklist. Then the **atomic one-execution
+  claim**: under an mkdir lock (atomic across worker processes; a stale lock
+  from a crash is broken once after 60 s) the worker validates the consumed,
+  unexpired `SKILL_REPLAY` token (type + claim_ref + recomputed digest) and
+  records the token hash in a separate `skill-claims.json` store the reviewer
+  surface never rewrites. Reuse is denied (`SKILL_REPLAY_TOKEN_SPENT`); a
+  concurrent loser is denied (`SKILL_CLAIM_CONTESTED` or
+  `SKILL_REPLAY_TOKEN_SPENT`). The static pass runs before the claim, so a
+  denied skill never spends its approval. Returns `REPLAY_COMPLETED`,
+  `submitted: false`, the per-step and final screenshots (SHA-256-hashed),
+  and `audit_head_hash`. Every replay step is appended to the hash-chained
+  audit log.
 
 Skill-replay approval uses the same reviewer surface and token store as §3:
 `POST /api/approve-skill {skill_id}` recomputes the digest from the skill file
@@ -174,6 +183,9 @@ consumes it (replay/tamper/other-claim denied; `external_action: false`
 always). The approvable action types stay internal
 (`INTERNAL_SYNTHETIC_REPORT_REVIEW` by default; `SKILL_REPLAY` for
 skill-replay approvals when enabled via `REVIEW_ACTION_TYPES`, see §2).
+Skill-replay executions are claimed exactly once per token in a separate
+`skill-claims.json` store next to the token store (the reviewer surface never
+rewrites it, so its wholesale saves cannot clobber a claim).
 **Real authentication stays separate from the demo role selector** — the reviewer credential is a local
 synthetic enrolment for the demo; production auth is out of scope here.
 
@@ -271,7 +283,7 @@ the full-chain `verifyEvidenceChain` result. Source adapter recorded as
 ## 5. Proven vs specified (nothing claimed unproven)
 
 **Proven 2026-11-27 in the build sandbox (latest run: verdict
-`E2E_PROOF_PASSED`, 46/46 checks, artifacts in
+`E2E_PROOF_PASSED`, 54/54 checks, artifacts in
 `portal-runner/evidence/e2e-proof-results.json`):**
 
 - Repo suite `npm test`: 44/44 pass (incl. 12 new contract/vault tests);
@@ -294,8 +306,8 @@ the full-chain `verifyEvidenceChain` result. Source adapter recorded as
 (visually verified, watermark banner rendered) with matching SHA-256 and a
 provenance sidecar; repo suite 45/45 at that patch.
 
-**Also proven (patch 3, record-and-replay skills; repo suite 51/51, e2e
-46/46):** a demonstrated FNOL flow recorded into a digest-sealed skill;
+**Also proven (patch 3, record-and-replay skills; repo suite 51/51 at that
+patch, e2e 46/46):** a demonstrated FNOL flow recorded into a digest-sealed skill;
 auto-save on checkpoint (`auto-syn-rc-004-*`); skills listed; replay without
 approval denied (`SKILL_APPROVAL_REQUIRED`); a tampered skill file denied by
 digest recompute on both the worker (`SKILL_DIGEST_MISMATCH`) and the
@@ -307,6 +319,17 @@ returned `REPLAY_COMPLETED` with `submitted: false` and hashed screenshots
 pack preview open, decision unsubmitted); a hostile skill with a *correct*
 digest **and** a valid approval was still denied at its submit-like step
 (`SKILL_STEP_DENIED`); app decisions unchanged after all replays.
+
+**Also proven (patch 4, skills hardening; repo suite 52/52, portal-runner
+units 6/6, e2e 54/54):** an approved replay token replays exactly once —
+immediate reuse is denied (`SKILL_REPLAY_TOKEN_SPENT`); two worker processes
+racing one fresh token produce exactly one `REPLAY_COMPLETED` and one denial
+(`SKILL_CLAIM_CONTESTED`); replay steps are restricted to the registered
+allowlists (a `#reviewer` fill and an unregistered button denied even with
+correct digest and valid approval); recorded navigation outside the
+synthetic recovery page (`/admin`) is denied; a statically denied skill never
+spends its approval token (claims store verified); auto-save still works
+(`auto-syn-rc-004-*`); final replay screenshot visually verified again.
 
 **Specified, not yet e2e-proven:** live KartaView fetches (sandbox proof used
 the allowlisted loopback preview; the CDN/tile origins follow the identical

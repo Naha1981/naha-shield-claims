@@ -455,12 +455,133 @@ const replayBody = JSON.parse(replayed.content[0].text);
 results.checks.replay_not_submitted = replayBody.submitted === false;
 results.checks.replay_screenshots = replayBody.screenshots.length >= 1;
 
+// One-execution claim: the same approval token can never replay twice.
+const reuseReplay = await recCall('replay_skill', {
+  skill_id: 'fnol-demo',
+  approval_token: fnolApproval.token,
+});
+results.checks.replay_token_reuse_denied =
+  reuseReplay.isError === true && reuseReplay.content[0].text.includes('SKILL_REPLAY_TOKEN_SPENT');
+
+// Concurrent claims: two worker processes race one fresh approval token;
+// exactly one replay wins, the other is denied.
+const raceApproval = await approveSkill('fnol-demo');
+results.checks.skill_reapproval_issued = typeof raceApproval.token === 'string';
+const WORKER2 = path.join(WORKER, 'computer', 'worker2-root');
+fs.mkdirSync(WORKER2, { recursive: true });
+let w2Buffer = '';
+const w2Waiting = new Map();
+let w2Seq = 0;
+const worker2 = spawn(process.execPath, [path.join(WORKER, 'computer-mcp.mjs')], {
+  cwd: WORKER,
+  env: {
+    ...process.env,
+    WORKER_ROOT: WORKER2,
+    EVIDENCE_DIR: path.join(WORKER2, 'evidence'),
+    SKILLS_DIR: path.join(WORKER, 'skills'),
+    REVIEWER_DATA_DIR: DATA,
+  },
+  stdio: ['pipe', 'pipe', 'inherit'],
+});
+worker2.stdout.on('data', (b) => {
+  w2Buffer += b;
+  for (;;) {
+    const i = w2Buffer.indexOf('\n');
+    if (i < 0) break;
+    const line = w2Buffer.slice(0, i);
+    w2Buffer = w2Buffer.slice(i + 1);
+    if (!line.trim()) continue;
+    const j = JSON.parse(line);
+    w2Waiting.get(j.id)?.(j.result);
+    w2Waiting.delete(j.id);
+  }
+});
+const w2Call = (name, args = {}) =>
+  new Promise((resolve) => {
+    const id = ++w2Seq;
+    w2Waiting.set(id, resolve);
+    worker2.stdin.write(
+      JSON.stringify({ jsonrpc: '2.0', id, method: 'tools/call', params: { name, arguments: args } }) + '\n',
+    );
+  });
+await new Promise((r) => setTimeout(r, 1200));
+const w2Open = await w2Call('open_case', { case_id: 'SYN-RC-004' });
+if (w2Open.isError) fail('worker2 open_case failed: ' + w2Open.content?.[0]?.text);
+const [raceA, raceB] = await Promise.all([
+  recCall('replay_skill', { skill_id: 'fnol-demo', approval_token: raceApproval.token }),
+  w2Call('replay_skill', { skill_id: 'fnol-demo', approval_token: raceApproval.token }),
+]);
+const raceWins = [raceA, raceB].filter(
+  (r) => !r.isError && JSON.parse(r.content[0].text).status === 'REPLAY_COMPLETED',
+);
+const raceDenials = [raceA, raceB].filter(
+  (r) => r.isError && /SKILL_REPLAY_TOKEN_SPENT|SKILL_CLAIM_CONTESTED/.test(r.content[0].text),
+);
+results.checks.concurrent_claim_single_winner = raceWins.length === 1 && raceDenials.length === 1;
+results.race_debug = [raceA, raceB].map((r) =>
+  r.isError ? 'ERR: ' + r.content[0].text : 'OK: ' + r.content[0].text.slice(0, 120),
+);
+worker2.stdin.end();
+await new Promise((r) => setTimeout(r, 600));
+worker2.kill();
+
 const hostileReplay = await recCall('replay_skill', {
   skill_id: 'fnol-hostile',
   approval_token: hostileApproval.token,
 });
 results.checks.hostile_replay_step_denied =
   hostileReplay.isError === true && hostileReplay.content[0].text.includes('SKILL_STEP_DENIED');
+
+// Allowlist gates: fills outside the registered draft fields and navigation
+// outside the synthetic recovery page are denied even with a correct digest
+// and a valid approval — and a statically denied skill never spends its token.
+const craftSkill = (skillId, steps) => {
+  fs.writeFileSync(
+    path.join(WORKER, 'skills', skillId + '.json'),
+    JSON.stringify(
+      {
+        ...skillFile,
+        skill_id: skillId,
+        name: skillId,
+        steps,
+        steps_digest: crypto.createHash('sha256').update(canonicalJson(steps), 'utf8').digest('hex'),
+      },
+      null,
+      2,
+    ),
+  );
+};
+craftSkill('fnol-badfield', [
+  { action: 'goto', path: '/recovery' },
+  { action: 'click_text', text: 'SYN-RC-004' },
+  { action: 'fill', selector: '#reviewer', value: 'Forged signer' },
+]);
+craftSkill('fnol-badnav', [
+  { action: 'goto', path: '/admin' },
+  { action: 'click_text', text: 'SYN-RC-004' },
+]);
+const badFieldApproval = await approveSkill('fnol-badfield');
+results.checks.badfield_skill_approval_issued = typeof badFieldApproval.token === 'string';
+const badFieldReplay = await recCall('replay_skill', {
+  skill_id: 'fnol-badfield',
+  approval_token: badFieldApproval.token,
+});
+results.checks.replay_field_not_allowlisted_denied =
+  badFieldReplay.isError === true && badFieldReplay.content[0].text.includes('SKILL_STEP_DENIED');
+const badNavApproval = await approveSkill('fnol-badnav');
+const badNavReplay = await recCall('replay_skill', {
+  skill_id: 'fnol-badnav',
+  approval_token: badNavApproval.token,
+});
+results.checks.replay_navigation_outside_recovery_denied =
+  badNavReplay.isError === true && badNavReplay.content[0].text.includes('SKILL_STEP_DENIED');
+const claimsStore = JSON.parse(fs.readFileSync(path.join(DATA, 'skill-claims.json'), 'utf8'));
+const claimKeyOf = (t) => crypto.createHash('sha256').update(t).digest('hex');
+results.checks.static_denial_does_not_spend_token =
+  Boolean(claimsStore[claimKeyOf(fnolApproval.token)]) &&
+  !claimsStore[claimKeyOf(badFieldApproval.token)] &&
+  !claimsStore[claimKeyOf(badNavApproval.token)] &&
+  !claimsStore[claimKeyOf(hostileApproval.token)];
 
 const stateAfterReplay = JSON.parse(
   fs.readFileSync(path.join(REPO, '.data', 'nahashield-state.json'), 'utf8'),

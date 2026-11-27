@@ -37,10 +37,14 @@ commit `2607629`. Free/open-source only: [Playwright](https://playwright.dev)
    the exact run-report digest and case ref. Forged/unused tokens refuse.
 8. Skills are JSON step lists (no scripts) sealed with a SHA-256 digest over
    the canonical step JSON. Replay verifies the digest
-   (`SKILL_DIGEST_MISMATCH`), requires a consumed `SKILL_REPLAY` approval
-   token bound to that digest (`SKILL_APPROVAL_REQUIRED`), only navigates
-   portal-relative paths on the loopback origin, and denies any submit-like
-   step (`SKILL_STEP_DENIED`) even with a valid approval.
+   (`SKILL_DIGEST_MISMATCH`), statically restricts every step to the portal's
+   registered allowlists — draft fields, safe preview buttons, assigned
+   synthetic cases, and the `/recovery` page for navigation
+   (`SKILL_STEP_DENIED`) — then atomically claims one execution of a consumed
+   `SKILL_REPLAY` approval token bound to that digest
+   (`SKILL_APPROVAL_REQUIRED`; reuse `SKILL_REPLAY_TOKEN_SPENT`; concurrent
+   loser `SKILL_CLAIM_CONTESTED`). The claim store is a separate
+   `skill-claims.json` the reviewer surface never rewrites.
 
 ## Layout
 

@@ -6,7 +6,7 @@ import { ApprovalSecurity } from '../portal-runner/approval-security.mjs';
 export type Reviewer = {principal:string;role:'investigator'|'reviewer'|'admin'|'CFO';csrf:string;expires:number};
 export const reviewerSecret=(req:express.Request)=>String(req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith('reviewer='))?.slice(9)||'';
 export function executionAuth(root:string){
- const security=new ApprovalSecurity(path.join(root,'sessions.json'),{allowedActionTypes:['SEAL_EXECUTION_EVIDENCE'],allowedClaimRefs:['SYN-RC-004','SYN-CLM-001']});
+ const security=new ApprovalSecurity(path.join(root,'reviewer-security.json'),{allowedActionTypes:['SEAL_EXECUTION_EVIDENCE','SKILL_REPLAY'],allowedClaimRefs:['SYN-RC-004','SYN-CLM-001']});
  const attempts=new Map<string,{at:number;n:number}>();
  const router=express.Router();
  const origin=(req:express.Request)=>process.env.APP_ORIGIN||`${req.protocol}://${req.get('host')}`;

@@ -71,13 +71,14 @@ const CAPTURE_WATERMARK = 'ADVISORY — UNVERIFIED VISUAL RECORD';
 
 // Record-and-replay skills. Skills are data, never scripts: a recorded step
 // list + a SHA-256 digest over the canonical step JSON. Replay verifies the
-// digest, requires a consumed human approval token bound to it, stays on the
-// loopback portal origin, and can never submit.
+// digest, statically restricts every step to the portal's registered
+// allowlists (draft fields, safe preview buttons, assigned synthetic cases,
+// the synthetic recovery page for navigation), then atomically claims one
+// execution of a consumed human approval token bound to that digest.
 const SKILLS_DIR = process.env.SKILLS_DIR || path.join(ROOT, 'skills');
 const REVIEWER_DATA = process.env.REVIEWER_DATA_DIR || path.join(ROOT, 'data');
 fs.mkdirSync(SKILLS_DIR, { recursive: true });
 const SKILL_NAME_SAFE = /^[A-Za-z0-9][A-Za-z0-9-]{0,60}$/;
-const SUBMIT_STEP_PATTERN = /record signed human decision|submit|send|final/i;
 
 // Keep in sync with src/lib/engine/captureExecutor.ts canonicalJson.
 function canonicalJson(v) {
@@ -131,8 +132,33 @@ function normalizeRecordedSteps(events) {
   return steps;
 }
 
+// Replay steps are restricted to the portal's exact registered allowlists
+// (draft fields, safe preview buttons, assigned synthetic cases) and the
+// synthetic recovery page for navigation — never a submit-word blacklist.
+function checkSkillStepAllowed(step) {
+  if (!step || typeof step !== 'object') throw Error('SKILL_STEP_DENIED');
+  if (step.action === 'goto') {
+    if (step.path !== '/recovery') throw Error('SKILL_STEP_DENIED');
+  } else if (step.action === 'click_text') {
+    const t = String(step.text || '');
+    if (!SYN_REF.test(t) || !ASSIGNED_CASES.includes(t)) throw Error('SKILL_STEP_DENIED');
+  } else if (step.action === 'click_button') {
+    if (!SAFE_BUTTONS.has(String(step.name || ''))) throw Error('SKILL_STEP_DENIED');
+  } else if (step.action === 'fill') {
+    const sel = String(step.selector || '');
+    if (!sel.startsWith('#') || !ALLOWED_FIELDS.has(sel.slice(1))) throw Error('SKILL_STEP_DENIED');
+    if (typeof step.value !== 'string' || step.value.length > 2500) throw Error('SKILL_STEP_DENIED');
+  } else if (step.action === 'screenshot') {
+    // Read-only capture, always allowed.
+  } else {
+    throw Error('SKILL_STEP_DENIED');
+  }
+}
+
 function writeSkill(name, steps, createdBy) {
   if (!SKILL_NAME_SAFE.test(name)) throw Error('SKILL_NAME_DENIED');
+  // Fail fast: never save a skill whose steps could never replay.
+  for (const step of steps) checkSkillStepAllowed(step);
   const skill = {
     skill_id: name,
     name,
@@ -152,22 +178,68 @@ function writeSkill(name, steps, createdBy) {
   return skill;
 }
 
-function verifySkillApproval(skill, token) {
+// Atomic one-execution claim of a SKILL_REPLAY approval. The claim store is
+// separate from the reviewer token store (which the reviewer surface rewrites
+// wholesale from its in-memory state), and the mkdir lock makes the
+// check-and-claim atomic across concurrent worker processes: exactly one
+// replay execution wins per token. Reuse is denied, and a stale lock from a
+// crashed claimant may be broken once after 60 s.
+function claimSkillReplayExecution(skill, token) {
   const securityFile = path.join(REVIEWER_DATA, 'reviewer-security.json');
   if (!fs.existsSync(securityFile)) throw Error('SKILL_APPROVAL_REQUIRED');
-  const state = JSON.parse(fs.readFileSync(securityFile));
-  const record = state.tokens[crypto.createHash('sha256').update(token).digest('hex')];
-  if (
-    !record ||
-    record.used !== true ||
-    record.type !== 'SKILL_REPLAY' ||
-    record.claim_ref !== (skill.case_ref || 'SYN-RC-004') ||
-    record.digest !== skill.steps_digest ||
-    record.expires < Date.now()
-  ) {
-    throw Error('SKILL_APPROVAL_REQUIRED');
+  const lock = path.join(REVIEWER_DATA, '.skill-claim.lock');
+  const acquire = () => {
+    try {
+      fs.mkdirSync(lock);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  if (!acquire()) {
+    let stale = false;
+    try {
+      stale = Date.now() - fs.statSync(lock).mtimeMs > 60000;
+    } catch {}
+    if (stale) {
+      fs.rmSync(lock, { recursive: true, force: true });
+      if (!acquire()) throw Error('SKILL_CLAIM_CONTESTED');
+    } else {
+      throw Error('SKILL_CLAIM_CONTESTED');
+    }
   }
-  return record;
+  try {
+    const key = crypto.createHash('sha256').update(token).digest('hex');
+    const state = JSON.parse(fs.readFileSync(securityFile));
+    const record = state.tokens[key];
+    if (
+      !record ||
+      record.used !== true ||
+      record.type !== 'SKILL_REPLAY' ||
+      record.claim_ref !== (skill.case_ref || 'SYN-RC-004') ||
+      record.digest !== skill.steps_digest ||
+      record.expires < Date.now()
+    ) {
+      throw Error('SKILL_APPROVAL_REQUIRED');
+    }
+    const claimsFile = path.join(REVIEWER_DATA, 'skill-claims.json');
+    const claims = fs.existsSync(claimsFile)
+      ? JSON.parse(fs.readFileSync(claimsFile))
+      : {};
+    if (claims[key]) throw Error('SKILL_REPLAY_TOKEN_SPENT');
+    claims[key] = {
+      skill_id: skill.skill_id,
+      digest: skill.steps_digest,
+      executed_at: new Date().toISOString(),
+    };
+    const tmp = claimsFile + '.tmp';
+    fs.writeFileSync(tmp, JSON.stringify(claims), { mode: 0o600 });
+    fs.renameSync(tmp, claimsFile);
+    log({ event: 'skill-replay-claimed', skill_id: skill.skill_id, digest: skill.steps_digest });
+    return record;
+  } finally {
+    fs.rmSync(lock, { recursive: true, force: true });
+  }
 }
 
 const SYN_REF = /^SYN-[A-Z0-9-]+$/;
@@ -544,7 +616,12 @@ async function call(name, args = {}) {
     let autoSkill = null;
     if (currentCase && sessionCalls.length > 0) {
       const stamp = checkpoint.digest.slice(0, 8);
-      autoSkill = writeSkill(`auto-${currentCase.toLowerCase()}-${stamp}`, sessionCalls.slice(), 'auto');
+      try {
+        autoSkill = writeSkill(`auto-${currentCase.toLowerCase()}-${stamp}`, sessionCalls.slice(), 'auto');
+      } catch (e) {
+        // Auto-save never breaks a checkpoint.
+        log({ event: 'skill-autosave-skipped', reason: e.message });
+      }
     }
     return JSON.stringify({ ...checkpoint, screenshot: artifact, auto_skill: autoSkill ? { skill_id: autoSkill.skill_id, steps_digest: autoSkill.steps_digest } : null });
   }
@@ -600,31 +677,29 @@ async function call(name, args = {}) {
       log({ event: 'skill-digest-mismatch', skill_id: skillId });
       throw Error('SKILL_DIGEST_MISMATCH');
     }
-    // Human approval gate: consumed token bound to this exact skill digest.
-    verifySkillApproval(skill, String(args.approval_token || ''));
+    // Static gate first: every step must sit on the registered allowlists
+    // BEFORE the approval token is claimed, so a denied skill never spends it.
+    for (const step of skill.steps) checkSkillStepAllowed(step);
+    // Human approval gate: atomically claim one execution of the consumed
+    // token bound to this exact skill digest. Reuse and concurrent claims
+    // are denied.
+    claimSkillReplayExecution(skill, String(args.approval_token || ''));
     log({ event: 'skill-replay-approved', skill_id: skillId, digest: skill.steps_digest });
     await init();
     const shots = [];
     for (const [i, step] of skill.steps.entries()) {
+      checkSkillStepAllowed(step);
       if (step.action === 'goto') {
-        if (typeof step.path !== 'string' || !step.path.startsWith('/') || step.path.startsWith('//'))
-          throw Error('SKILL_STEP_DENIED');
         await page.goto(PORTAL_ORIGIN + step.path, { waitUntil: 'load', timeout: 30000 });
         await page.waitForTimeout(800);
       } else if (step.action === 'click_text') {
-        if (SUBMIT_STEP_PATTERN.test(step.text || '')) throw Error('SKILL_STEP_DENIED');
         await page.getByText(step.text, { exact: true }).first().click();
       } else if (step.action === 'click_button') {
-        if (SUBMIT_STEP_PATTERN.test(step.name || '')) throw Error('SKILL_STEP_DENIED');
         await page.getByRole('button', { name: step.name, exact: true }).click();
       } else if (step.action === 'fill') {
-        if (typeof step.selector !== 'string' || typeof step.value !== 'string' || step.value.length > 2500)
-          throw Error('SKILL_STEP_DENIED');
         await page.locator(step.selector).fill(step.value);
       } else if (step.action === 'screenshot') {
         shots.push(await captureScreenshot(step.name || `replay-${String(i + 1).padStart(2, '0')}.png`));
-      } else {
-        throw Error('SKILL_STEP_DENIED');
       }
       log({ event: 'replay-step', skill_id: skillId, index: i, action: step.action });
     }
