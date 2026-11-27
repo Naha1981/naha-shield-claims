@@ -1,3 +1,4 @@
+import{PublicMapPreview}from'./components/PublicMapPreview';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import {ErrorBoundary} from './components/ErrorBoundary.tsx';
@@ -5,6 +6,6 @@ import './index.css';
 
 createRoot(document.getElementById('root')!).render(
   <ErrorBoundary>
-    <App />
+    {location.pathname==='/map-preview'?<PublicMapPreview/>:<App/>}
   </ErrorBoundary>,
 );

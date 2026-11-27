@@ -1,3 +1,4 @@
+import{hostedExecutorRoutes}from'./server/hostedExecutor';
 import{workforceRoutes}from'./server/workforce';
 import{SynthChat,synthChatRoutes}from'./server/synthChat';
 import { fetchOfficialResearch, extractResearchText, safeResearchQuestion } from './server/researchFallback';
@@ -118,6 +119,7 @@ async function startServer() {
     sink: (e) => store.logAudit({ actor_role: 'head_of_forensics', actor_id: e.actor_id, action: e.action, object_type: 'claim', object_id: e.object_id, details: e.details }),
   });
   app.use('/api/workforce/chat', synthChatRoutes(synthChat, { authorize: (req) => workforce.principal(req) }));
+  app.use('/api/workforce/hosted',hostedExecutorRoutes(req=>workforce.principal(req),store,(q,s)=>workforce.hostedSkills(q,s)));
 
   // Health endpoint for Render & monitoring
   app.get('/api/health', (_req, res) => {
