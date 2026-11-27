@@ -51,40 +51,40 @@ const NAV_ITEMS: Array<{
   sublabel: string;
   icon: React.ComponentType<{ className?: string }>;
 }> = [
- {route:'/workforce',label:'AI Workforce',sublabel:'Synthetic uploads · Human review',icon:ShieldCheck},
+ {route:'/workforce',label:'AI team',sublabel:'Synthetic uploads · Human review',icon:ShieldCheck},
   {
     route: '/',
-    label: 'Savings & Leakage',
+    label: 'Savings',
     sublabel: 'Review example amounts',
     icon: FileSpreadsheet,
   },
   {
     route: '/recovery',
-    label: 'Recovery Operations',
+    label: 'Recovery',
     sublabel: 'Assess recovery options',
     icon: Scale,
   },
   {
     route: '/vault',
-    label: 'Evidence Management',
+    label: 'Evidence',
     sublabel: 'Sources and evidence history',
     icon: FolderLock,
   },
   {
     route: '/consent',
-    label: 'Consent & Permissions',
+    label: 'Consent',
     sublabel: 'Review consent evidence',
     icon: UserCheck,
   },
   {
     route: '/claims',
-    label: 'Claims Quality Assurance',
+    label: 'Claims',
     sublabel: 'Timing and payment checks',
     icon: ShieldAlert,
   },
   {
     route: '/compliance',
-    label: 'Governance & Audit',
+    label: 'Audit',
     sublabel: 'Review actions and safeguards',
     icon: ShieldCheck,
   },
@@ -454,7 +454,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
                         : 'text-slate-300 hover:bg-slate-800/60 border border-transparent'
                     }`}
                   >
-                    <Icon className="w-4 h-4 mt-0.5 shrink-0" />
+                    <span className="visual-nav-icon"><Icon className="w-6 h-6 shrink-0" /></span>
                     <div className={collapsed?'lg:hidden min-w-0':'min-w-0'}>
                       <div className="text-sm font-semibold whitespace-normal">
                         {item.label}
