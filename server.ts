@@ -1,3 +1,4 @@
+import {workspaceIsolation} from './server/workspaceIsolation';
 import {insuranceTeamRoutes} from './server/insuranceTeam';
 import React from'react';
 import{renderToString}from'react-dom/server';
@@ -106,8 +107,10 @@ function getGeminiClient(): GoogleGenAI {
 }
 
 async function startServer() {
-  const store = new NahaShieldStore();
-  await store.init();
+  const originalStore = new NahaShieldStore();
+  await originalStore.init();
+  const isolation=workspaceIsolation(originalStore);
+  const store=isolation.store;
   const healthMonitor = new InfrastructureHealthMonitor();
   // Warm up two initial real latency samples in the background so sparklines start with genuine trajectory data
   void healthMonitor
@@ -118,6 +121,7 @@ async function startServer() {
   const app = express();
   app.set('trust proxy',1);
   app.use(express.json({ limit: '8mb' }));
+  app.use('/api',isolation.middleware);
   app.use('/api/insurance-team',insuranceTeamRoutes());
   const workforce = workforceRoutes(store);
   app.use('/api/workforce', workforce);

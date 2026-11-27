@@ -46,7 +46,7 @@ export function SynthMessagesPanel() {
   const loadThreads = React.useCallback(async () => { const j = await api('threads'); setThreads(j.threads); }, []);
   const loadThread = React.useCallback(async (id: string) => { setTr(await api('threads/' + id)); setThreads((await api('threads')).threads); }, []);
   const boot = React.useCallback(async () => {
-    try { setMe(await api('me')); setNeedLogin(false); await loadThreads(); }
+    try { setMe(await api('me')); setNeedLogin(false);window.dispatchEvent(new Event('workspace-changed')); await loadThreads(); }
     catch (e: any) { if (e.status === 401) setNeedLogin(true); else setMsg(String(e.message)); }
   }, [loadThreads]);
   React.useEffect(() => { void boot(); }, [boot]);

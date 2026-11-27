@@ -94,8 +94,17 @@ export class NahaShieldStore {
   private pool: Pool | null = null;
   public dbMode: 'postgres' | 'local-persistent' = 'local-persistent';
 
-  constructor() {
+  private stateFile:string;
+  private workspaceId:string;
+  constructor(workspaceId='original') {
+    if(!/^(original|ws_[a-f0-9]{32})$/.test(workspaceId))throw Error('Invalid workspace');
+    this.workspaceId=workspaceId;
+    this.stateFile=workspaceId==='original'?STATE_FILE:path.join(DATA_DIR,'workspaces',workspaceId+'.json');
     this.state = this.createInitialSeedState();
+    if(workspaceId!=='original'){
+      this.state=JSON.parse(JSON.stringify(this.state).split(DEFAULT_ORG_ID).join(workspaceId));
+      this.state.org_name='Private synthetic workspace';
+    }
   }
 
   private createInitialSeedState(): AppStateSnapshot {
@@ -170,7 +179,7 @@ export class NahaShieldStore {
   }
 
   async init(): Promise<void> {
-    if (process.env.DATABASE_URL) {
+    if (process.env.DATABASE_URL && this.workspaceId==='original') {
       try {
         this.pool = new Pool({
           connectionString: process.env.DATABASE_URL,
@@ -203,11 +212,11 @@ export class NahaShieldStore {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
-    if (fs.existsSync(STATE_FILE)) {
+    if (fs.existsSync(this.stateFile)) {
       try {
-        const raw = fs.readFileSync(STATE_FILE, 'utf8');
+        const raw = fs.readFileSync(this.stateFile, 'utf8');
         const parsed = JSON.parse(raw) as AppStateSnapshot;
-        if (parsed && parsed.org_id === DEFAULT_ORG_ID) {
+        if (parsed && parsed.org_id === this.state.org_id) {
           this.state = parsed;
           if (this.ensureAnomalyStateInitialized()) {
             this.persistLocal();
@@ -651,7 +660,8 @@ export class NahaShieldStore {
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
-    fs.writeFileSync(STATE_FILE, JSON.stringify(this.state, null, 2), 'utf8');
+    fs.mkdirSync(path.dirname(this.stateFile),{recursive:true});
+    fs.writeFileSync(this.stateFile, JSON.stringify(this.state, null, 2), 'utf8');
   }
 
   getSnapshot(): AppStateSnapshot & {
@@ -1811,8 +1821,8 @@ export class NahaShieldStore {
     }
 
     let fileBytes = 0;
-    if (fs.existsSync(STATE_FILE)) {
-      const stat = fs.statSync(STATE_FILE);
+    if (fs.existsSync(this.stateFile)) {
+      const stat = fs.statSync(this.stateFile);
       fileBytes = stat.size;
     }
     return {
