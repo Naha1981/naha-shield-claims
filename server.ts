@@ -1,3 +1,4 @@
+import{telecomRoutes}from'./server/telecomRisk';
 import{hostedExecutorRoutes}from'./server/hostedExecutor';
 import{workforceRoutes}from'./server/workforce';
 import{SynthChat,synthChatRoutes}from'./server/synthChat';
@@ -119,6 +120,7 @@ async function startServer() {
     sink: (e) => store.logAudit({ actor_role: 'head_of_forensics', actor_id: e.actor_id, action: e.action, object_type: 'claim', object_id: e.object_id, details: e.details }),
   });
   app.use('/api/workforce/chat', synthChatRoutes(synthChat, { authorize: (req) => workforce.principal(req) }));
+  app.use('/api/workforce/telecom',telecomRoutes(req=>workforce.principal(req),store));
   app.use('/api/workforce/hosted',hostedExecutorRoutes(req=>workforce.principal(req),store,(q,s)=>workforce.hostedSkills(q,s)));
 
   // Health endpoint for Render & monitoring
