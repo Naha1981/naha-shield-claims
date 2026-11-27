@@ -14,6 +14,7 @@ import type {
   TitleType,
 } from '../lib/engine/types';
 import { apiFetch, formatZar } from '../utils/format';
+import { TRACING_SOURCES } from '../lib/engine/tracingSources';
 
 interface RecoveryDeskViewProps {
   cases: RecoveryCaseInput[];
@@ -35,7 +36,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
   onDecisionRecorded,
 }) => {
   const [detailTab,setDetailTab]=React.useState('overview');
-  const detailTabs=[['overview','Overview'],['assets','Assets & legal'],['scenario','NRV scenarios'],['handover','Draft handover'],['decision','Human decisions']];
+  const detailTabs=[['overview','Overview'],['assets','Assets & legal'],['scenario','NRV scenarios'],['handover','Draft handover'],['decision','Human decisions'],['tracing','Tracing & ranking']];
   const [filter, setFilter] = React.useState<TriageFilter>('all');
   const [search, setSearch] = React.useState('');
   const [selectedCase, setSelectedCase] = React.useState<RecoveryCaseInput | null>(
@@ -130,6 +131,16 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
     });
   }, [enrichedCases, filter, search]);
 
+  const worthChasing = React.useMemo(
+    () =>
+      [...enrichedCases]
+        .map((x) => ({
+          ...x,
+          net: x.triage.practically_recoverable - x.item.legal_costs,
+        }))
+        .sort((a, b) => b.net - a.net),
+    [enrichedCases],
+  );
   const caseQueue=useQueueView('recovery',filteredCases,{filters:{filter,search},onRestore:f=>{setFilter((f.filter||'all') as TriageFilter);setSearch(f.search||'')}});
   const liveTriage = React.useMemo(() => {
     if (!selectedCase) return null;
@@ -512,6 +523,22 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
               </div>
             </div>
 
+            </section><section id="recovery-panel-tracing" role="tabpanel" aria-labelledby="recovery-tab-tracing" hidden={detailTab!=='tracing'} className="space-y-4">
+              <div>
+                <h3 className="font-semibold">Worth chasing first</h3>
+                <p className="text-[13px] text-slate-400 mt-1">All cases ranked by modelled net recovery (practically recoverable minus legal costs). Modelled ranking, not a legal conclusion.</p>
+                <div className="overflow-x-auto mt-2"><table className="w-full text-xs border border-slate-800"><thead><tr className="text-left text-slate-400"><th className="py-1.5 px-2">Rank</th><th className="py-1.5 px-2">Case</th><th className="py-1.5 px-2 text-right">Paid out</th><th className="py-1.5 px-2 text-right">Net recoverable</th><th className="py-1.5 px-2">Route</th></tr></thead><tbody>{worthChasing.map((x, i) => <tr key={x.item.case_id} className={x.item.case_id===selectedCase?.case_id?'bg-emerald-500/10 border-t border-slate-800':'border-t border-slate-800'}><td className="py-1.5 px-2 font-mono">{i + 1}</td><td className="py-1.5 px-2"><button type="button" className="text-emerald-300 font-mono hover:underline" onClick={() => setSelectedCase(x.item)}>{x.item.case_id}</button><div className="text-slate-400">{x.item.defendant_alias}{x.triage.early_write_off ? ' · Park: futile spend' : ''}</div></td><td className="py-1.5 px-2 text-right font-mono">{formatZar(x.item.original_payout)}</td><td className={x.net > 0 ? 'py-1.5 px-2 text-right font-mono text-emerald-400' : 'py-1.5 px-2 text-right font-mono text-slate-500'}>{formatZar(x.net)}</td><td className="py-1.5 px-2 text-slate-300">{x.triage.recommended_route}</td></tr>)}</tbody></table></div>
+              </div>
+              <div>
+                <h3 className="font-semibold">Free South African tracing sources</h3>
+                <p className="text-[13px] text-slate-400 mt-1">Free sources first; official-fee sources are marked so nothing is spent by accident. No live lookup is wired in: each search is a human step.</p>
+                <div className="overflow-x-auto mt-2"><table className="w-full text-xs border border-slate-800"><thead><tr className="text-left text-slate-400"><th className="py-1.5 px-2">Source</th><th className="py-1.5 px-2">What it verifies</th><th className="py-1.5 px-2">Cost</th><th className="py-1.5 px-2">When to use it</th></tr></thead><tbody>{TRACING_SOURCES.map((s) => <tr key={s.name} className="border-t border-slate-800"><td className="py-1.5 px-2"><a className="text-emerald-300 hover:underline" href={s.url} target="_blank" rel="noreferrer">{s.name}</a></td><td className="py-1.5 px-2 text-slate-300">{s.what}</td><td className={s.cost==='Free'?'py-1.5 px-2 text-emerald-400':'py-1.5 px-2 text-amber-300'}>{s.cost}</td><td className="py-1.5 px-2 text-slate-300">{s.use}</td></tr>)}</tbody></table></div>
+              </div>
+              {liveTriage?.ipilra_pto_flag && (
+                <div className="p-3 rounded bg-amber-950/40 border border-amber-700/60 text-xs text-amber-200">
+                  Communal / PTO tenure: the land cannot be sheriff-attached, so auction estimates do not apply. Verify tenure with the Traditional Council or communal property association records, and use the engine's emoluments or structured-settlement route.
+                </div>
+              )}
             </section><section id="recovery-panel-scenario" role="tabpanel" aria-labelledby="recovery-tab-scenario" hidden={detailTab!=='scenario'} className="space-y-4">
             <h3 className="font-semibold">NRV scenario comparison</h3><p className="text-sm">Illustrative assumptions only. Existing deterministic triage calculation, no probability or recoverability guarantee. Changing a slider does not change the case or commit a decision.</p><div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr><th className="text-left p-2">Scenario</th><th className="text-left p-2">Discount</th><th className="text-left p-2">Legal cost</th><th className="text-left p-2">Model route</th></tr></thead><tbody>{[{name:'Lower discount / cost',discount:0.15,cost:25000},{name:'Recorded case assumptions',discount:selectedCase.forced_sale_discount??0.25,cost:selectedCase.legal_costs},{name:'Higher discount / cost',discount:0.5,cost:150000}].map(row=>{const evaluation=evaluateRecoveryCase({...selectedCase,forced_sale_discount:row.discount,legal_costs:row.cost});return <tr key={row.name} className="border-t border-slate-700"><td className="p-2">{row.name}</td><td className="p-2">{Math.round(row.discount*100)}%</td><td className="p-2">{formatZar(row.cost)}</td><td className="p-2">{evaluation.recommended_route}</td></tr>})}</tbody></table></div>
             {/* Live NRV Sensitivity Sliders */}
