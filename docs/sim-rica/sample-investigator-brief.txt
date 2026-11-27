@@ -1,0 +1,36 @@
+INVESTIGATOR BRIEF: SYN-SIM-DEMO  (as of 2026-11-27T00:00:00Z)
+Data mode: SIMULATED: pilot fixtures, not telco records
+Triage band: ELEVATED (a prompt to look, not a finding)
+
+WHAT THE RECORDS SHOW (VERIFIED, internal records or live telco only)
+- [SHARED_NUMBER] Same number recorded for 2 parties across 2 policies (internal records).
+
+WHAT MAY BE INFERRED (INFERRED, including all SIMULATED data)
+- [SIM_SWAP_BEFORE_BANK_DETAIL_CHANGE] SIM swap 2 days before bank detail change (STRONG). Data mode: SIMULATED.
+- [RICA_ID_MISMATCH] RICA registration does not match the beneficiary's SA ID.
+
+NOT KNOWN (UNKNOWN)
+- Telco/RICA connector is SIMULATED; no live telco record was consulted.
+
+PLAUSIBLE INNOCENT EXPLANATIONS
+- Family members sharing one phone, common in households and rural areas
+- Number recorded by a broker or relative on someone else's behalf
+- Data-entry reuse of a contact number
+- Lost, stolen or damaged phone replaced by the genuine customer
+- Customer upgraded handset or changed network and then updated their details
+- Change was requested through a broker or family member with the customer's consent
+- SIM registered by a spouse, parent or other relative (common)
+- Employer or household-registered number
+- Number reassigned after churn
+
+RECOMMENDATION: consider a payout hold. This needs human sign-off; nothing has been held, rejected or released.
+
+NEXT STEPS FOR A HUMAN
+- Never send an OTP or message to the number that was swapped; contact the customer on a number or channel held on file BEFORE the swap.
+- Use out-of-band confirmation, in-branch ID check or a liveness/ID re-verification (open-source liveness tooling is a Phase 2 item).
+- Messages to the customer are neutral and non-accusatory and are held as approval cards, never auto-sent.
+- Assessor reviews indicators together with the innocent explanations before any decision.
+- Check declared family/household relationships between the parties sharing the number.
+- Record the human decision with name and role (POPIA s71: no decision solely by automated processing).
+
+Guardrails: this is not proof of fraud. No accusatory message was sent. No claim was auto-rejected. No payout was auto-released.

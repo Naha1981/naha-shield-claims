@@ -1,0 +1,44 @@
+name: Approved synthetic browser batch
+run-name: synthetic-${{ inputs.request_id }}
+on:
+  workflow_dispatch:
+    inputs:
+      request_id:
+        required: true
+        type: string
+      kind:
+        required: true
+        type: choice
+        options:
+          - portal_draft
+          - public_map
+permissions:
+  contents: read
+concurrency:
+  group: approved-synthetic-browser
+  cancel-in-progress: false
+jobs:
+  batch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts --legacy-peer-deps && npm run build
+      - run: npm ci --prefix portal-runner --ignore-scripts
+      - run: npx --prefix portal-runner playwright install --with-deps chromium
+      - run: node hosted-batch.mjs
+        working-directory: portal-runner
+        env:
+          SYNTHETIC_REQUEST_ID: ${{ inputs.request_id }}
+          SYNTHETIC_BATCH_KIND: ${{ inputs.kind }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-${{ inputs.request_id }}
+          path: |
+            portal-runner/evidence/batch-result.json
+            portal-runner/evidence/*.png
+          retention-days: 1

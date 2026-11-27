@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "rica_match_check (MCP tool)",
+  "description": "Compares the RICA registration behind a number with the SA ID of the policyholder, insured or beneficiary. Mismatch is an indicator, not proof.",
+  "input": {
+    "type": "object", "required": ["msisdn", "claimed_sa_id_hash", "claimed_role", "claim_ref", "purpose"], "additionalProperties": false,
+    "properties": {
+      "msisdn": { "type": "string" },
+      "claimed_sa_id_hash": { "type": "string", "description": "salted SHA-256 of the SA ID; the raw ID is not passed to agents", "pattern": "^[a-f0-9]{64}$" },
+      "claimed_role": { "enum": ["policyholder", "insured", "beneficiary", "claimant"] },
+      "claim_ref": { "type": "string", "pattern": "^SYN-" },
+      "purpose": { "const": "claim_fraud_screening" },
+      "consent_ref": { "type": "string" }
+    }
+  },
+  "output": {
+    "type": "object", "required": ["msisdn_ref", "msisdn_redacted", "mode", "label", "registration", "id_match", "registered_at", "checked_at", "note"],
+    "properties": {
+      "msisdn_ref": { "type": "string" }, "msisdn_redacted": { "type": "string" },
+      "mode": { "enum": ["SIMULATED", "NEEDS_SETUP", "LIVE"] },
+      "label": { "enum": ["VERIFIED", "INFERRED", "UNKNOWN"] },
+      "registration": { "enum": ["registered", "unregistered", "unknown"] },
+      "id_match": { "enum": ["MATCH", "MISMATCH", "UNKNOWN"] },
+      "registered_at": { "type": ["string", "null"], "format": "date-time" },
+      "checked_at": { "type": "string", "format": "date-time" },
+      "note": { "type": "string" }
+    }
+  },
+  "example_output": { "msisdn_ref": "MS-3fa9c01b22", "msisdn_redacted": "+27*****4567", "mode": "SIMULATED", "label": "INFERRED", "registration": "registered", "id_match": "MISMATCH", "registered_at": "2026-11-01T00:00:00Z", "checked_at": "2026-11-27T10:00:00Z", "note": "SIMULATED data. Not a RICA record." }
+}

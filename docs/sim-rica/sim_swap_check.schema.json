@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "sim_swap_check (MCP tool)",
+  "description": "Checks SIM-swap recency for a number. Connector mode must be reported. SIMULATED and NEEDS_SETUP results are never VERIFIED.",
+  "input": {
+    "type": "object", "required": ["msisdn", "claim_ref", "purpose"], "additionalProperties": false,
+    "properties": {
+      "msisdn": { "type": "string", "description": "SA number, normalised server-side; never logged raw" },
+      "claim_ref": { "type": "string", "pattern": "^SYN-" },
+      "purpose": { "const": "claim_fraud_screening" },
+      "consent_ref": { "type": "string", "description": "POPIA consent/lawful-basis reference; required before a LIVE connector is called" }
+    }
+  },
+  "output": {
+    "type": "object", "required": ["msisdn_ref", "msisdn_redacted", "mode", "label", "swap_detected", "swapped_at", "imei_changed", "checked_at", "note"],
+    "properties": {
+      "msisdn_ref": { "type": "string", "pattern": "^MS-[a-f0-9]{10}$" },
+      "msisdn_redacted": { "type": "string", "examples": ["+27*****4567"] },
+      "mode": { "enum": ["SIMULATED", "NEEDS_SETUP", "LIVE"] },
+      "label": { "enum": ["VERIFIED", "INFERRED", "UNKNOWN"] },
+      "swap_detected": { "type": ["boolean", "null"], "description": "null = unknown" },
+      "swapped_at": { "type": ["string", "null"], "format": "date-time" },
+      "imei_changed": { "type": ["boolean", "null"] },
+      "checked_at": { "type": "string", "format": "date-time" },
+      "note": { "type": "string" }
+    }
+  },
+  "example_output": { "msisdn_ref": "MS-3fa9c01b22", "msisdn_redacted": "+27*****4567", "mode": "SIMULATED", "label": "INFERRED", "swap_detected": true, "swapped_at": "2026-11-20T08:14:00Z", "imei_changed": true, "checked_at": "2026-11-27T10:00:00Z", "note": "SIMULATED data for pilot testing. Not a telco record." }
+}
