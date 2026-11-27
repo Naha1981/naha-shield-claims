@@ -1,0 +1,20 @@
+{
+  "case": "SYN-RC-004",
+  "kind": "public_map",
+  "captured_at": "2026-11-27T10:32:23.633Z",
+  "source": "OpenFreeMap / OpenMapTiles / OpenStreetMap contributors",
+  "scope": "Fixed public Constitution Hill landmark. Synthetic case only. Not a claimant address verification.",
+  "github_run_url": "https://github.com/Naha1981/naha-shield-claims/actions/runs/45982811429",
+  "originals": [
+    {
+      "filename": "map-close.png",
+      "sha256": "af3f2ff69004a0ae2da62dcda71edf18cbdda7033610a68543ba72b3626dd8c7",
+      "byte_size": 302052
+    },
+    {
+      "filename": "map-wide.png",
+      "sha256": "68ae4c4bc79274fe05527c707faeaee867d921b0ee694f955f728da93e73c6d7",
+      "byte_size": 975360
+    }
+  ]
+}
