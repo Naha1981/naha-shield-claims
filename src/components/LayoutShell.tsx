@@ -407,7 +407,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
         <aside
           className={`${
             mobileMenuOpen ? 'fixed inset-y-0 left-0 z-40 overflow-y-auto' : 'hidden'
-          } lg:block lg:static ${collapsed?'lg:w-24':'lg:w-60'} w-64 shrink-0 bg-[#0F172A] border-r border-slate-800 flex flex-col justify-between`}
+          } lg:block lg:static ${collapsed?'lg:w-24':'lg:w-60'} ns-sidebar w-64 shrink-0 bg-[#0F172A] border-r border-slate-800 flex flex-col justify-between`}
         >
           <div className="p-4 space-y-6">
             <div className="flex items-center justify-between lg:hidden pb-3 border-b border-slate-800">
@@ -502,7 +502,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
         </aside>
 
         {/* Main Viewport */}
-        <main className="flex-1 min-w-0 p-4 lg:p-8 max-w-[1840px]">
+        <main className="ns-main flex-1 min-w-0 p-4 lg:p-8 max-w-[1840px]">
           <div className="flex flex-wrap items-start justify-between gap-3 mb-4"><div><p className="text-sm text-slate-400">NahaShield / {currentTitle}</p><h1 className="text-2xl font-semibold text-slate-100 mt-1">{currentTitle}</h1></div><details className="rounded border border-slate-700 p-3 text-sm text-slate-200"><summary className="cursor-pointer">Workspace and account</summary><p className="mt-2 max-w-sm">{orgName}. Named reviewer sign-in is under Documents or Messages. The role selector is a demo view, not account access.</p><p className="mt-2 max-w-sm">No account invitation, password reset or company onboarding is provided here. Do not enter real claimant data.</p></details></div><a href="/map-preview" className="inline-flex items-center rounded-lg border border-emerald-700 bg-emerald-800 text-white px-4 py-3 mb-4 font-semibold">Maps · Check a physical address</a><ScreenGuide route={activeRoute}/>{children}
         </main>
       </div>
