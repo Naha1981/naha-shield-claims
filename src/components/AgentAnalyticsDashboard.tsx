@@ -1,3 +1,4 @@
+import {useQueueView, QueueControls} from './QueueControls';
 import React from 'react';
 import {
   Area,
@@ -158,6 +159,7 @@ export const AgentAnalyticsDashboard: React.FC<
   }
 
   const { summary, by_specialist: bySpecialist, timeline } = report;
+  const specialistQueue=useQueueView('specialist-analytics',bySpecialist,{filters:{agentFilter},onRestore:f=>setAgentFilter((f.agentFilter||'all') as typeof agentFilter)});
 
   return (
     <section
@@ -210,7 +212,7 @@ export const AgentAnalyticsDashboard: React.FC<
             type="button"
             onClick={handleExportCsv}
             data-testid="analytics-export-csv-btn"
-            aria-label="Export Agent Analytics CSV"
+            aria-label="Export CSV, Agent Analytics"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-700 bg-slate-900 hover:bg-slate-800 text-xs font-medium text-slate-200 whitespace-nowrap transition-colors"
           >
             <Download className="w-3.5 h-3.5 text-emerald-400" />
@@ -533,6 +535,7 @@ export const AgentAnalyticsDashboard: React.FC<
 
           {/* Specialist Efficiency Breakdown Table */}
           <div className="rounded border border-slate-800 overflow-x-auto bg-slate-900/50">
+            <QueueControls label="Specialist analytics" queue={specialistQueue}/>
             <table className="w-full text-left border-collapse text-xs">
               <thead className="bg-slate-900 border-b border-slate-800 text-slate-400">
                 <tr>
@@ -556,7 +559,7 @@ export const AgentAnalyticsDashboard: React.FC<
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/80">
-                {bySpecialist.map((row) => (
+                {specialistQueue.rows.map((row) => (
                   <tr key={row.agent_id} className="hover:bg-slate-800/30">
                     <td className="py-2.5 px-3.5 font-medium text-slate-200">
                       {row.agent_name}

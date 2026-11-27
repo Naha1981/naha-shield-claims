@@ -132,3 +132,6 @@ html[data-theme="light"] .screen-guide {background:transparent!important;}
 .executive-summary .financial-metrics {align-content:start;}
 .insights-rail {padding:20px;}.insights-rail h3{font-size:16px!important;}.insights-rail dl>div{padding:10px 0;}
 @media(max-width:640px){.workspace-notice{font-size:12px;padding:6px 16px;}.workspace-notice span{display:none;}main>div:first-child details{padding:0;border:0;}main>div:first-child details summary{min-height:28px;font-size:12px;}main>div:first-child{gap:4px;}}
+
+/* Accessible anomaly badges retain explicit contrast in both themes. */
+html[data-theme="light"] [aria-label="Anomaly Density Heatmap"] span.bg-red-600 {background:#b42337!important;color:#fff!important;}

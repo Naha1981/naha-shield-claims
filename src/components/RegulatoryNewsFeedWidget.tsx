@@ -154,7 +154,7 @@ export const RegulatoryNewsFeedWidget: React.FC<
             type="button"
             disabled={loading}
             onClick={() => fetchFeed(topic, true)}
-            aria-label="Refresh regulatory news feed"
+            aria-label={loading?'Syncing...':'Refresh'}
             className="px-3 py-1.5 text-xs font-medium rounded-md border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-200 inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 disabled:opacity-60"
           >
             <RefreshCw
@@ -169,7 +169,7 @@ export const RegulatoryNewsFeedWidget: React.FC<
       {loading && (
         <div
           aria-busy="true"
-          aria-label="Loading regulatory updates"
+          role="status" aria-label="Loading regulatory updates"
           className="grid grid-cols-1 lg:grid-cols-2 gap-3"
         >
           {[0, 1, 2, 3].map((idx) => (

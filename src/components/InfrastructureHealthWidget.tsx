@@ -328,7 +328,7 @@ export const InfrastructureHealthWidget: React.FC<
             type="button"
             disabled={loading || probing}
             onClick={() => void runHealthFetch(true)}
-            aria-label="Probe infrastructure integrations now"
+            aria-label={probing?'Probing...':'Probe Now'}
             className="px-3 py-1.5 text-xs font-medium rounded-md border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-200 inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 disabled:opacity-60"
           >
             <RefreshCw

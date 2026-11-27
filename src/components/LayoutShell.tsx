@@ -236,7 +236,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
               onClick={() => setAlertsOpen((v) => !v)}
               aria-expanded={alertsOpen}
               aria-haspopup="dialog"
-              aria-label={`Anomaly threshold alerts (${unacknowledgedCount} unacknowledged)`}
+              title="Unacknowledged anomaly alerts"
               data-testid="header-anomaly-alert-button"
               className={`relative inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-md border text-[13px] sm:text-xs font-medium transition-colors whitespace-nowrap shrink-0 ${
                 unacknowledgedCount > 0

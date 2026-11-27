@@ -1,3 +1,4 @@
+import {useQueueView, QueueControls} from './QueueControls';
 import React from 'react';
 import type { User } from 'firebase/auth';
 import {
@@ -390,6 +391,7 @@ export const StakeholderApprovalWorkflow: React.FC<
         ? 'Chief Financial Officer'
         : activeRole.replace(/_/g, ' ');
 
+  const approvalQueue=useQueueView('approvals',filteredEntries,{filters:{filter},onRestore:f=>setFilter((f.filter||'awaiting') as WorkflowFilter)});
   return (
     <section
       aria-label="Stakeholder Approval Workflow"
@@ -572,13 +574,14 @@ export const StakeholderApprovalWorkflow: React.FC<
             </div>
           </div>
 
+          <QueueControls label="Review sign-offs" queue={approvalQueue}/>
           <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1">
             {filteredEntries.length === 0 ? (
               <div className="p-4 rounded bg-[#0F172A] border border-slate-800 text-xs text-slate-400">
                 No ledger entries match this filter.
               </div>
             ) : (
-              filteredEntries.map((entry) => {
+              approvalQueue.rows.map((entry) => {
                 const wf = approvalWorkflows[entry.entry_id];
                 const isSelected = selectedEntry?.entry_id === entry.entry_id;
                 const verified = isLedgerEntryVerified(wf);

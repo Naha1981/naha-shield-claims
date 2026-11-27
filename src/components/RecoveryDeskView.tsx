@@ -1,3 +1,4 @@
+import {useQueueView, QueueControls} from './QueueControls';
 import {AgentText} from './AgentText';
 import React from 'react';
 import { AlertTriangle, Plus, Scale, Sparkles, X } from 'lucide-react';
@@ -33,6 +34,8 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
   onCaseAdded,
   onDecisionRecorded,
 }) => {
+  const [detailTab,setDetailTab]=React.useState('overview');
+  const detailTabs=[['overview','Overview'],['assets','Assets & legal'],['scenario','NRV scenarios'],['handover','Draft handover'],['decision','Human decisions']];
   const [filter, setFilter] = React.useState<TriageFilter>('all');
   const [search, setSearch] = React.useState('');
   const [selectedCase, setSelectedCase] = React.useState<RecoveryCaseInput | null>(
@@ -127,6 +130,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
     });
   }, [enrichedCases, filter, search]);
 
+  const caseQueue=useQueueView('recovery',filteredCases,{filters:{filter,search},onRestore:f=>{setFilter((f.filter||'all') as TriageFilter);setSearch(f.search||'')}});
   const liveTriage = React.useMemo(() => {
     if (!selectedCase) return null;
     return evaluateRecoveryCase({
@@ -317,6 +321,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
           </div>
 
           <div className="overflow-x-auto max-h-[680px] overflow-y-auto">
+            <QueueControls label="Recovery cases" queue={caseQueue}/>
             <table className="w-full text-left border-collapse text-xs">
               <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-400">
                 <tr>
@@ -328,7 +333,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/80">
-                {filteredCases.map(({ item, triage }) => {
+                {caseQueue.rows.map(({ item, triage }) => {
                   const active = selectedCase?.case_id === item.case_id;
                   return (
                     <tr
@@ -421,6 +426,9 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
               </span>
             </div>
 
+            <div role="tablist" aria-label="Recovery case details" className="flex flex-wrap gap-2">{detailTabs.map(([id,label])=><button key={id} type="button" role="tab" id={'recovery-tab-'+id} aria-controls={'recovery-panel-'+id} aria-selected={detailTab===id} className={'rounded-lg border px-3 py-2 text-sm '+(detailTab===id?'bg-emerald-800 text-white border-emerald-700':'border-slate-600')} onClick={()=>setDetailTab(id)}>{label}</button>)}</div>
+            <section id="recovery-panel-overview" role="tabpanel" aria-labelledby="recovery-tab-overview" hidden={detailTab!=='overview'}><h3 className="font-semibold">Recovery overview</h3><dl className="grid sm:grid-cols-2 gap-4 mt-3 text-sm"><div><dt>Illustrative original payout</dt><dd>{formatZar(selectedCase.original_payout)}</dd></div><div><dt>Recommended route, human review required</dt><dd>{liveTriage.recommended_route}</dd></div></dl><p className="text-sm mt-3">This is a synthetic review model, not collectible cash, a court order or authority to contact a defendant. Use Assets & legal for the existing statutory flags, NRV scenarios for assumptions, then draft handover and the named human decision.</p></section>
+            <section id="recovery-panel-assets" role="tabpanel" aria-labelledby="recovery-tab-assets" hidden={detailTab!=='assets'} className="space-y-4">
             {/* Statutory Warning Banners */}
             <div className="space-y-2">
               {liveTriage.s300_warning && (
@@ -504,6 +512,8 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
               </div>
             </div>
 
+            </section><section id="recovery-panel-scenario" role="tabpanel" aria-labelledby="recovery-tab-scenario" hidden={detailTab!=='scenario'} className="space-y-4">
+            <h3 className="font-semibold">NRV scenario comparison</h3><p className="text-sm">Illustrative assumptions only. Existing deterministic triage calculation, no probability or recoverability guarantee. Changing a slider does not change the case or commit a decision.</p><div className="overflow-x-auto"><table className="w-full text-sm"><thead><tr><th className="text-left p-2">Scenario</th><th className="text-left p-2">Discount</th><th className="text-left p-2">Legal cost</th><th className="text-left p-2">Model route</th></tr></thead><tbody>{[{name:'Lower discount / cost',discount:0.15,cost:25000},{name:'Recorded case assumptions',discount:selectedCase.forced_sale_discount??0.25,cost:selectedCase.legal_costs},{name:'Higher discount / cost',discount:0.5,cost:150000}].map(row=>{const evaluation=evaluateRecoveryCase({...selectedCase,forced_sale_discount:row.discount,legal_costs:row.cost});return <tr key={row.name} className="border-t border-slate-700"><td className="p-2">{row.name}</td><td className="p-2">{Math.round(row.discount*100)}%</td><td className="p-2">{formatZar(row.cost)}</td><td className="p-2">{evaluation.recommended_route}</td></tr>})}</tbody></table></div>
             {/* Live NRV Sensitivity Sliders */}
             <div className="p-3.5 rounded bg-slate-900/70 border border-slate-800 space-y-3">
               <div className="flex items-center justify-between">
@@ -548,6 +558,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
               </div>
             </div>
 
+            </section><section id="recovery-panel-handover" role="tabpanel" aria-labelledby="recovery-tab-handover" hidden={detailTab!=='handover'} className="space-y-4">
             {/* Attorney / AFU Handover Pack */}
             <div className="flex flex-wrap gap-2">
               <button
@@ -602,6 +613,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
               </div>
             )}
 
+            </section><section id="recovery-panel-decision" role="tabpanel" aria-labelledby="recovery-tab-decision" hidden={detailTab!=='decision'} className="space-y-4">
             {/* Mandatory Human Decision Form (POPIA s71) */}
             <form
               onSubmit={handleSubmitDecision}
@@ -724,7 +736,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
                   ))}
                 </div>
               )}
-            </form>
+            </form></section>
           </div>
         )}
       </div>

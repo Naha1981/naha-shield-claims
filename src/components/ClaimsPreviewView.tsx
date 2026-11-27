@@ -1,3 +1,4 @@
+import {useQueueView, QueueControls} from './QueueControls';
 import React from 'react';
 import { Clock, ShieldAlert, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { evaluateClaimTimers } from '../lib/engine/timers';
@@ -17,6 +18,7 @@ export const ClaimsPreviewView: React.FC<ClaimsPreviewViewProps> = ({
   activeRole,
   onRefresh,
 }) => {
+  const claimQueue=useQueueView('claims',claims);
   const referenceNowIso = '2026-11-25T12:00:00Z';
   const [selectedClaimId, setSelectedClaimId] = React.useState(
     claims[0]?.claim_id ?? '',
@@ -90,6 +92,7 @@ export const ClaimsPreviewView: React.FC<ClaimsPreviewViewProps> = ({
           {/* Claims Table */}
           <section className="rounded-md bg-[#131C31] border border-slate-800 overflow-hidden">
             <div className="overflow-x-auto" data-testid="claims-table-container">
+              <QueueControls label="Claims" queue={claimQueue}/>
               <table className="w-full text-left border-collapse text-[13px]">
                 <thead>
                   <tr className="border-b border-slate-800 bg-slate-900/60 text-slate-400">
@@ -102,7 +105,7 @@ export const ClaimsPreviewView: React.FC<ClaimsPreviewViewProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/80">
-                  {claims.map((clm) => {
+                  {claimQueue.rows.map((clm) => {
                     const timer = evaluateClaimTimers(clm, referenceNowIso);
                     const selected = selectedClaim?.claim_id === clm.claim_id;
                     return (
