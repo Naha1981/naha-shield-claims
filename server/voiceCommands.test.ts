@@ -1,0 +1,2 @@
+import test from 'node:test';import assert from 'node:assert/strict';import{resolveVoiceCommand}from'../src/components/VoiceCommandPanel';
+test('voice allows only exact local navigation commands',()=>{for(const k of ['documents','vault','claims','consent','recovery','agents'])assert(resolveVoiceCommand('open '+k)?.href.startsWith('/'));for(const k of ['pay claim','approve and open claims','open vault and send','delete documents','open https://bad.invalid','something with claim',''])assert.equal(resolveVoiceCommand(k),null);});
