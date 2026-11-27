@@ -104,6 +104,9 @@ export class NahaShieldStore {
     if(workspaceId!=='original'){
       this.state=JSON.parse(JSON.stringify(this.state).split(DEFAULT_ORG_ID).join(workspaceId));
       this.state.org_name='Private synthetic workspace';
+      let prev=GENESIS_CHAIN_HASH;
+      for(const item of this.state.evidence_items){item.sha256_content=computeContentHash(item.content_summary);item.prev_chain_hash=prev;item.chain_hash=computeChainHash(item);prev=item.chain_hash;}
+
     }
   }
 
@@ -218,6 +221,10 @@ export class NahaShieldStore {
         const parsed = JSON.parse(raw) as AppStateSnapshot;
         if (parsed && parsed.org_id === this.state.org_id) {
           this.state = parsed;
+          if(this.workspaceId!=='original'&&!verifyEvidenceChain(this.state.evidence_items).valid){
+            const old=structuredClone(this.state.evidence_items);for(const item of old)item.org_id=DEFAULT_ORG_ID;
+            if(verifyEvidenceChain(old).valid){let prev=GENESIS_CHAIN_HASH;for(const item of this.state.evidence_items){item.prev_chain_hash=prev;item.chain_hash=computeChainHash(item);prev=item.chain_hash;}this.persistLocal();}
+          }
           if (this.ensureAnomalyStateInitialized()) {
             this.persistLocal();
           }

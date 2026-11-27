@@ -427,7 +427,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
               <div className="px-2.5 py-2 rounded-md bg-slate-900/90 border border-slate-800 text-xs text-slate-200 leading-snug">
                 <div className="font-medium truncate">{orgName}</div>
                 <div className="text-[11px] text-slate-400 mt-0.5 font-mono">
-                  Single-Tenant · RLS Active
+                  Synthetic workspace · Server separated
                 </div>
               </div>
             </div>
