@@ -466,7 +466,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
                   </button>
                 );
               })}
-            </nav>
+            </nav><a href="/map-preview" className="mt-3 flex rounded-lg border border-emerald-700 bg-emerald-800 px-4 py-3 font-semibold text-white">Maps &amp; address evidence</a>
 
             {/* Vault Integrity & Phase 3 Locked Status */}
             <div className="pt-4 border-t border-slate-800 space-y-3">
@@ -502,7 +502,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
 
         {/* Main Viewport */}
         <main className="flex-1 min-w-0 p-4 lg:p-8 max-w-[1840px]">
-          <div className="flex flex-wrap items-start justify-between gap-3 mb-4"><div><p className="text-sm text-slate-400">NahaShield / {currentTitle}</p><h1 className="text-2xl font-semibold text-slate-100 mt-1">{currentTitle}</h1></div><details className="rounded border border-slate-700 p-3 text-sm text-slate-200"><summary className="cursor-pointer">Workspace and account</summary><p className="mt-2 max-w-sm">{orgName}. Named reviewer sign-in is under Documents or Messages. The role selector is a demo view, not account access.</p><p className="mt-2 max-w-sm">No account invitation, password reset or company onboarding is provided here. Do not enter real claimant data.</p></details></div><a href="/map-preview" className="inline-flex text-sm text-sky-300 mb-4 underline underline-offset-4">Check a questionable address · Open Maps</a><ScreenGuide route={activeRoute}/>{children}
+          <div className="flex flex-wrap items-start justify-between gap-3 mb-4"><div><p className="text-sm text-slate-400">NahaShield / {currentTitle}</p><h1 className="text-2xl font-semibold text-slate-100 mt-1">{currentTitle}</h1></div><details className="rounded border border-slate-700 p-3 text-sm text-slate-200"><summary className="cursor-pointer">Workspace and account</summary><p className="mt-2 max-w-sm">{orgName}. Named reviewer sign-in is under Documents or Messages. The role selector is a demo view, not account access.</p><p className="mt-2 max-w-sm">No account invitation, password reset or company onboarding is provided here. Do not enter real claimant data.</p></details></div><a href="/map-preview" className="inline-flex items-center rounded-lg border border-emerald-700 bg-emerald-800 text-white px-4 py-3 mb-4 font-semibold">Maps · Check a physical address</a><ScreenGuide route={activeRoute}/>{children}
         </main>
       </div>
     </div>

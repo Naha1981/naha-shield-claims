@@ -135,3 +135,4 @@ html[data-theme="light"] .screen-guide {background:transparent!important;}
 
 /* Accessible anomaly badges retain explicit contrast in both themes. */
 html[data-theme="light"] [aria-label="Anomaly Density Heatmap"] span.bg-red-600 {background:#b42337!important;color:#fff!important;}
+html[data-theme="light"] a[href="/map-preview"][class*="bg-emerald-8"] {background:#087864!important;color:#fff!important;border-color:#087864!important;}
