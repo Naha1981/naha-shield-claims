@@ -1,3 +1,4 @@
+import{WorkforceView}from'./components/WorkforceView';
 import React from 'react';
 import { LayoutShell, type NavRoute } from './components/LayoutShell';
 import { OverviewLedgerView } from './components/OverviewLedgerView';
@@ -60,7 +61,7 @@ function parseRouteFromLocation(): NavRoute {
     '/vault',
     '/consent',
     '/claims',
-    '/compliance',
+    '/compliance','/workforce',
   ];
   return valid.includes(path) ? path : '/';
 }
@@ -261,6 +262,7 @@ export default function App() {
       onInspectHeatmap={handleInspectHeatmap}
       onOpenReadout={handleOpenReadout}
     >
+      {route === '/workforce' && <WorkforceView onRecorded={()=>loadState(activeRole)}/>}
       {route === '/' && (
         <OverviewLedgerView
           entries={data.ledger_entries}

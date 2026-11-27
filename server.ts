@@ -1,3 +1,4 @@
+import{workforceRoutes}from'./server/workforce';
 import { fetchOfficialResearch, extractResearchText, safeResearchQuestion } from './server/researchFallback';
 import { runFreeModelChain } from './server/freeModelChain';
 import 'dotenv/config';
@@ -93,7 +94,9 @@ async function startServer() {
     .catch(() => {});
 
   const app = express();
+  app.set('trust proxy',1);
   app.use(express.json({ limit: '8mb' }));
+  app.use('/api/workforce',workforceRoutes(store));
 
   // Health endpoint for Render & monitoring
   app.get('/api/health', (_req, res) => {
