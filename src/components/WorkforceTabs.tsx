@@ -11,7 +11,8 @@ import { SynthMessagesPanel } from './SynthMessagesPanel';
 
 /** Sub-tabs. The Documents tab renders the existing WorkforceView unchanged (PDF/Excel flows untouched). */
 export function WorkforceTabs({ onRecorded, activeRole }: { onRecorded: () => void; activeRole: string }) {
-  const [tab, setTab] = React.useState<'docs' | 'messages' | 'browser' | 'maps' | 'telecom' | 'voice' | 'home' | 'chat'>('home');
+  const [tab, setTab] = React.useState<'docs' | 'messages' | 'browser' | 'maps' | 'telecom' | 'voice' | 'home' | 'chat'>(()=>location.hash==='#agent-chat'?'chat':location.hash==='#workforce-tools'?'docs':location.hash==='#commands'?'voice':'home');
+  React.useEffect(()=>{const change=()=>{if(location.hash==='#agent-chat')setTab('chat');if(location.hash==='#workforce-tools')setTab('docs');if(location.hash==='#commands')setTab('voice')};window.addEventListener('hashchange',change);return()=>window.removeEventListener('hashchange',change)},[]);
   const b = (on: boolean) => `px-4 py-2 rounded-t-lg text-sm ${on ? 'bg-slate-900 text-white border border-b-0 border-slate-700' : 'text-slate-400 hover:text-slate-200'}`;
   const tasks = [
     ['docs','Read a file','Read fictional PDFs & spreadsheets',FileText,'#e2f2ff'],
@@ -20,7 +21,7 @@ export function WorkforceTabs({ onRecorded, activeRole }: { onRecorded: () => vo
     ['messages','Review messages','Review supplied test messages',Mail,'#fff0d9'],
     ['browser','Run a browser task','Run approved synthetic tasks',Globe,'#e1f1ff'],
     ['telecom','Check a SIM','Inspect synthetic SIM / RICA signals',Smartphone,'#ffe7ec'],
-    ['voice','Use your voice','Commands & samples',Mic,'#eeeaff'],
+    ['voice','Open a tool','Typed commands',Mic,'#eeeaff'],
   ] as const;
   return <div className="visual-workspace">
     {tab === 'home' ? <>

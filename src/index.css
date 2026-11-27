@@ -157,3 +157,5 @@ html[data-theme="light"] .ns-sidebar{background:linear-gradient(180deg,#103c32,#
 .dark button.bg-emerald-600{background:#087864!important;color:#fff!important}.dark button.bg-emerald-600:hover{background:#086650!important}
 html[data-theme="light"] .ns-sidebar .text-slate-500{color:#bfd7cd!important}.dark .ns-sidebar .text-slate-500{color:#bfd7cd!important}
 html[data-theme="light"] .ns-sidebar nav[aria-label="Primary modules"] button[class*="bg-emerald-"] .visual-nav-icon{background:#286b55!important;color:white!important}
+
+.command-tool a{background:#087864!important;color:#fff!important}.command-tool button{border-radius:12px!important;min-height:44px}.command-tool summary{cursor:pointer}.command-tool{max-width:740px;margin:auto}.command-tool input{min-height:48px}
