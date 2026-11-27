@@ -19,9 +19,19 @@ import type { AnomalyAlertRecord } from '../lib/engine/anomaly';
 import { KpiSummaryWidget } from './KpiSummaryWidget';
 import { RegulatoryNewsFeedWidget } from './RegulatoryNewsFeedWidget';
 import { InfrastructureHealthWidget } from './InfrastructureHealthWidget';
+import {
+  StakeholderApprovalWorkflow,
+  type ApplyDigitalSignaturePayload,
+  type ApplyDigitalSignatureResult,
+} from './StakeholderApprovalWorkflow';
+import {
+  isLedgerEntryVerified,
+  type LedgerApprovalWorkflowRecord,
+} from '../lib/engine/approvalWorkflow';
 import type { NavRoute } from './LayoutShell';
 
 interface OverviewLedgerViewProps {
+  orgId: string;
   entries: LedgerEntryInput[];
   recoveryCases: RecoveryCaseInput[];
   consentPolicies: ConsentPolicyInput[];
@@ -30,6 +40,7 @@ interface OverviewLedgerViewProps {
   anomalyThresholdPct: number;
   anomalyAlerts: AnomalyAlertRecord[];
   kpiAuditNotes: KpiAuditNoteRecord[];
+  approvalWorkflows: Record<string, LedgerApprovalWorkflowRecord>;
   onAddKpiAuditNote: (content: string) => Promise<KpiAuditNoteRecord>;
   onToggleKpiAuditNotePdf: (
     noteId: string,
@@ -45,6 +56,9 @@ interface OverviewLedgerViewProps {
     signoffType: 'forensics' | 'finance',
     signed: boolean,
   ) => Promise<void>;
+  onApplyDigitalSignature: (
+    payload: ApplyDigitalSignaturePayload,
+  ) => Promise<ApplyDigitalSignatureResult>;
   onNavigate?: (route: NavRoute) => void;
   onRefresh?: () => Promise<void>;
   readoutModalOpen: boolean;
@@ -62,6 +76,7 @@ const FILTER_LABELS: Record<LedgerFilter, string> = {
 };
 
 export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
+  orgId,
   entries,
   recoveryCases,
   consentPolicies,
@@ -70,6 +85,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
   anomalyThresholdPct,
   anomalyAlerts,
   kpiAuditNotes,
+  approvalWorkflows,
   onAddKpiAuditNote,
   onToggleKpiAuditNotePdf,
   onDeleteKpiAuditNote,
@@ -78,6 +94,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
   activeRole,
   activeActorName,
   onToggleSignoff,
+  onApplyDigitalSignature,
   onNavigate,
   onRefresh,
   readoutModalOpen,
@@ -412,6 +429,16 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
         onProbed={onRefresh}
       />
 
+      {/* Stakeholder Dual-Factor Approval Workflow (Head of Forensics + CFO) */}
+      <StakeholderApprovalWorkflow
+        orgId={orgId}
+        entries={entries}
+        approvalWorkflows={approvalWorkflows}
+        activeRole={activeRole}
+        activeActorName={activeActorName}
+        onApplyDigitalSignature={onApplyDigitalSignature}
+      />
+
       {/* Ledger Controls & Table */}
       <section className="rounded-md bg-[#131C31] border border-slate-800 overflow-hidden">
         <div className="p-4 border-b border-slate-800 space-y-3">
@@ -471,6 +498,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
                 <th className="py-2.5 px-4 font-medium text-right">At Stake / Cost</th>
                 <th className="py-2.5 px-4 font-medium text-right">Counted (ZAR)</th>
                 <th className="py-2.5 px-4 font-medium">Language Lock</th>
+                <th className="py-2.5 px-4 font-medium">Approval Status</th>
                 <th className="py-2.5 px-4 font-medium text-center">Forensics</th>
                 <th className="py-2.5 px-4 font-medium text-center">Finance CFO</th>
               </tr>
@@ -554,6 +582,31 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
                       >
                         {evalOut.language_label}
                       </span>
+                    </td>
+                    <td className="py-3 px-4 align-top whitespace-nowrap">
+                      {(() => {
+                        const wf = approvalWorkflows[entry.entry_id];
+                        const verified = isLedgerEntryVerified(wf);
+                        return verified ? (
+                          <div>
+                            <div className="text-[11px] font-semibold text-emerald-400">
+                              Verified
+                            </div>
+                            <div className="text-[10px] font-mono text-slate-400 tabular-nums">
+                              Cert: {wf.verification_certificate_hash?.slice(0, 10)}
+                            </div>
+                          </div>
+                        ) : (
+                          <div>
+                            <div className="text-[11px] font-medium text-amber-300">
+                              {wf?.workflow_status ?? 'Pending Dual-Factor'}
+                            </div>
+                            <div className="text-[10px] text-slate-500">
+                              2FA dual sign-off required
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </td>
                     <td className="py-3 px-4 align-top text-center whitespace-nowrap">
                       <button

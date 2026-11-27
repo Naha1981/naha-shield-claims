@@ -35,6 +35,20 @@ import {
   type RegulatoryFeedResponse,
   type RegulatoryTopic,
 } from './src/lib/engine/regulatoryFeed';
+import {
+  isApprovalSignerRole,
+  ROLE_TO_LABEL,
+  summarizeApprovalWorkflows,
+  validateDualFactorApprovalInput,
+  type ApprovalSignerRole,
+} from './src/lib/engine/approvalWorkflow';
+import {
+  buildClaimAgentModelPrompt,
+  buildDeterministicClaimAnalysis,
+  canRoleApproveAgentProposal,
+  getClaimAgentById,
+} from './src/lib/engine/claimsAgents';
+import type { ClaimAgentId } from './src/lib/engine/types';
 import { SYNTHETIC_USERS } from './db/seeds/syntheticData';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -362,6 +376,140 @@ async function startServer() {
     } catch (err) {
       res.status(404).json({
         error: err instanceof Error ? err.message : 'Sign-off failed',
+      });
+    }
+  });
+
+  // Stakeholder Dual-Factor Digital Signature Workflow Endpoint
+  app.post('/api/ledger/:entryId/approve-signature', async (req, res) => {
+    const actor = getActorContext(req);
+    const { entryId } = req.params;
+    const targetRole = String(req.body?.target_role || '') as ApprovalSignerRole;
+    const action = String(req.body?.action || 'sign');
+
+    if (!isApprovalSignerRole(targetRole as RoleId)) {
+      res.status(400).json({
+        error:
+          'target_role must be either "head_of_forensics" or "finance_cfo".',
+      });
+      return;
+    }
+
+    if (action !== 'sign' && action !== 'revoke') {
+      res.status(400).json({ error: 'action must be "sign" or "revoke".' });
+      return;
+    }
+
+    if (actor.role !== targetRole) {
+      await store.logAudit({
+        actor_role: actor.role,
+        actor_id: actor.userId,
+        action: 'RBAC_DENIED_APPROVAL_WORKFLOW_SIGNATURE',
+        object_type: 'ledger_entry',
+        object_id: entryId,
+        details: {
+          attempted_target_role: targetRole,
+          attempted_action: action,
+        },
+      });
+      res.status(403).json({
+        error: `Separation of Duties Enforced: Switch active role to "${ROLE_TO_LABEL[targetRole]}" to ${action} this digital signature.`,
+      });
+      return;
+    }
+
+    if (action === 'sign') {
+      const expectedChallenge = String(req.body?.expected_challenge_code || '');
+      const enteredChallenge = String(req.body?.entered_challenge_code || '');
+      const attestationAccepted = Boolean(req.body?.attestation_accepted);
+      const attestationText = String(req.body?.attestation_text || '');
+
+      const validation = validateDualFactorApprovalInput({
+        actorRole: actor.role,
+        targetRole,
+        expectedChallengeCode: expectedChallenge,
+        enteredChallengeCode: enteredChallenge,
+        attestationAccepted,
+        attestationText,
+      });
+
+      if (!validation.ok) {
+        await store.logAudit({
+          actor_role: actor.role,
+          actor_id: actor.userId,
+          action: 'DUAL_FACTOR_CHALLENGE_FAILED',
+          object_type: 'ledger_entry',
+          object_id: entryId,
+          details: { target_role: targetRole, reason: validation.error },
+        });
+        res.status(422).json({
+          error: validation.error || 'Dual-factor verification failed.',
+        });
+        return;
+      }
+
+      try {
+        const result = await store.applyStakeholderDigitalSignature({
+          entry_id: entryId,
+          target_role: targetRole,
+          actor_role: actor.role,
+          actor_id: actor.userId,
+          actor_name: actor.displayName,
+          expected_challenge_code: expectedChallenge,
+          entered_challenge_code: enteredChallenge,
+          attestation_accepted: attestationAccepted,
+          attestation_text: attestationText,
+          firebase_uid:
+            typeof req.body?.firebase_uid === 'string'
+              ? req.body.firebase_uid
+              : null,
+          firebase_email:
+            typeof req.body?.firebase_email === 'string'
+              ? req.body.firebase_email
+              : null,
+          firebase_display_name:
+            typeof req.body?.firebase_display_name === 'string'
+              ? req.body.firebase_display_name
+              : null,
+        });
+        res.json({
+          ok: true,
+          ...result,
+          summary: summarizeApprovalWorkflows(
+            store.getSnapshot().approval_workflows,
+          ),
+        });
+      } catch (err) {
+        res.status(404).json({
+          error:
+            err instanceof Error
+              ? err.message
+              : 'Failed to apply stakeholder digital signature',
+        });
+      }
+      return;
+    }
+
+    try {
+      const result = await store.revokeStakeholderDigitalSignature({
+        entry_id: entryId,
+        target_role: targetRole,
+        actor_role: actor.role,
+        actor_id: actor.userId,
+      });
+      res.json({
+        ok: true,
+        ...result,
+        summary: summarizeApprovalWorkflows(
+          store.getSnapshot().approval_workflows,
+        ),
+      });
+    } catch (err) {
+      res.status(404).json({
+        error:
+          err instanceof Error
+            ? err.message
+            : 'Failed to revoke stakeholder digital signature',
       });
     }
   });
@@ -706,6 +854,160 @@ async function startServer() {
     }
   });
 
+  // Claims-Agents Integration: Fetch scoped claim context, evidence, and audit trail
+  app.get('/api/claims/:claimId/agent-context', async (req, res) => {
+    const actor = getActorContext(req);
+    const { claimId } = req.params;
+    const recordAudit = req.query.audit === '1';
+    try {
+      const context = store.getClaimAgentContext(claimId);
+      if (recordAudit) {
+        await store.logAudit({
+          actor_role: actor.role,
+          actor_id: actor.userId,
+          action: 'CLAIM_AGENT_CONTEXT_FETCHED',
+          object_type: 'claim_preview',
+          object_id: claimId,
+          details: {
+            claim_id: claimId,
+            evidence_count: context.related_evidence.length,
+            adapter_mode: 'simulated',
+          },
+        });
+      }
+      res.json({ ok: true, ...store.getClaimAgentContext(claimId) });
+    } catch (err) {
+      res.status(404).json({
+        error: err instanceof Error ? err.message : 'Claim not found',
+      });
+    }
+  });
+
+  // Claims-Agents Integration: Execute agent analysis (deterministic engine + optional free model synthesis)
+  app.post('/api/claims/:claimId/agent-analyze', async (req, res) => {
+    const startedAt = performance.now();
+    const actor = getActorContext(req);
+    const { claimId } = req.params;
+    const rawAgentId = String(req.body?.agent_id || 'investigator_lead');
+    const promptText = String(req.body?.prompt || '').trim().slice(0, 400);
+
+    let context;
+    try {
+      context = store.getClaimAgentContext(claimId);
+    } catch (err) {
+      res.status(404).json({
+        error: err instanceof Error ? err.message : 'Claim not found',
+      });
+      return;
+    }
+
+    const agent = getClaimAgentById(rawAgentId);
+    const deterministic = buildDeterministicClaimAnalysis({
+      claim: context.claim,
+      agentId: agent.id as ClaimAgentId,
+      userPrompt: promptText,
+      relatedEvidence: context.related_evidence,
+      relatedPolicies: context.related_policies,
+      relatedRecoveryCases: context.related_recovery_cases,
+      adapters: context.adapters,
+    });
+
+    let providerLabel = 'Deterministic NahaShield Engine';
+    let modelLabel = 'claims-rules-v1';
+
+    try {
+      const modelPrompt = buildClaimAgentModelPrompt({
+        claim: context.claim,
+        agent,
+        deterministic,
+        userPrompt: promptText,
+      });
+      const reply = await runFreeModelChain(modelPrompt);
+      if (reply.text.trim()) {
+        deterministic.brief.narrative_summary = reply.text.trim();
+        providerLabel = `${reply.provider} + Deterministic Engine`;
+        modelLabel = reply.model;
+      }
+    } catch {
+      // Deterministic NahaShield engine provides full 8-part case brief cleanly when free providers are offline/unconfigured
+    }
+
+    const durationMs = Math.max(1, Math.round(performance.now() - startedAt));
+    const recorded = await store.recordClaimAgentRun({
+      claim_id: claimId,
+      agent_id: agent.id,
+      prompt_text: promptText,
+      provider_label: providerLabel,
+      model_label: modelLabel,
+      duration_ms: durationMs,
+      brief: deterministic.brief,
+      proposals: deterministic.proposals,
+      actor_role: actor.role,
+      actor_id: actor.userId,
+    });
+
+    res.status(201).json({
+      ok: true,
+      run: recorded.run,
+      created_proposals: recorded.proposals,
+      context: store.getClaimAgentContext(claimId),
+    });
+  });
+
+  // Claims-Agents Integration: Mandatory Human Approval / Rejection for Proposed Findings & Actions
+  app.post(
+    '/api/claims/:claimId/agent-proposals/:proposalId/review',
+    async (req, res) => {
+      const actor = getActorContext(req);
+      const { claimId, proposalId } = req.params;
+      const decision =
+        req.body?.decision === 'reject' ? 'reject' : 'approve';
+      const reviewerNote = String(req.body?.reviewer_note || '').trim();
+
+      if (!canRoleApproveAgentProposal(actor.role)) {
+        await store.logAudit({
+          actor_role: actor.role,
+          actor_id: actor.userId,
+          action: 'RBAC_DENIED_AGENT_PROPOSAL_REVIEW',
+          object_type: 'agent_proposal',
+          object_id: proposalId,
+          details: { claim_id: claimId, attempted_decision: decision },
+        });
+        res.status(403).json({
+          error:
+            'Separation of Duties Enforced: Finance / CFO role cannot approve or reject claim investigation proposals. Switch to Head of Forensics, Legal / Recoveries, Underwriter, or Compliance / DPO.',
+        });
+        return;
+      }
+
+      try {
+        const proposal = await store.reviewClaimAgentProposal({
+          claim_id: claimId,
+          proposal_id: proposalId,
+          decision,
+          reviewer_note: reviewerNote,
+          actor_role: actor.role,
+          actor_id: actor.userId,
+          actor_name: actor.displayName,
+        });
+        res.json({
+          ok: true,
+          proposal,
+          context: store.getClaimAgentContext(claimId),
+        });
+      } catch (err) {
+        const msg =
+          err instanceof Error ? err.message : 'Proposal review failed';
+        const statusCode = msg.includes('Tipping-Off Linter')
+          ? 422
+          : msg.includes('not found')
+            ? 404
+            : 400;
+        res.status(statusCode).json({ error: msg });
+      }
+    },
+  );
+
   // Phase 0 Executive Readout (JSON + CSV)
   app.get('/api/readout/phase0', async (req, res) => {
     const actor = getActorContext(req);
@@ -749,6 +1051,36 @@ async function startServer() {
       ledger,
       consent,
     });
+  });
+
+  // Claims-Agents Integration: Audit-log offline Agent Analytics CSV exports
+  app.post('/api/compliance/agent-analytics-export', async (req, res) => {
+    const actor = getActorContext(req);
+    const filename = String(
+      req.body?.filename || 'nahashield-agent-analytics.csv',
+    ).slice(0, 120);
+    const specialistFilter = String(
+      req.body?.specialist_filter || 'all',
+    ).slice(0, 64);
+    const totalRuns = Number(req.body?.total_runs || 0);
+    const claimsProcessed = Number(req.body?.claims_processed || 0);
+
+    await store.logAudit({
+      actor_role: actor.role,
+      actor_id: actor.userId,
+      action: 'AGENT_ANALYTICS_CSV_EXPORTED',
+      object_type: 'agent_analytics_report',
+      object_id: filename,
+      details: {
+        specialist_filter: specialistFilter,
+        claims_processed: claimsProcessed,
+        total_runs: totalRuns,
+        format: 'csv',
+        synthetic_only: true,
+      },
+    });
+
+    res.status(201).json({ ok: true, filename });
   });
 
   const regulatoryFeedCache = new Map<

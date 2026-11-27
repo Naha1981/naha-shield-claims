@@ -1,9 +1,16 @@
 import React from 'react';
 import { Lock, Search, ShieldCheck, ExternalLink } from 'lucide-react';
-import type { AuditLogRecord, RoleId } from '../lib/engine/types';
+import type {
+  AuditLogRecord,
+  ClaimAgentProposalRecord,
+  ClaimAgentRunRecord,
+  ClaimPreviewRecord,
+  RoleId,
+} from '../lib/engine/types';
 import type { SimulatedAdapterMeta } from '../lib/adapters';
 import { RULE_CATALOGUE_V1 } from '../lib/engine/rules';
 import { apiFetch } from '../utils/format';
+import { AgentAnalyticsDashboard } from './AgentAnalyticsDashboard';
 
 interface GuardrailItem {
   id: string;
@@ -17,6 +24,9 @@ interface ComplianceAuditViewProps {
   guardrails: GuardrailItem[];
   adapters: SimulatedAdapterMeta[];
   auditLog: AuditLogRecord[];
+  agentRuns: ClaimAgentRunRecord[];
+  agentProposals: ClaimAgentProposalRecord[];
+  claims: ClaimPreviewRecord[];
   activeRole: RoleId;
   onRefresh: () => Promise<void>;
 }
@@ -25,6 +35,9 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
   guardrails,
   adapters,
   auditLog,
+  agentRuns,
+  agentProposals,
+  claims,
   activeRole,
   onRefresh,
 }) => {
@@ -89,6 +102,15 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
           LOCKED · POPIA s57/58
         </span>
       </div>
+
+      {/* Agent Analytics & Efficiency Reporting (Recharts) */}
+      <AgentAnalyticsDashboard
+        runs={agentRuns}
+        proposals={agentProposals}
+        claims={claims}
+        activeRole={activeRole}
+        onRefresh={onRefresh}
+      />
 
       {/* Statutory Guardrail Register */}
       <section className="rounded-md bg-[#131C31] border border-slate-800 overflow-hidden">

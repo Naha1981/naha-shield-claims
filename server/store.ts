@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { Pool } from 'pg';
 import {
   buildSeedEvidenceVault,
@@ -13,6 +14,10 @@ import {
 } from '../db/seeds/syntheticData';
 import type {
   AuditLogRecord,
+  ClaimAgentBrief,
+  ClaimAgentId,
+  ClaimAgentProposalRecord,
+  ClaimAgentRunRecord,
   ClaimPreviewRecord,
   ConsentPolicyInput,
   EvidenceItemRecord,
@@ -35,6 +40,30 @@ import {
   evaluateAnomalyThresholdAlerts,
   type AnomalyAlertRecord,
 } from '../src/lib/engine/anomaly';
+import {
+  buildSeedApprovalWorkflows,
+  buildSignatureCanonicalPayload,
+  DEFAULT_ATTESTATION_BY_ROLE,
+  deriveWorkflowStatus,
+  ROLE_TO_LABEL,
+  validateDualFactorApprovalInput,
+  type ApprovalSignerRole,
+  type LedgerApprovalWorkflowRecord,
+  type StakeholderDigitalSignature,
+} from '../src/lib/engine/approvalWorkflow';
+import {
+  canRoleApproveAgentProposal,
+  getClaimAgentById,
+  type ProposedHumanActionDraft,
+} from '../src/lib/engine/claimsAgents';
+import { evaluateClaimTimers } from '../src/lib/engine/timers';
+import { lintOutboundMessage } from '../src/lib/engine/lint';
+import { buildSeedAgentTelemetry } from '../src/lib/engine/agentAnalytics';
+import { ADAPTER_INVENTORY } from '../src/lib/adapters';
+
+function sha256Hex(input: string): string {
+  return createHash('sha256').update(input).digest('hex');
+}
 
 export interface AppStateSnapshot {
   org_id: string;
@@ -52,6 +81,9 @@ export interface AppStateSnapshot {
   anomaly_threshold_pct: number;
   anomaly_alerts: AnomalyAlertRecord[];
   kpi_audit_notes: KpiAuditNoteRecord[];
+  approval_workflows: Record<string, LedgerApprovalWorkflowRecord>;
+  agent_runs: ClaimAgentRunRecord[];
+  agent_proposals: ClaimAgentProposalRecord[];
 }
 
 const DATA_DIR = path.resolve(process.cwd(), '.data');
@@ -77,16 +109,25 @@ export class NahaShieldStore {
       nowIso: now,
     }).alerts;
 
+    const ledgerEntries = structuredClone(SYNTHETIC_LEDGER_ENTRIES);
+    const claimsPreview = structuredClone(SYNTHETIC_CLAIMS_PREVIEW);
+    const evidenceItems = buildSeedEvidenceVault();
+    const seededAgentTelemetry = buildSeedAgentTelemetry({
+      claims: claimsPreview,
+      evidenceItems,
+      adapters: ADAPTER_INVENTORY,
+    });
+
     return {
       org_id: DEFAULT_ORG_ID,
       org_name: 'UbuntuShield Life & Funeral (Synthetic Partner)',
       residency_region: process.env.NAHASHIELD_REGION || 'demo-render-synthetic-only',
       psi_phase3_unlocked: false,
       recovery_cases: structuredClone(SYNTHETIC_RECOVERY_CASES),
-      ledger_entries: structuredClone(SYNTHETIC_LEDGER_ENTRIES),
+      ledger_entries: ledgerEntries,
       consent_policies: consentPolicies,
-      claims_preview: structuredClone(SYNTHETIC_CLAIMS_PREVIEW),
-      evidence_items: buildSeedEvidenceVault(),
+      claims_preview: claimsPreview,
+      evidence_items: evidenceItems,
       decisions: [
         {
           decision_id: 'DEC-0001',
@@ -122,6 +163,9 @@ export class NahaShieldStore {
       anomaly_threshold_pct: defaultThreshold,
       anomaly_alerts: initialAlerts,
       kpi_audit_notes: [],
+      approval_workflows: buildSeedApprovalWorkflows(ledgerEntries, sha256Hex),
+      agent_runs: seededAgentTelemetry.runs,
+      agent_proposals: seededAgentTelemetry.proposals,
     };
   }
 
@@ -196,6 +240,42 @@ export class NahaShieldStore {
     }
     if (!Array.isArray(this.state.kpi_audit_notes)) {
       this.state.kpi_audit_notes = [];
+      changed = true;
+    }
+    if (
+      !this.state.approval_workflows ||
+      typeof this.state.approval_workflows !== 'object'
+    ) {
+      this.state.approval_workflows = buildSeedApprovalWorkflows(
+        this.state.ledger_entries,
+        sha256Hex,
+      );
+      changed = true;
+    } else {
+      const seeded = buildSeedApprovalWorkflows(
+        this.state.ledger_entries,
+        sha256Hex,
+      );
+      for (const entry of this.state.ledger_entries) {
+        if (!this.state.approval_workflows[entry.entry_id]) {
+          this.state.approval_workflows[entry.entry_id] = seeded[entry.entry_id];
+          changed = true;
+        }
+      }
+    }
+    if (
+      !Array.isArray(this.state.agent_runs) ||
+      !Array.isArray(this.state.agent_proposals) ||
+      (this.state.agent_runs.length === 0 &&
+        this.state.agent_proposals.length === 0)
+    ) {
+      const seededTelemetry = buildSeedAgentTelemetry({
+        claims: this.state.claims_preview,
+        evidenceItems: this.state.evidence_items,
+        adapters: ADAPTER_INVENTORY,
+      });
+      this.state.agent_runs = seededTelemetry.runs;
+      this.state.agent_proposals = seededTelemetry.proposals;
       changed = true;
     }
     return changed;
@@ -634,6 +714,96 @@ export class NahaShieldStore {
     return record;
   }
 
+  private syncWorkflowSlotFromLedgerToggle(params: {
+    entry: LedgerEntryInput;
+    signoff_type: 'forensics' | 'finance';
+    signed: boolean;
+    actor_id: string;
+    actor_name: string;
+  }): void {
+    this.ensureAnomalyStateInitialized();
+    const current =
+      this.state.approval_workflows[params.entry.entry_id] ??
+      buildSeedApprovalWorkflows([params.entry], sha256Hex)[
+        params.entry.entry_id
+      ];
+
+    const now = new Date().toISOString();
+    let forensicsSig = current.forensics_signature;
+    let cfoSig = current.cfo_signature;
+
+    if (params.signoff_type === 'forensics') {
+      if (params.signed) {
+        const challenge = 'NAHA-1001';
+        const attestation = DEFAULT_ATTESTATION_BY_ROLE.head_of_forensics;
+        const payload = buildSignatureCanonicalPayload({
+          entry_id: params.entry.entry_id,
+          role: 'head_of_forensics',
+          signer_id: params.actor_id,
+          challenge_code: challenge,
+          attestation,
+          signed_at: now,
+        });
+        forensicsSig = {
+          role: 'head_of_forensics',
+          role_label: 'Head of Forensics',
+          signer_id: params.actor_id,
+          signer_name: params.actor_name,
+          signer_email: null,
+          auth_method: 'workspace_rbac_2fa',
+          challenge_code: challenge,
+          attestation,
+          signature_digest: sha256Hex(payload),
+          signed_at: now,
+        };
+      } else {
+        forensicsSig = null;
+      }
+    } else if (params.signed) {
+      const challenge = 'NAHA-2002';
+      const attestation = DEFAULT_ATTESTATION_BY_ROLE.finance_cfo;
+      const payload = buildSignatureCanonicalPayload({
+        entry_id: params.entry.entry_id,
+        role: 'finance_cfo',
+        signer_id: params.actor_id,
+        challenge_code: challenge,
+        attestation,
+        signed_at: now,
+      });
+      cfoSig = {
+        role: 'finance_cfo',
+        role_label: 'Chief Financial Officer',
+        signer_id: params.actor_id,
+        signer_name: params.actor_name,
+        signer_email: null,
+        auth_method: 'workspace_rbac_2fa',
+        challenge_code: challenge,
+        attestation,
+        signature_digest: sha256Hex(payload),
+        signed_at: now,
+      };
+    } else {
+      cfoSig = null;
+    }
+
+    const status = deriveWorkflowStatus(forensicsSig, cfoSig);
+    const certHash =
+      status === 'Verified' && forensicsSig && cfoSig
+        ? sha256Hex(
+            `${params.entry.entry_id}|${forensicsSig.signature_digest}|${cfoSig.signature_digest}`,
+          )
+        : null;
+
+    this.state.approval_workflows[params.entry.entry_id] = {
+      entry_id: params.entry.entry_id,
+      forensics_signature: forensicsSig,
+      cfo_signature: cfoSig,
+      workflow_status: status,
+      verification_certificate_hash: certHash,
+      verified_at: status === 'Verified' ? now : null,
+    };
+  }
+
   async toggleLedgerSignoff(params: {
     entry_id: string;
     signoff_type: 'forensics' | 'finance';
@@ -656,6 +826,14 @@ export class NahaShieldStore {
       entry.finance_signoff = params.signed;
       entry.finance_signoff_by = params.signed ? params.actor_name : null;
     }
+
+    this.syncWorkflowSlotFromLedgerToggle({
+      entry,
+      signoff_type: params.signoff_type,
+      signed: params.signed,
+      actor_id: params.actor_id,
+      actor_name: params.actor_name,
+    });
 
     if (this.pool) {
       await this.pool.query(
@@ -687,6 +865,255 @@ export class NahaShieldStore {
     });
 
     return entry;
+  }
+
+  async applyStakeholderDigitalSignature(params: {
+    entry_id: string;
+    target_role: ApprovalSignerRole;
+    actor_role: RoleId;
+    actor_id: string;
+    actor_name: string;
+    expected_challenge_code: string;
+    entered_challenge_code: string;
+    attestation_accepted: boolean;
+    attestation_text: string;
+    firebase_uid?: string | null;
+    firebase_email?: string | null;
+    firebase_display_name?: string | null;
+  }): Promise<{
+    entry: LedgerEntryInput;
+    workflow: LedgerApprovalWorkflowRecord;
+    signature: StakeholderDigitalSignature;
+    transitioned_to_verified: boolean;
+  }> {
+    const entry = this.state.ledger_entries.find(
+      (e) => e.entry_id === params.entry_id,
+    );
+    if (!entry) {
+      throw new Error(`Ledger entry ${params.entry_id} not found`);
+    }
+
+    const validation = validateDualFactorApprovalInput({
+      actorRole: params.actor_role,
+      targetRole: params.target_role,
+      expectedChallengeCode: params.expected_challenge_code,
+      enteredChallengeCode: params.entered_challenge_code,
+      attestationAccepted: params.attestation_accepted,
+      attestationText: params.attestation_text,
+    });
+    if (!validation.ok) {
+      throw new Error(validation.error || 'Dual-factor signature validation failed');
+    }
+
+    this.ensureAnomalyStateInitialized();
+    const existingWorkflow =
+      this.state.approval_workflows[entry.entry_id] ??
+      buildSeedApprovalWorkflows([entry], sha256Hex)[entry.entry_id];
+    const wasVerified = existingWorkflow.workflow_status === 'Verified';
+
+    const signedAt = new Date().toISOString();
+    const signerId = params.firebase_uid?.trim() || params.actor_id;
+    const signerName = params.firebase_display_name?.trim()
+      ? `${params.actor_name} (${params.firebase_display_name.trim()})`
+      : params.actor_name;
+    const challengeUpper = params.entered_challenge_code.trim().toUpperCase();
+    const cleanAttestation = params.attestation_text.trim();
+    const canonicalPayload = buildSignatureCanonicalPayload({
+      entry_id: entry.entry_id,
+      role: params.target_role,
+      signer_id: signerId,
+      challenge_code: challengeUpper,
+      attestation: cleanAttestation,
+      signed_at: signedAt,
+    });
+    const signatureDigest = sha256Hex(canonicalPayload);
+
+    const signature: StakeholderDigitalSignature = {
+      role: params.target_role,
+      role_label: ROLE_TO_LABEL[params.target_role],
+      signer_id: signerId,
+      signer_name: signerName,
+      signer_email: params.firebase_email?.trim() || null,
+      auth_method: params.firebase_uid?.trim()
+        ? 'firebase_google_oauth'
+        : 'workspace_rbac_2fa',
+      challenge_code: challengeUpper,
+      attestation: cleanAttestation,
+      signature_digest: signatureDigest,
+      signed_at: signedAt,
+    };
+
+    let forensicsSig = existingWorkflow.forensics_signature;
+    let cfoSig = existingWorkflow.cfo_signature;
+
+    if (params.target_role === 'head_of_forensics') {
+      forensicsSig = signature;
+      entry.forensics_signoff = true;
+      entry.forensics_signoff_by = signerName;
+    } else {
+      cfoSig = signature;
+      entry.finance_signoff = true;
+      entry.finance_signoff_by = signerName;
+    }
+
+    const workflowStatus = deriveWorkflowStatus(forensicsSig, cfoSig);
+    const certHash =
+      workflowStatus === 'Verified' && forensicsSig && cfoSig
+        ? sha256Hex(
+            `${entry.entry_id}|${forensicsSig.signature_digest}|${cfoSig.signature_digest}`,
+          )
+        : null;
+
+    const updatedWorkflow: LedgerApprovalWorkflowRecord = {
+      entry_id: entry.entry_id,
+      forensics_signature: forensicsSig,
+      cfo_signature: cfoSig,
+      workflow_status: workflowStatus,
+      verification_certificate_hash: certHash,
+      verified_at: workflowStatus === 'Verified' ? signedAt : null,
+    };
+
+    this.state.approval_workflows[entry.entry_id] = updatedWorkflow;
+
+    if (this.pool) {
+      await this.pool.query(
+        `UPDATE ledger_entries
+         SET forensics_signoff = $1, forensics_signoff_by = $2,
+             finance_signoff = $3, finance_signoff_by = $4
+         WHERE entry_id = $5 AND org_id = $6`,
+        [
+          entry.forensics_signoff,
+          entry.forensics_signoff_by ?? null,
+          entry.finance_signoff,
+          entry.finance_signoff_by ?? null,
+          entry.entry_id,
+          DEFAULT_ORG_ID,
+        ],
+      );
+    }
+
+    this.persistLocal();
+    await this.logAudit({
+      actor_role: params.actor_role,
+      actor_id: signerId,
+      action: 'STAKEHOLDER_DIGITAL_SIGNATURE_APPLIED',
+      object_type: 'ledger_entry',
+      object_id: entry.entry_id,
+      details: {
+        target_role: params.target_role,
+        auth_method: signature.auth_method,
+        signature_digest: signature.signature_digest,
+        workflow_status: updatedWorkflow.workflow_status,
+      },
+    });
+
+    const transitionedToVerified =
+      !wasVerified && updatedWorkflow.workflow_status === 'Verified';
+    if (transitionedToVerified) {
+      await this.logAudit({
+        actor_role: params.actor_role,
+        actor_id: signerId,
+        action: 'LEDGER_ENTRY_VERIFIED_DUAL_FACTOR',
+        object_type: 'ledger_entry',
+        object_id: entry.entry_id,
+        details: {
+          verification_certificate_hash: updatedWorkflow.verification_certificate_hash,
+          forensics_signer: forensicsSig?.signer_name,
+          cfo_signer: cfoSig?.signer_name,
+        },
+      });
+    }
+
+    return {
+      entry,
+      workflow: updatedWorkflow,
+      signature,
+      transitioned_to_verified: transitionedToVerified,
+    };
+  }
+
+  async revokeStakeholderDigitalSignature(params: {
+    entry_id: string;
+    target_role: ApprovalSignerRole;
+    actor_role: RoleId;
+    actor_id: string;
+  }): Promise<{
+    entry: LedgerEntryInput;
+    workflow: LedgerApprovalWorkflowRecord;
+  }> {
+    const entry = this.state.ledger_entries.find(
+      (e) => e.entry_id === params.entry_id,
+    );
+    if (!entry) {
+      throw new Error(`Ledger entry ${params.entry_id} not found`);
+    }
+    if (params.actor_role !== params.target_role) {
+      throw new Error(
+        `Separation of Duties Enforced: Switch active role to "${ROLE_TO_LABEL[params.target_role]}" to revoke this signature.`,
+      );
+    }
+
+    this.ensureAnomalyStateInitialized();
+    const existingWorkflow =
+      this.state.approval_workflows[entry.entry_id] ??
+      buildSeedApprovalWorkflows([entry], sha256Hex)[entry.entry_id];
+
+    let forensicsSig = existingWorkflow.forensics_signature;
+    let cfoSig = existingWorkflow.cfo_signature;
+
+    if (params.target_role === 'head_of_forensics') {
+      forensicsSig = null;
+      entry.forensics_signoff = false;
+      entry.forensics_signoff_by = null;
+    } else {
+      cfoSig = null;
+      entry.finance_signoff = false;
+      entry.finance_signoff_by = null;
+    }
+
+    const workflowStatus = deriveWorkflowStatus(forensicsSig, cfoSig);
+    const updatedWorkflow: LedgerApprovalWorkflowRecord = {
+      entry_id: entry.entry_id,
+      forensics_signature: forensicsSig,
+      cfo_signature: cfoSig,
+      workflow_status: workflowStatus,
+      verification_certificate_hash: null,
+      verified_at: null,
+    };
+
+    this.state.approval_workflows[entry.entry_id] = updatedWorkflow;
+
+    if (this.pool) {
+      await this.pool.query(
+        `UPDATE ledger_entries
+         SET forensics_signoff = $1, forensics_signoff_by = $2,
+             finance_signoff = $3, finance_signoff_by = $4
+         WHERE entry_id = $5 AND org_id = $6`,
+        [
+          entry.forensics_signoff,
+          entry.forensics_signoff_by ?? null,
+          entry.finance_signoff,
+          entry.finance_signoff_by ?? null,
+          entry.entry_id,
+          DEFAULT_ORG_ID,
+        ],
+      );
+    }
+
+    this.persistLocal();
+    await this.logAudit({
+      actor_role: params.actor_role,
+      actor_id: params.actor_id,
+      action: 'STAKEHOLDER_DIGITAL_SIGNATURE_REVOKED',
+      object_type: 'ledger_entry',
+      object_id: entry.entry_id,
+      details: {
+        target_role: params.target_role,
+        workflow_status: updatedWorkflow.workflow_status,
+      },
+    });
+
+    return { entry, workflow: updatedWorkflow };
   }
 
   async addRecoveryCase(
@@ -1394,5 +1821,285 @@ export class NahaShieldStore {
       latencyMs: Math.round((performance.now() - start) * 10) / 10,
       fileBytes,
     };
+  }
+
+  getClaimAgentContext(claimId: string) {
+    this.ensureAnomalyStateInitialized();
+    const claim = this.state.claims_preview.find((c) => c.claim_id === claimId);
+    if (!claim) {
+      throw new Error(`Claim ${claimId} not found`);
+    }
+
+    const timer = evaluateClaimTimers(claim, '2026-11-25T12:00:00Z');
+    const relatedEvidence = this.state.evidence_items.filter(
+      (ev) => ev.case_ref === claim.claim_id || ev.case_ref === claim.policy_ref,
+    );
+    const relatedPolicies = this.state.consent_policies.filter(
+      (p) => p.policy_id === claim.policy_ref,
+    );
+    const relatedRecoveryCases = this.state.recovery_cases.filter(
+      (rc) =>
+        rc.claim_ref === claim.claim_id || rc.policy_ref === claim.policy_ref,
+    );
+    const runs = (this.state.agent_runs ?? []).filter(
+      (r) => r.claim_id === claim.claim_id,
+    );
+    const proposals = (this.state.agent_proposals ?? []).filter(
+      (p) => p.claim_id === claim.claim_id,
+    );
+    const proposalIds = new Set(proposals.map((p) => p.proposal_id));
+    const evidenceIds = new Set(relatedEvidence.map((e) => e.evidence_id));
+    const claimAuditTrail = this.state.audit_log.filter(
+      (a) =>
+        a.object_id === claim.claim_id ||
+        a.object_id === claim.policy_ref ||
+        proposalIds.has(a.object_id) ||
+        evidenceIds.has(a.object_id) ||
+        a.details?.claim_id === claim.claim_id,
+    );
+
+    return {
+      claim,
+      timer,
+      related_evidence: relatedEvidence,
+      related_policies: relatedPolicies,
+      related_recovery_cases: relatedRecoveryCases,
+      adapters: ADAPTER_INVENTORY,
+      runs,
+      proposals,
+      claim_audit_trail: claimAuditTrail,
+      synthetic_only: true as const,
+    };
+  }
+
+  async recordClaimAgentRun(params: {
+    claim_id: string;
+    agent_id: ClaimAgentId;
+    prompt_text: string;
+    provider_label: string;
+    model_label: string;
+    duration_ms?: number;
+    brief: ClaimAgentBrief;
+    proposals: ProposedHumanActionDraft[];
+    actor_role: RoleId;
+    actor_id: string;
+  }): Promise<{
+    run: ClaimAgentRunRecord;
+    proposals: ClaimAgentProposalRecord[];
+  }> {
+    this.ensureAnomalyStateInitialized();
+    const agent = getClaimAgentById(params.agent_id);
+    const now = new Date().toISOString();
+    const runId = `AGRUN-${Date.now()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+
+    const run: ClaimAgentRunRecord = {
+      run_id: runId,
+      org_id: DEFAULT_ORG_ID,
+      claim_id: params.claim_id,
+      agent_id: agent.id,
+      agent_name: agent.name,
+      requested_by_role: params.actor_role,
+      requested_by_id: params.actor_id,
+      prompt_text: params.prompt_text.slice(0, 400),
+      provider_label: params.provider_label,
+      model_label: params.model_label,
+      synthetic_only: true,
+      duration_ms: params.duration_ms,
+      brief: params.brief,
+      created_at: now,
+    };
+
+    const createdProposals: ClaimAgentProposalRecord[] = params.proposals.map(
+      (draft, idx) => ({
+        proposal_id: `AGPROP-${Date.now()}-${idx + 1}-${Math.random().toString(36).slice(2, 5).toUpperCase()}`,
+        run_id: runId,
+        org_id: DEFAULT_ORG_ID,
+        claim_id: params.claim_id,
+        agent_id: agent.id,
+        proposal_type: draft.proposal_type,
+        title: draft.title,
+        rationale: draft.rationale,
+        proposed_payload: draft.proposed_payload,
+        lint_ok: draft.lint_ok,
+        lint_violations: draft.lint_violations,
+        status: 'pending',
+        reviewed_by_role: null,
+        reviewed_by_id: null,
+        reviewed_by_name: null,
+        reviewer_note: null,
+        reviewed_at: null,
+        committed_ref: null,
+        created_at: now,
+      }),
+    );
+
+    this.state.agent_runs = [run, ...(this.state.agent_runs ?? [])].slice(
+      0,
+      40,
+    );
+    this.state.agent_proposals = [
+      ...createdProposals,
+      ...(this.state.agent_proposals ?? []),
+    ].slice(0, 80);
+    this.persistLocal();
+
+    await this.logAudit({
+      actor_role: params.actor_role,
+      actor_id: params.actor_id,
+      action: 'CLAIM_AGENT_ANALYSIS_RUN',
+      object_type: 'claim_preview',
+      object_id: params.claim_id,
+      details: {
+        run_id: runId,
+        claim_id: params.claim_id,
+        agent_id: agent.id,
+        agent_name: agent.name,
+        provider: params.provider_label,
+        model: params.model_label,
+        duration_ms: params.duration_ms ?? null,
+        finding_count: params.brief.findings.length,
+        proposal_count: createdProposals.length,
+        synthetic_only: true,
+      },
+    });
+
+    return { run, proposals: createdProposals };
+  }
+
+  async reviewClaimAgentProposal(params: {
+    claim_id: string;
+    proposal_id: string;
+    decision: 'approve' | 'reject';
+    reviewer_note: string;
+    actor_role: RoleId;
+    actor_id: string;
+    actor_name: string;
+  }): Promise<ClaimAgentProposalRecord> {
+    this.ensureAnomalyStateInitialized();
+    if (!canRoleApproveAgentProposal(params.actor_role)) {
+      throw new Error(
+        'RBAC Denied: Finance / CFO role cannot approve or reject claim investigation proposals (Separation of Duties).',
+      );
+    }
+
+    const proposal = (this.state.agent_proposals ?? []).find(
+      (p) =>
+        p.proposal_id === params.proposal_id && p.claim_id === params.claim_id,
+    );
+    if (!proposal) {
+      throw new Error(`Agent proposal ${params.proposal_id} not found`);
+    }
+    if (proposal.status !== 'pending') {
+      throw new Error(
+        `Proposal ${params.proposal_id} has already been ${proposal.status}.`,
+      );
+    }
+
+    const cleanNote = params.reviewer_note.trim().slice(0, 320);
+    if (cleanNote.length < 5) {
+      throw new Error(
+        'Please provide a brief human reviewer note / objective reason (min 5 characters).',
+      );
+    }
+
+    const now = new Date().toISOString();
+    let committedRef: string | null = null;
+
+    if (params.decision === 'approve') {
+      if (proposal.proposal_type === 'append_evidence_finding') {
+        if (this.state.tamper_backup_items !== null) {
+          throw new Error(
+            'Evidence Vault is currently in Tamper Simulation mode. Restore the valid chain before committing agent findings.',
+          );
+        }
+        const tag = proposal.proposed_payload.evidence_tag ?? 'Inference';
+        const summary =
+          proposal.proposed_payload.evidence_summary || proposal.rationale;
+        const item = await this.appendEvidence({
+          case_ref: proposal.claim_id,
+          title: `${proposal.title} (Human Approved)`,
+          content_summary: `${summary} [Human Reviewer Note: ${cleanNote}]`,
+          evidence_tag: VALID_EVIDENCE_TAGS.has(tag) ? tag : 'Inference',
+          source_adapter: `Claims Agent (${getClaimAgentById(proposal.agent_id).name}) · Human Approved`,
+          uploader_id: params.actor_id,
+          actor_role: params.actor_role,
+          access_authority: 'PPR Rule 2A.8 / POPIA s71 Human-Approved Review',
+        });
+        committedRef = item.evidence_id;
+      } else if (proposal.proposal_type === 'draft_basdeo_notice') {
+        const noticeText = (proposal.proposed_payload.notice_text || '').trim();
+        const lint = lintOutboundMessage(noticeText);
+        if (!lint.ok) {
+          throw new Error(
+            `FIC Act Tipping-Off Linter blocked approval: ${lint.violations.join(', ')}`,
+          );
+        }
+        const updatedClaim = await this.openClaimDisputeNotice({
+          claim_id: proposal.claim_id,
+          notice_text: noticeText,
+          actor_role: params.actor_role,
+          actor_id: params.actor_id,
+        });
+        committedRef = updatedClaim.claim_id;
+      } else if (proposal.proposal_type === 'flag_human_review_hold') {
+        const claim = this.state.claims_preview.find(
+          (c) => c.claim_id === proposal.claim_id,
+        );
+        if (!claim) {
+          throw new Error(`Claim ${proposal.claim_id} not found`);
+        }
+        const nextStatus =
+          proposal.proposed_payload.suggested_status ||
+          'Human Review Hold (Agent Escalated)';
+        claim.status = nextStatus;
+        if (this.pool) {
+          await this.pool.query(
+            `UPDATE claims_preview SET status = $1 WHERE claim_id = $2 AND org_id = $3`,
+            [nextStatus, claim.claim_id, DEFAULT_ORG_ID],
+          );
+        }
+        const decisionRec = await this.recordDecision({
+          target_type: 'claim_deferment',
+          target_ref: claim.claim_id,
+          selected_action: nextStatus,
+          reviewer_id: params.actor_name,
+          reviewer_role: params.actor_role,
+          objective_reasons: [
+            ...(proposal.proposed_payload.objective_reasons ?? []),
+            cleanNote,
+          ],
+          counsel_note: `Approved from Claims Agent proposal ${proposal.proposal_id}`,
+        });
+        committedRef = decisionRec.decision_id;
+      }
+    }
+
+    proposal.status = params.decision === 'approve' ? 'approved' : 'rejected';
+    proposal.reviewed_by_role = params.actor_role;
+    proposal.reviewed_by_id = params.actor_id;
+    proposal.reviewed_by_name = params.actor_name;
+    proposal.reviewer_note = cleanNote;
+    proposal.reviewed_at = now;
+    proposal.committed_ref = committedRef;
+
+    this.persistLocal();
+    await this.logAudit({
+      actor_role: params.actor_role,
+      actor_id: params.actor_id,
+      action:
+        params.decision === 'approve'
+          ? 'CLAIM_AGENT_PROPOSAL_APPROVED'
+          : 'CLAIM_AGENT_PROPOSAL_REJECTED',
+      object_type: 'agent_proposal',
+      object_id: proposal.proposal_id,
+      details: {
+        claim_id: proposal.claim_id,
+        proposal_type: proposal.proposal_type,
+        committed_ref: committedRef,
+        reviewer_note: cleanNote,
+      },
+    });
+
+    return proposal;
   }
 }

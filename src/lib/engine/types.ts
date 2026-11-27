@@ -304,3 +304,172 @@ export interface KpiAuditNoteRecord {
   include_in_pdf: boolean;
 }
 
+export type ClaimAgentId =
+  | 'investigator_lead'
+  | 'claims_sla_coordinator'
+  | 'document_evidence_analyst'
+  | 'entity_geospatial_analyst'
+  | 'network_payout_analyst'
+  | 'tool_integration_auditor';
+
+export type ClaimAgentProposalType =
+  | 'append_evidence_finding'
+  | 'draft_basdeo_notice'
+  | 'flag_human_review_hold';
+
+export type ClaimAgentProposalStatus = 'pending' | 'approved' | 'rejected';
+
+export interface ClaimAgentFinding {
+  finding_id: string;
+  reason_code: string;
+  summary: string;
+  evidence_tag: EvidenceTag;
+  source_ref: string;
+  evidence_type: string;
+  coverage_status: 'Verified' | 'Contradicted' | 'Unverified' | 'Unavailable';
+  visual_record_disclaimer?: string | null;
+}
+
+export interface ClaimAgentBrief {
+  case_reference: string;
+  purpose_and_checks_run: string[];
+  findings: ClaimAgentFinding[];
+  conflicting_or_missing_info: string[];
+  innocent_explanations: string[];
+  what_would_resolve: string[];
+  suggested_next_human_step: string;
+  audit_references: string[];
+  advisory_disclaimer: string;
+  narrative_summary: string;
+  prompt_injection_warnings: string[];
+}
+
+export interface ClaimAgentRunRecord {
+  run_id: string;
+  org_id: string;
+  claim_id: string;
+  agent_id: ClaimAgentId;
+  agent_name: string;
+  requested_by_role: RoleId;
+  requested_by_id: string;
+  prompt_text: string;
+  provider_label: string;
+  model_label: string;
+  synthetic_only: true;
+  duration_ms?: number;
+  brief: ClaimAgentBrief;
+  created_at: string;
+}
+
+export interface ClaimAgentProposalRecord {
+  proposal_id: string;
+  run_id: string;
+  org_id: string;
+  claim_id: string;
+  agent_id: ClaimAgentId;
+  proposal_type: ClaimAgentProposalType;
+  title: string;
+  rationale: string;
+  proposed_payload: {
+    case_ref?: string;
+    evidence_tag?: EvidenceTag;
+    evidence_summary?: string;
+    notice_text?: string;
+    suggested_status?: string;
+    objective_reasons?: string[];
+  };
+  lint_ok: boolean;
+  lint_violations: string[];
+  status: ClaimAgentProposalStatus;
+  reviewed_by_role: RoleId | null;
+  reviewed_by_id: string | null;
+  reviewed_by_name: string | null;
+  reviewer_note: string | null;
+  reviewed_at: string | null;
+  committed_ref: string | null;
+  created_at: string;
+}
+
+export type ClaimAgentActionCategory =
+  | 'analysis_run'
+  | 'automated_check'
+  | 'guardrail_lint'
+  | 'human_gate';
+
+export type ClaimAgentActionOutcomeStatus =
+  | 'completed'
+  | 'verified'
+  | 'warning'
+  | 'blocked'
+  | 'pending'
+  | 'approved'
+  | 'rejected';
+
+export interface ClaimAgentActionHistoryItem {
+  action_id: string;
+  claim_id: string;
+  run_id: string;
+  timestamp: string;
+  agent_id: ClaimAgentId;
+  agent_name: string;
+  category: ClaimAgentActionCategory;
+  action_type: string;
+  outcome: string;
+  outcome_status: ClaimAgentActionOutcomeStatus;
+  detail: string;
+  reference: string;
+}
+
+export interface AgentPerformanceSummary {
+  total_runs: number;
+  unique_claims_processed: number;
+  total_claims_universe: number;
+  coverage_pct: number;
+  avg_time_to_insight_ms: number;
+  median_time_to_insight_ms: number;
+  p95_time_to_insight_ms: number;
+  total_proposals: number;
+  reviewed_proposals: number;
+  approved_proposals: number;
+  rejected_proposals: number;
+  pending_proposals: number;
+  manual_override_rate_pct: number;
+  human_acceptance_rate_pct: number;
+  avg_human_review_latency_minutes: number | null;
+}
+
+export interface AgentTimeSeriesPoint {
+  run_id: string;
+  label: string;
+  claim_id: string;
+  agent_id: ClaimAgentId;
+  agent_name: string;
+  provider_label: string;
+  time_to_insight_ms: number;
+  findings_count: number;
+  approvals_count: number;
+  overrides_count: number;
+  pending_count: number;
+  created_at: string;
+}
+
+export interface AgentBySpecialistMetric {
+  agent_id: ClaimAgentId;
+  short_name: string;
+  agent_name: string;
+  claims_processed: number;
+  runs_count: number;
+  avg_time_to_insight_ms: number;
+  approved_count: number;
+  override_count: number;
+  pending_count: number;
+  override_rate_pct: number;
+}
+
+export interface AgentAnalyticsReport {
+  summary: AgentPerformanceSummary;
+  by_specialist: AgentBySpecialistMetric[];
+  timeline: AgentTimeSeriesPoint[];
+}
+
+

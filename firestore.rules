@@ -1,0 +1,302 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Pillar 4.1: Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Core helper primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Admin bootstrap check (verified user email or trusted admins doc)
+    function isAdmin() {
+      return isVerifiedUser() && (
+        request.auth.token.email == 'naha.thabiso@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Trusted org membership check via stakeholder profile
+    function isOrgMember(orgId) {
+      return isVerifiedUser() &&
+        isValidId(orgId) &&
+        exists(/databases/$(database)/documents/orgs/$(orgId)/stakeholder_profiles/$(request.auth.uid));
+    }
+
+    function isAuthorizedStakeholder(orgId) {
+      return isAdmin() || isOrgMember(orgId);
+    }
+
+    // Health check endpoint doc used by client startup testConnection()
+    match /test/connection {
+      allow get: if isSignedIn();
+      allow list, write: if false;
+    }
+
+    // Admin registry (read-only from client; managed via console/admin)
+    match /admins/{adminUid} {
+      allow get: if isSignedIn() && request.auth.uid == adminUid;
+      allow list, write: if false;
+    }
+
+    // Stakeholder profile validation helper
+    function isValidStakeholderProfile(data, orgId, userId) {
+      return data.keys().hasAll([
+        'uid',
+        'orgId',
+        'displayName',
+        'assignedRole',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'uid',
+        'orgId',
+        'displayName',
+        'email',
+        'assignedRole',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.uid is string && data.uid == userId && isValidId(data.uid) &&
+      data.orgId is string && data.orgId == orgId && isValidId(data.orgId) &&
+      data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 100 &&
+      (!('email' in data) || (data.email is string && data.email.size() <= 180)) &&
+      data.assignedRole in [
+        'head_of_forensics',
+        'finance_cfo',
+        'legal_recoveries',
+        'underwriter',
+        'compliance_dpo'
+      ] &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp;
+    }
+
+    function isValidSignatureMap(sig, expectedRole) {
+      return sig is map &&
+        sig.keys().hasAll([
+          'role',
+          'signerUid',
+          'signerName',
+          'signatureDigest',
+          'challengeCode',
+          'attestation',
+          'signedAt'
+        ]) &&
+        sig.keys().hasOnly([
+          'role',
+          'signerUid',
+          'signerName',
+          'signatureDigest',
+          'challengeCode',
+          'attestation',
+          'signedAt'
+        ]) &&
+        sig.role == expectedRole &&
+        sig.signerUid is string && sig.signerUid.size() >= 1 && sig.signerUid.size() <= 128 &&
+        sig.signerName is string && sig.signerName.size() >= 1 && sig.signerName.size() <= 100 &&
+        sig.signatureDigest is string && sig.signatureDigest.size() >= 16 && sig.signatureDigest.size() <= 128 &&
+        sig.challengeCode is string && sig.challengeCode.size() >= 4 && sig.challengeCode.size() <= 32 &&
+        sig.attestation is string && sig.attestation.size() >= 10 && sig.attestation.size() <= 300 &&
+        sig.signedAt is string && sig.signedAt.size() >= 10 && sig.signedAt.size() <= 40;
+    }
+
+    function isValidLedgerApproval(data, orgId, entryId) {
+      return data.keys().hasAll([
+        'entryId',
+        'orgId',
+        'caseRef',
+        'amountAtStake',
+        'workflowStatus',
+        'forensicsSigned',
+        'cfoSigned',
+        'updatedByUid',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.keys().hasOnly([
+        'entryId',
+        'orgId',
+        'caseRef',
+        'amountAtStake',
+        'workflowStatus',
+        'forensicsSigned',
+        'cfoSigned',
+        'forensicsSignature',
+        'cfoSignature',
+        'verificationCertificateHash',
+        'updatedByUid',
+        'createdAt',
+        'updatedAt'
+      ]) &&
+      data.entryId is string && data.entryId == entryId && isValidId(data.entryId) &&
+      data.orgId is string && data.orgId == orgId && isValidId(data.orgId) &&
+      data.caseRef is string && data.caseRef.size() >= 1 && data.caseRef.size() <= 64 &&
+      data.amountAtStake is number && data.amountAtStake >= 0 &&
+      data.forensicsSigned is bool &&
+      data.cfoSigned is bool &&
+      data.updatedByUid is string && data.updatedByUid == request.auth.uid && isValidId(data.updatedByUid) &&
+      data.createdAt is timestamp &&
+      data.updatedAt is timestamp &&
+      (!('forensicsSignature' in data) || data.forensicsSignature == null || isValidSignatureMap(data.forensicsSignature, 'head_of_forensics')) &&
+      (!('cfoSignature' in data) || data.cfoSignature == null || isValidSignatureMap(data.cfoSignature, 'finance_cfo')) &&
+      (!('verificationCertificateHash' in data) || data.verificationCertificateHash == null || (data.verificationCertificateHash is string && data.verificationCertificateHash.size() <= 128)) &&
+      // Dual-factor invariant: 'Verified' is ONLY permitted when BOTH Forensics and CFO signatures exist
+      (
+        (data.workflowStatus == 'Verified' && data.forensicsSigned == true && data.cfoSigned == true &&
+          'forensicsSignature' in data && data.forensicsSignature != null &&
+          'cfoSignature' in data && data.cfoSignature != null) ||
+        (data.workflowStatus == 'Awaiting CFO Signature' && data.forensicsSigned == true && data.cfoSigned == false) ||
+        (data.workflowStatus == 'Awaiting Forensics Signature' && data.forensicsSigned == false && data.cfoSigned == true) ||
+        (data.workflowStatus == 'Pending Dual-Factor' && data.forensicsSigned == false && data.cfoSigned == false)
+      );
+    }
+
+    function isValidApprovalAudit(data, orgId, auditId) {
+      return data.keys().hasAll([
+        'auditId',
+        'orgId',
+        'entryId',
+        'actorUid',
+        'actorRole',
+        'action',
+        'signatureDigest',
+        'createdAt'
+      ]) &&
+      data.keys().hasOnly([
+        'auditId',
+        'orgId',
+        'entryId',
+        'actorUid',
+        'actorRole',
+        'action',
+        'signatureDigest',
+        'createdAt'
+      ]) &&
+      data.auditId is string && data.auditId == auditId && isValidId(data.auditId) &&
+      data.orgId is string && data.orgId == orgId && isValidId(data.orgId) &&
+      data.entryId is string && isValidId(data.entryId) &&
+      data.actorUid is string && data.actorUid == request.auth.uid && isValidId(data.actorUid) &&
+      data.actorRole in ['head_of_forensics', 'finance_cfo'] &&
+      data.action in ['SIGNATURE_APPLIED', 'SIGNATURE_REVOKED', 'WORKFLOW_VERIFIED'] &&
+      data.signatureDigest is string && data.signatureDigest.size() >= 16 && data.signatureDigest.size() <= 128 &&
+      data.createdAt is timestamp;
+    }
+
+    match /orgs/{orgId}/stakeholder_profiles/{userId} {
+      // PII isolation: profile containing email is readable only by the owner or admin
+      allow get: if isValidId(orgId) && isValidId(userId) && (
+        (isVerifiedUser() && request.auth.uid == userId) || isAdmin()
+      );
+      allow list: if isAdmin();
+
+      // Users can register their own profile without self-escalating to privileged roles unless admin
+      allow create: if isValidId(orgId) && isValidId(userId) &&
+        isVerifiedUser() &&
+        request.auth.uid == userId &&
+        isValidStakeholderProfile(incoming(), orgId, userId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time &&
+        (isAdmin() || incoming().assignedRole in ['underwriter', 'legal_recoveries', 'compliance_dpo']);
+
+      allow update: if isValidId(orgId) && isValidId(userId) &&
+        isVerifiedUser() &&
+        isValidStakeholderProfile(incoming(), orgId, userId) &&
+        incoming().uid == existing().uid &&
+        incoming().orgId == existing().orgId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (
+          isAdmin() ||
+          (
+            request.auth.uid == userId &&
+            incoming().assignedRole == existing().assignedRole &&
+            incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'updatedAt'])
+          )
+        );
+
+      allow delete: if false;
+    }
+
+    match /orgs/{orgId}/ledger_approvals/{entryId} {
+      allow get: if isValidId(orgId) && isValidId(entryId) && isAuthorizedStakeholder(orgId);
+      allow list: if isVerifiedUser() && resource.data.orgId == orgId && isAuthorizedStakeholder(orgId);
+
+      allow create: if isValidId(orgId) && isValidId(entryId) &&
+        isAuthorizedStakeholder(orgId) &&
+        isValidLedgerApproval(incoming(), orgId, entryId) &&
+        incoming().createdAt == request.time &&
+        incoming().updatedAt == request.time;
+
+      allow update: if isValidId(orgId) && isValidId(entryId) &&
+        isAuthorizedStakeholder(orgId) &&
+        isValidLedgerApproval(incoming(), orgId, entryId) &&
+        incoming().entryId == existing().entryId &&
+        incoming().orgId == existing().orgId &&
+        incoming().createdAt == existing().createdAt &&
+        incoming().updatedAt == request.time &&
+        (
+          isAdmin() ||
+          (
+            existing().workflowStatus != 'Verified' &&
+            (
+              // Action: Forensics signature update
+              (incoming().diff(existing()).affectedKeys().hasOnly([
+                'forensicsSigned',
+                'forensicsSignature',
+                'workflowStatus',
+                'verificationCertificateHash',
+                'updatedByUid',
+                'updatedAt'
+              ])) ||
+              // Action: CFO signature update
+              (incoming().diff(existing()).affectedKeys().hasOnly([
+                'cfoSigned',
+                'cfoSignature',
+                'workflowStatus',
+                'verificationCertificateHash',
+                'updatedByUid',
+                'updatedAt'
+              ]))
+            )
+          )
+        );
+
+      allow delete: if false;
+    }
+
+    match /orgs/{orgId}/approval_audit/{auditId} {
+      allow get: if isValidId(orgId) && isValidId(auditId) && isAuthorizedStakeholder(orgId);
+      allow list: if isVerifiedUser() && resource.data.orgId == orgId && isAuthorizedStakeholder(orgId);
+
+      // Append-only audit log
+      allow create: if isValidId(orgId) && isValidId(auditId) &&
+        isAuthorizedStakeholder(orgId) &&
+        isValidApprovalAudit(incoming(), orgId, auditId) &&
+        incoming().createdAt == request.time;
+
+      allow update, delete: if false;
+    }
+  }
+}

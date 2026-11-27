@@ -9,6 +9,8 @@ import { ClaimsPreviewView } from './components/ClaimsPreviewView';
 import { ComplianceAuditView } from './components/ComplianceAuditView';
 import type {
   AuditLogRecord,
+  ClaimAgentProposalRecord,
+  ClaimAgentRunRecord,
   ClaimPreviewRecord,
   ConsentPolicyInput,
   EvidenceItemRecord,
@@ -20,6 +22,11 @@ import type {
   VaultVerificationResult,
 } from './lib/engine/types';
 import type { AnomalyAlertRecord } from './lib/engine/anomaly';
+import type { LedgerApprovalWorkflowRecord } from './lib/engine/approvalWorkflow';
+import type {
+  ApplyDigitalSignaturePayload,
+  ApplyDigitalSignatureResult,
+} from './components/StakeholderApprovalWorkflow';
 import type { SimulatedAdapterMeta } from './lib/adapters';
 import { apiFetch } from './utils/format';
 
@@ -36,6 +43,9 @@ interface AppBootstrapPayload {
   anomaly_threshold_pct: number;
   anomaly_alerts: AnomalyAlertRecord[];
   kpi_audit_notes: KpiAuditNoteRecord[];
+  approval_workflows: Record<string, LedgerApprovalWorkflowRecord>;
+  agent_runs?: ClaimAgentRunRecord[];
+  agent_proposals?: ClaimAgentProposalRecord[];
   guardrails: Array<{
     id: string;
     statute: string;
@@ -139,6 +149,33 @@ export default function App() {
       body: JSON.stringify({ signoff_type: signoffType, signed }),
     });
     await loadState(activeRole);
+  }
+
+  async function handleApplyDigitalSignature(
+    payload: ApplyDigitalSignaturePayload,
+  ): Promise<ApplyDigitalSignatureResult> {
+    const res = await apiFetch<
+      ApplyDigitalSignatureResult & { ok: boolean }
+    >(
+      `/api/ledger/${encodeURIComponent(payload.entryId)}/approve-signature`,
+      activeRole,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          target_role: payload.targetRole,
+          action: payload.action,
+          expected_challenge_code: payload.expectedChallengeCode,
+          entered_challenge_code: payload.enteredChallengeCode,
+          attestation_accepted: payload.attestationAccepted,
+          attestation_text: payload.attestationText,
+          firebase_uid: payload.firebaseUid ?? null,
+          firebase_email: payload.firebaseEmail ?? null,
+          firebase_display_name: payload.firebaseDisplayName ?? null,
+        }),
+      },
+    );
+    await loadState(activeRole);
+    return res;
   }
 
   function handleOpenReadout() {
@@ -265,6 +302,7 @@ export default function App() {
       {route === '/workforce' && <WorkforceView onRecorded={()=>loadState(activeRole)}/>}
       {route === '/' && (
         <OverviewLedgerView
+          orgId={data.org_id}
           entries={data.ledger_entries}
           recoveryCases={data.recovery_cases}
           consentPolicies={data.consent_policies}
@@ -273,6 +311,7 @@ export default function App() {
           anomalyThresholdPct={data.anomaly_threshold_pct ?? 75}
           anomalyAlerts={data.anomaly_alerts ?? []}
           kpiAuditNotes={data.kpi_audit_notes ?? []}
+          approvalWorkflows={data.approval_workflows ?? {}}
           onAddKpiAuditNote={handleAddKpiAuditNote}
           onToggleKpiAuditNotePdf={handleToggleKpiAuditNotePdf}
           onDeleteKpiAuditNote={handleDeleteKpiAuditNote}
@@ -281,6 +320,7 @@ export default function App() {
           activeRole={activeRole}
           activeActorName={data.active_actor.displayName}
           onToggleSignoff={handleToggleSignoff}
+          onApplyDigitalSignature={handleApplyDigitalSignature}
           onNavigate={navigate}
           onRefresh={() => loadState(activeRole)}
           readoutModalOpen={readoutModalOpen}
@@ -330,6 +370,9 @@ export default function App() {
           guardrails={data.guardrails}
           adapters={data.adapters}
           auditLog={data.audit_log}
+          agentRuns={data.agent_runs ?? []}
+          agentProposals={data.agent_proposals ?? []}
+          claims={data.claims_preview}
           activeRole={activeRole}
           onRefresh={() => loadState(activeRole)}
         />

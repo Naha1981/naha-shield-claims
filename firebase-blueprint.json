@@ -1,0 +1,202 @@
+{
+  "entities": {
+    "StakeholderProfile": {
+      "title": "StakeholderProfile",
+      "description": "Authenticated NahaShield stakeholder profile with verified identity and RBAC assignment.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "orgId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 180
+        },
+        "assignedRole": {
+          "type": "string",
+          "enum": [
+            "head_of_forensics",
+            "finance_cfo",
+            "legal_recoveries",
+            "underwriter",
+            "compliance_dpo"
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "orgId", "displayName", "assignedRole", "createdAt", "updatedAt"]
+    },
+    "LedgerApprovalWorkflow": {
+      "title": "LedgerApprovalWorkflow",
+      "description": "Dual-factor digital signature approval state for a savings & recovery ledger entry requiring both Head of Forensics and Chief Financial Officer signatures before Verified status.",
+      "type": "object",
+      "properties": {
+        "entryId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "orgId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "caseRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "amountAtStake": {
+          "type": "number"
+        },
+        "workflowStatus": {
+          "type": "string",
+          "enum": [
+            "Pending Dual-Factor",
+            "Awaiting CFO Signature",
+            "Awaiting Forensics Signature",
+            "Verified"
+          ]
+        },
+        "forensicsSigned": {
+          "type": "boolean"
+        },
+        "cfoSigned": {
+          "type": "boolean"
+        },
+        "forensicsSignature": {
+          "type": "object"
+        },
+        "cfoSignature": {
+          "type": "object"
+        },
+        "verificationCertificateHash": {
+          "type": "string",
+          "maxLength": 128
+        },
+        "updatedByUid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "entryId",
+        "orgId",
+        "caseRef",
+        "amountAtStake",
+        "workflowStatus",
+        "forensicsSigned",
+        "cfoSigned",
+        "updatedByUid",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "ApprovalAuditEvent": {
+      "title": "ApprovalAuditEvent",
+      "description": "Append-only digital signature audit event for dual-factor stakeholder ledger approvals.",
+      "type": "object",
+      "properties": {
+        "auditId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "orgId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "entryId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "actorUid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "actorRole": {
+          "type": "string",
+          "enum": ["head_of_forensics", "finance_cfo"]
+        },
+        "action": {
+          "type": "string",
+          "enum": ["SIGNATURE_APPLIED", "SIGNATURE_REVOKED", "WORKFLOW_VERIFIED"]
+        },
+        "signatureDigest": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 128
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "auditId",
+        "orgId",
+        "entryId",
+        "actorUid",
+        "actorRole",
+        "action",
+        "signatureDigest",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/orgs/{orgId}/stakeholder_profiles/{userId}": {
+      "schema": { "$ref": "#/entities/StakeholderProfile" },
+      "description": "Owner-isolated stakeholder profiles and role memberships."
+    },
+    "/orgs/{orgId}/ledger_approvals/{entryId}": {
+      "schema": { "$ref": "#/entities/LedgerApprovalWorkflow" },
+      "description": "Dual-factor digital signature approval records per ledger entry."
+    },
+    "/orgs/{orgId}/approval_audit/{auditId}": {
+      "schema": { "$ref": "#/entities/ApprovalAuditEvent" },
+      "description": "Append-only digital signature audit events."
+    }
+  }
+}
