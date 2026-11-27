@@ -469,7 +469,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
             </nav><a href="/map-preview" className="mt-3 flex rounded-lg border border-emerald-700 bg-emerald-800 px-4 py-3 font-semibold text-white">Maps &amp; address evidence</a>
 
             {/* Vault Integrity & Phase 3 Locked Status */}
-            <div className="pt-4 border-t border-slate-800 space-y-3">
+            <details><summary className="text-sm cursor-pointer">Evidence & safeguards</summary><div className="pt-4 border-t border-slate-800 space-y-3">
               <div className="px-3 py-2.5 rounded-md bg-slate-900/80 border border-slate-800">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-400">Evidence hash chain</span>
@@ -492,7 +492,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
                   LOCKED. Owner: designated compliance/legal reviewer, not assigned in this demo. Activation requires case-specific legal review of POPIA s57/58, lawful basis, agreements and tested security controls. No authorisation is recorded.
                 </p>
               </div>
-            </div>
+            </div></details>
           </div>
 
           <div className="p-4 border-t border-slate-800 text-[13px] text-slate-500">
