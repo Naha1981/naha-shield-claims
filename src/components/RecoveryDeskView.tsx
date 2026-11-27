@@ -35,7 +35,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
   onCaseAdded,
   onDecisionRecorded,
 }) => {
-  const [detailTab,setDetailTab]=React.useState('overview');
+  const [detailTab,setDetailTab]=React.useState(()=>typeof window!=='undefined'&&window.location.hash==='#tracing'?'tracing':'overview');
   const detailTabs=[['overview','Overview'],['assets','Assets & legal'],['scenario','NRV scenarios'],['handover','Draft handover'],['decision','Human decisions'],['tracing','Tracing & ranking']];
   const [filter, setFilter] = React.useState<TriageFilter>('all');
   const [search, setSearch] = React.useState('');
@@ -526,17 +526,17 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
             </section><section id="recovery-panel-tracing" role="tabpanel" aria-labelledby="recovery-tab-tracing" hidden={detailTab!=='tracing'} className="space-y-4">
               <div>
                 <h3 className="font-semibold">Worth chasing first</h3>
-                <p className="text-[13px] text-slate-400 mt-1">All cases ranked by modelled net recovery (practically recoverable minus legal costs). Modelled ranking, not a legal conclusion.</p>
+                <p className="text-[13px] text-slate-400 mt-1">Ranked by modelled net recovery · not a legal conclusion</p>
                 <div className="overflow-x-auto mt-2"><table className="w-full text-xs border border-slate-800"><thead><tr className="text-left text-slate-400"><th className="py-1.5 px-2">Rank</th><th className="py-1.5 px-2">Case</th><th className="py-1.5 px-2 text-right">Paid out</th><th className="py-1.5 px-2 text-right">Net recoverable</th><th className="py-1.5 px-2">Route</th></tr></thead><tbody>{worthChasing.map((x, i) => <tr key={x.item.case_id} className={x.item.case_id===selectedCase?.case_id?'bg-emerald-500/10 border-t border-slate-800':'border-t border-slate-800'}><td className="py-1.5 px-2 font-mono">{i + 1}</td><td className="py-1.5 px-2"><button type="button" className="text-emerald-300 font-mono hover:underline" onClick={() => setSelectedCase(x.item)}>{x.item.case_id}</button><div className="text-slate-400">{x.item.defendant_alias}{x.triage.early_write_off ? ' · Park: futile spend' : ''}</div></td><td className="py-1.5 px-2 text-right font-mono">{formatZar(x.item.original_payout)}</td><td className={x.net > 0 ? 'py-1.5 px-2 text-right font-mono text-emerald-400' : 'py-1.5 px-2 text-right font-mono text-slate-500'}>{formatZar(x.net)}</td><td className="py-1.5 px-2 text-slate-300">{x.triage.recommended_route}</td></tr>)}</tbody></table></div>
               </div>
               <div>
-                <h3 className="font-semibold">Free South African tracing sources</h3>
-                <p className="text-[13px] text-slate-400 mt-1">Free sources first; official-fee sources are marked so nothing is spent by accident. No live lookup is wired in: each search is a human step.</p>
-                <div className="overflow-x-auto mt-2"><table className="w-full text-xs border border-slate-800"><thead><tr className="text-left text-slate-400"><th className="py-1.5 px-2">Source</th><th className="py-1.5 px-2">What it verifies</th><th className="py-1.5 px-2">Cost</th><th className="py-1.5 px-2">When to use it</th></tr></thead><tbody>{TRACING_SOURCES.map((s) => <tr key={s.name} className="border-t border-slate-800"><td className="py-1.5 px-2"><a className="text-emerald-300 hover:underline" href={s.url} target="_blank" rel="noreferrer">{s.name}</a></td><td className="py-1.5 px-2 text-slate-300">{s.what}</td><td className={s.cost==='Free'?'py-1.5 px-2 text-emerald-400':'py-1.5 px-2 text-amber-300'}>{s.cost}</td><td className="py-1.5 px-2 text-slate-300">{s.use}</td></tr>)}</tbody></table></div>
+                <h3 className="font-semibold">Tracing sources</h3>
+                <p className="text-[13px] text-slate-400 mt-1">Free first · each lookup is a human step</p>
+                <div className="space-y-2 mt-2">{TRACING_SOURCES.map((s) => <details key={s.name} className="rounded border border-slate-800 px-3 py-2"><summary className="cursor-pointer text-sm">{s.name}<span className={s.cost==='Free'?'ml-2 text-xs text-emerald-400':'ml-2 text-xs text-amber-300'}>{s.cost}</span></summary><p className="mt-1"><a className="text-emerald-300 text-[13px] hover:underline" href={s.url} target="_blank" rel="noreferrer">{s.url.replace('https://','')}</a></p><p className="text-[13px] text-slate-300">{s.what}</p><p className="text-[13px] text-slate-400">{s.use}</p></details>)}</div>
               </div>
               {liveTriage?.ipilra_pto_flag && (
                 <div className="p-3 rounded bg-amber-950/40 border border-amber-700/60 text-xs text-amber-200">
-                  Communal / PTO tenure: the land cannot be sheriff-attached, so auction estimates do not apply. Verify tenure with the Traditional Council or communal property association records, and use the engine's emoluments or structured-settlement route.
+                  Communal / PTO land cannot be sheriff-attached. Verify tenure, then use the emoluments or structured-settlement route.
                 </div>
               )}
             </section><section id="recovery-panel-scenario" role="tabpanel" aria-labelledby="recovery-tab-scenario" hidden={detailTab!=='scenario'} className="space-y-4">

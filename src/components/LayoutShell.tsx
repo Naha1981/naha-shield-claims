@@ -213,7 +213,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
             aria-label="Demo role view, not account permissions"
             value={activeRole}
             onChange={(e) => {const role=e.target.value as RoleId;void fetch('/api/demo-view-audit',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({role})});onChangeRole(role)}}
-            className="w-full max-w-[106px] sm:max-w-none sm:w-auto truncate bg-slate-900 border border-slate-700 text-slate-100 text-[13px] sm:text-xs font-medium rounded-md px-1.5 sm:px-3 py-1 sm:py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full max-w-[152px] sm:max-w-none sm:w-auto truncate bg-slate-900 border border-slate-700 text-slate-100 text-[13px] sm:text-xs font-medium rounded-md px-1.5 sm:px-3 py-1 sm:py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             {(Object.keys(ROLE_LABELS) as RoleId[]).map((roleKey) => (
               <option key={roleKey} value={roleKey}>
