@@ -154,7 +154,7 @@ export const RegulatoryNewsFeedWidget: React.FC<
             type="button"
             disabled={loading}
             onClick={() => fetchFeed(topic, true)}
-            aria-label={loading?'Syncing...':'Refresh'}
+            aria-label={loading?'Syncing...':'Refresh Feed'}
             className="px-3 py-1.5 text-xs font-medium rounded-md border border-slate-700 bg-slate-900 hover:bg-slate-800 text-slate-200 inline-flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 disabled:opacity-60"
           >
             <RefreshCw
