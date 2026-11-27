@@ -12,6 +12,13 @@ on:
         options:
           - portal_draft
           - public_map
+          - skill_replay
+      skill_data:
+        required: false
+        type: string
+      skill_digest:
+        required: false
+        type: string
 permissions:
   contents: read
 concurrency:
@@ -35,6 +42,8 @@ jobs:
         env:
           SYNTHETIC_REQUEST_ID: ${{ inputs.request_id }}
           SYNTHETIC_BATCH_KIND: ${{ inputs.kind }}
+          SYNTHETIC_SKILL_DATA: ${{ inputs.skill_data }}
+          SYNTHETIC_SKILL_DIGEST: ${{ inputs.skill_digest }}
       - uses: actions/upload-artifact@v4
         with:
           name: synthetic-${{ inputs.request_id }}
