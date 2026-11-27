@@ -68,7 +68,9 @@ interface AppBootstrapPayload {
 }
 
 function parseRouteFromLocation(): NavRoute {
-  const path = window.location.pathname as NavRoute;
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const raw = window.location.pathname;
+  const path = ((base && raw.startsWith(base) ? raw.slice(base.length) : raw) || '/') as NavRoute;
   const valid: NavRoute[] = [
     '/',
     '/recovery',
