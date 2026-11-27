@@ -160,7 +160,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
     <div className="min-h-screen bg-[#0B1120] text-slate-100 flex flex-col overflow-x-hidden">
       {/* Mandatory Environment & Residency Banner */}
       <div className="bg-slate-900 border-b border-slate-800 px-3 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-[11px] font-mono tracking-wide text-slate-400 text-center leading-tight">
-        DEVELOPMENT / DEMO ENVIRONMENT (RENDER) · SYNTHETIC DATA ONLY · PRODUCTION REQUIRES SOUTH AFRICAN DATA RESIDENCY (POPIA)
+        DEVELOPMENT / SANDBOX · SYNTHETIC ONLY · Real-data use requires security, legal and insurer approval
       </div>
 
       {/* Top Bar (Strict 3-Zone Contract) */}
@@ -492,7 +492,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
           </div>
 
           <div className="p-4 border-t border-slate-800 text-[11px] text-slate-500">
-            NahaLabs (Pty) Ltd · POPIA s71 Human-in-the-Loop Enforced
+            NahaLabs (Pty) Ltd · AI recommendations require named human review
           </div>
         </aside>
 

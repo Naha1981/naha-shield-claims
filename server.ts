@@ -1,3 +1,7 @@
+import React from'react';
+import{renderToString}from'react-dom/server';
+import{PublicReview}from'./src/components/PublicReview';
+import{readFileSync}from'node:fs';
 import{telecomRoutes}from'./server/telecomRisk';
 import{hostedExecutorRoutes}from'./server/hostedExecutor';
 import{workforceRoutes}from'./server/workforce';
@@ -1342,7 +1346,14 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distDir = path.resolve(__dirname, 'dist');
-    app.use(express.static(distDir));
+    const readable:Record<string,string>={'/':'savings','/workforce':'workforce','/recovery':'recovery','/vault':'vault','/consent':'consent','/claims':'claims','/compliance':'compliance'};
+    app.get(['/', '/workforce','/recovery','/vault','/consent','/claims','/compliance','/review','/review/:module'],(req,res)=>{
+      const module=req.params.module||readable[req.path]||'workforce';
+      const snapshot=renderToString(React.createElement(PublicReview,{module}));
+      const html=readFileSync(path.join(distDir,'index.html'),'utf8').replace('<div id="root"></div>','<div id="root">'+snapshot+'</div>');
+      res.setHeader('Cache-Control','no-store');res.type('html').send(html);
+    });
+    app.use(express.static(distDir,{index:false}));
     app.get('*', (_req, res) => {
       res.sendFile(path.join(distDir, 'index.html'));
     });

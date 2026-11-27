@@ -11,10 +11,10 @@ const BADGE: Record<string, string> = {
 };
 const LABEL: Record<string, string> = {
   received_synthetic: 'synthetic inbound',
-  draft_pending_approval: 'DRAFT: not counted',
+  draft_pending_approval: 'AI Draft · Awaiting human review',
   blocked_lint: 'BLOCKED by lint',
-  approved_in_test_inbox: 'approved (test inbox only)',
-  rejected: 'rejected',
+  approved_in_test_inbox: 'Accepted for test handoff',
+  rejected: 'Returned for revision',
   human_posted: 'human',
 };
 
@@ -40,6 +40,7 @@ export function SynthMessagesPanel() {
   const [agents, setAgents] = React.useState<string[]>(['investigator_lead', 'document_evidence_analyst']);
   const [inText, setInText] = React.useState('');
   const [subject, setSubject] = React.useState('');
+  const [search, setSearch] = React.useState('');
   const [humanText, setHumanText] = React.useState('');
 
   const loadThreads = React.useCallback(async () => { const j = await api('threads'); setThreads(j.threads); }, []);
@@ -64,7 +65,7 @@ export function SynthMessagesPanel() {
   const inp = 'bg-slate-800 border border-slate-600 rounded px-2 py-1 text-sm text-slate-100';
   const btn = 'px-3 py-1 rounded bg-sky-700 hover:bg-sky-600 text-sm disabled:opacity-40';
 
-  const banner = <p role="note" className="mb-4 rounded-lg bg-amber-950 border border-amber-700 text-amber-100 px-4 py-2 text-sm">TEST INBOX ONLY. Synthetic claimants and test handles. Nothing here is sent over WhatsApp or email, and approval means approved inside this test inbox, not delivered.</p>;
+  const banner = <p role="note" className="mb-4 rounded-lg bg-amber-950 border border-amber-700 text-amber-100 px-4 py-2 text-sm">TEST INBOX ONLY. Synthetic claimants and test handles. Nothing here is sent over WhatsApp or email, and acceptance is a human review of an AI draft, never a claim or payment decision. Nothing is delivered.</p>;
   if (needLogin) return <div>{banner}<form onSubmit={login} className={cls}><h2 className="font-semibold mb-2">Private reviewer sign-in</h2><p className="text-sm text-slate-300 mb-3">Same private reviewer session as the Documents tab.</p><input type="password" aria-label="Reviewer password" className={inp} value={password} onChange={(e) => setPassword(e.target.value)} /> <button className={btn}>Sign in</button>{msg && <p role="alert" className="mt-2 text-red-300 text-sm">{msg}</p>}</form></div>;
   if (!me) return <p className="text-slate-300">{msg || 'Loading...'}</p>;
   const ro = me.read_only;
@@ -89,22 +90,23 @@ export function SynthMessagesPanel() {
         </section>
         <section className={cls} aria-label="Threads"><h2 className="font-semibold mb-2">Threads</h2>
           {threads.length === 0 && <p className="text-sm text-slate-400">None yet.</p>}
-          {threads.map((x) => <button key={x.id} onClick={() => setSel(x.id)} className={`block w-full text-left text-sm rounded px-2 py-1 mb-1 ${sel === x.id ? 'bg-slate-700' : 'bg-slate-800'}`}>{x.channel} · {x.case_id} · {x.message_count} msgs</button>)}
+          <label className="block text-sm mb-2">Find claim<input aria-label="Find synthetic claim" className={inp+' w-full'} value={search} onChange={e=>setSearch(e.target.value)}/></label>
+          {threads.filter(x=>x.case_id.toLowerCase().includes(search.toLowerCase())).map((x) => <button key={x.id} onClick={() => setSel(x.id)} className={`block w-full text-left text-sm rounded px-2 py-1 mb-1 ${sel === x.id ? 'bg-slate-700' : 'bg-slate-800'}`}>{x.channel} · {x.case_id} · {x.message_count} msgs</button>)}
         </section>
       </div>
       <section className={cls + ' lg:col-span-2'} aria-label="Conversation">
         {!t ? <p className="text-sm text-slate-400">Select or create a thread.</p> : <>
-          <h2 className="font-semibold mb-1">{t.channel} · {t.case_id}</h2>
+          <header className="rounded bg-slate-800 p-4 mb-4"><p className="text-xs text-amber-200">SYNTHETIC INVESTIGATION · NO CLAIM DECISION</p><h2 className="font-semibold my-2">{t.case_id}</h2><p className="text-sm">Human reviewer: {me.id} · {t.message_count || tr.messages.length} messages · Legal SLA: not established by this demo</p></header>
           <p className="text-xs text-slate-400 mb-3">Claimant {t.claimant_handle} · agents {t.agent_ids.join(', ')}{t.channel === 'group_sim' ? ` · humans ${t.humans.map((h: any) => h.id).join(', ') || 'none joined'}` : ''}</p>
           <div className="space-y-2 mb-4" data-testid="messages">
             {tr.messages.map((m: any) => <div key={m.id} className={`rounded-lg p-3 text-sm ${m.author_kind === 'synthetic_claimant' ? 'bg-slate-800' : m.author_kind === 'human' ? 'bg-sky-950' : 'bg-slate-950 border border-slate-700'}`}>
               <div className="flex justify-between gap-2 text-xs mb-1"><span className="text-slate-300">{m.author_kind}: {m.author_id}</span><span className={`px-2 rounded ${BADGE[m.state]}`}>{LABEL[m.state]}</span></div>
               {m.subject && <div className="font-medium">{m.subject}</div>}
-              <div>{m.text}</div>
+              {m.author_kind==='agent'&&<p className="text-xs text-amber-200 my-2">AI finding, advisory only. Human decision and external delivery are separate.</p>}<h3 className="font-semibold text-sm">{m.author_kind==='agent'?'Finding / recommendation':'Message'}</h3><div className="mt-2">{m.text}</div><details className="mt-3 text-sm text-slate-300"><summary>Evidence provenance and review receipt</summary><p className="mt-2">Source: synthetic test inbox thread {t.case_id}. Not external claimant evidence.</p><p>Created: {m.created_at}. Agent: {m.author_id}.</p><p>Model/version: not recorded by this response. Confidence: not calibrated, no percentage asserted.</p><p className="break-all">Exact message SHA256: {m.digest}</p><p>Human reviewer: {m.decided_by||'Awaiting review'}. Decision time: {m.decided_at||'Not recorded'}.</p><p>External delivery: none. AI finding is not a claim approval.</p></details>
               {m.lint_violations.length > 0 && <div className="text-red-300 text-xs mt-1">Lint: {m.lint_violations.join(', ')}</div>}
               {m.state === 'draft_pending_approval' && <div className="mt-2 flex gap-2">
-                <button className={btn} disabled={ro || (t.channel === 'group_sim' && !joined)} onClick={() => run(async () => { await api(`messages/${m.id}/decision`, { decision: 'approve', digest: m.digest }); await loadThread(t.id); })}>Approve (test inbox)</button>
-                <button className="px-3 py-1 rounded bg-slate-600 text-sm disabled:opacity-40" disabled={ro || (t.channel === 'group_sim' && !joined)} onClick={() => run(async () => { await api(`messages/${m.id}/decision`, { decision: 'reject', digest: m.digest }); await loadThread(t.id); })}>Reject</button>
+                <button className={btn} disabled={ro || (t.channel === 'group_sim' && !joined)} onClick={() => run(async () => { await api(`messages/${m.id}/decision`, { decision: 'approve', digest: m.digest }); await loadThread(t.id); })}>Accept for test handoff</button>
+                <button className="px-3 py-1 rounded bg-slate-600 text-sm disabled:opacity-40" disabled={ro || (t.channel === 'group_sim' && !joined)} onClick={() => run(async () => { await api(`messages/${m.id}/decision`, { decision: 'reject', digest: m.digest }); await loadThread(t.id); })}>Return for revision</button>
                 {t.channel === 'group_sim' && !joined && <span className="text-xs text-slate-400 self-center">Join the group to decide.</span>}
               </div>}
             </div>)}

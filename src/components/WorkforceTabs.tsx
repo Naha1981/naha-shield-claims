@@ -8,7 +8,7 @@ import { SynthMessagesPanel } from './SynthMessagesPanel';
 export function WorkforceTabs({ onRecorded, activeRole }: { onRecorded: () => void; activeRole: string }) {
   const [tab, setTab] = React.useState<'docs' | 'messages' | 'browser' | 'telecom'>('docs');
   const b = (on: boolean) => `px-4 py-2 rounded-t-lg text-sm ${on ? 'bg-slate-900 text-white border border-b-0 border-slate-700' : 'text-slate-400 hover:text-slate-200'}`;
-  return <div>
+  return <div><a href="/review" className="inline-block mb-3 text-sky-300 underline text-sm">Visitor? Open the public synthetic review, no sign-in needed</a>
     <div role="tablist" className="flex flex-wrap gap-1 mb-4">
       <button role="tab" aria-selected={tab === 'docs'} className={b(tab === 'docs')} onClick={() => setTab('docs')}>Documents</button>
       <button role="tab" aria-selected={tab === 'messages'} className={b(tab === 'messages')} onClick={() => setTab('messages')}>Messages (test inbox)</button>
