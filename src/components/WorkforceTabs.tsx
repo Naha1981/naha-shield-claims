@@ -25,7 +25,7 @@ export function WorkforceTabs({ onRecorded, activeRole }: { onRecorded: () => vo
   return <div className="visual-workspace">
     {tab === 'home' ? <>
       <section className="visual-welcome" aria-label="Choose a task">
-        <div><span className="visual-eyebrow">YOUR AI WORKSPACE · DESIGN PREVIEW</span><h2>Coordinate claims intelligence.</h2><p>Focused checks. Evidence for your team to review.</p><span className="visual-safety">Synthetic examples only · Human review</span></div>
+        <div><span className="visual-eyebrow">YOUR AI WORKSPACE · DESIGN PREVIEW</span><h2>What shall we check?</h2><p>Pick a task. You stay in charge.</p><span className="visual-safety">Synthetic examples only · Human review</span></div>
         <div className="intelligence-diagram" aria-label="Identity, address, policy and evidence checks require human review"><span><Fingerprint/>Identity</span><span><MapPin/>Address</span><ShieldCheck className="diagram-shield"/><span><FileText/>Policy</span><span><FolderLock/>Evidence</span></div>
       </section>
       <h3 className="specialist-title">Choose a specialist</h3><div className="visual-task-grid">{tasks.map(([id,title,hint,Icon,color])=><button key={id} className="visual-task" onClick={()=>setTab(id)}><span className="visual-task-icon" style={{background:color}}><Icon size={34} strokeWidth={1.8}/></span><strong>{title}</strong><small>{hint}</small><span className="visual-task-arrow" aria-hidden="true">↗</span></button>)}</div>
