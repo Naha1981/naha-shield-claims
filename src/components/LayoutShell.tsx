@@ -171,7 +171,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
       </div>
 
       {/* Top Bar (Strict 3-Zone Contract) */}
-      <header className="sticky top-0 z-30 bg-[#0F172A]/95 backdrop-blur border-b border-slate-800 px-3 sm:px-4 lg:px-6 h-12 sm:h-14 flex items-center justify-between gap-2 sm:gap-4">
+      <header className="sticky top-0 z-30 bg-[#0F172A]/95 backdrop-blur border-b border-slate-800 px-3 sm:px-4 lg:px-6 min-h-12 sm:h-14 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 sm:gap-4 py-1 sm:py-0">
         {/* Zone 1: Single-line Wordmark + Mobile toggle */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0 lg:min-w-0">
           <button
@@ -201,7 +201,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
         </div>
 
         {/* Zone 2: Demo RBAC Role Switcher */}
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 justify-end sm:flex-initial">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 justify-end sm:flex-initial basis-full order-last sm:order-none sm:basis-auto">
           <label
             htmlFor="role-switcher"
             className="hidden md:inline text-xs text-slate-400 whitespace-nowrap"
@@ -213,7 +213,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
             aria-label="Demo role view, not account permissions"
             value={activeRole}
             onChange={(e) => {const role=e.target.value as RoleId;void fetch('/api/demo-view-audit',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({role})});onChangeRole(role)}}
-            className="w-full max-w-[152px] sm:max-w-none sm:w-auto truncate bg-slate-900 border border-slate-700 text-slate-100 text-[13px] sm:text-xs font-medium rounded-md px-1.5 sm:px-3 py-1 sm:py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full max-w-[240px] sm:max-w-none sm:w-auto truncate bg-slate-900 border border-slate-700 text-slate-100 text-[13px] sm:text-xs font-medium rounded-md px-1.5 sm:px-3 py-1 sm:py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             {(Object.keys(ROLE_LABELS) as RoleId[]).map((roleKey) => (
               <option key={roleKey} value={roleKey}>
