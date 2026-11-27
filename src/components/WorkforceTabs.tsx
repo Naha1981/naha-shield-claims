@@ -4,7 +4,7 @@ import {VoiceCommandPanel} from './VoiceCommandPanel';
 import {WorkforceIntroduction} from './WorkforceIntroduction';
 import{TelecomRiskPanel}from'./TelecomRiskPanel';
 import React from 'react';
-import {Bot, FileText, Mail, Globe, MapPin, Smartphone, Mic, ChevronLeft, MessageCircle, ShieldCheck, Fingerprint, FolderLock} from 'lucide-react';
+import {Bot, FileText, Mail, Globe, MapPin, Smartphone, Command, ChevronLeft, MessageCircle, ShieldCheck, Fingerprint, FolderLock} from 'lucide-react';
 import{HostedExecutionPanel}from'./HostedExecutionPanel';
 import { WorkforceView } from './WorkforceView';
 import { SynthMessagesPanel } from './SynthMessagesPanel';
@@ -21,7 +21,7 @@ export function WorkforceTabs({ onRecorded, activeRole }: { onRecorded: () => vo
     ['messages','Review messages','Review supplied test messages',Mail,'#fff0d9'],
     ['browser','Run a browser task','Run approved synthetic tasks',Globe,'#e1f1ff'],
     ['telecom','Check a SIM','Inspect synthetic SIM / RICA signals',Smartphone,'#ffe7ec'],
-    ['voice','Open a tool','Typed commands',Mic,'#eeeaff'],
+    ['voice','Open a tool','Typed commands',Command,'#eeeaff'],
   ] as const;
   return <div className="visual-workspace">
     {tab === 'home' ? <>
@@ -33,7 +33,7 @@ export function WorkforceTabs({ onRecorded, activeRole }: { onRecorded: () => vo
       <div className="visual-footer"><a href="/review">Try the guided demo ↗</a><details><summary>How it works & safeguards</summary><WorkforceIntroduction/><GovernanceReadiness/></details></div>
     </> : <>
       <button className="visual-back" onClick={()=>setTab('home')}><ChevronLeft size={18}/> All tasks</button>
-      <div role="tablist" aria-label="Work tools" className="flex flex-wrap gap-1 mb-4">{tasks.map(([id,title,,Icon])=><button key={id} role="tab" aria-selected={tab===id} className={b(tab===id)} onClick={()=>setTab(id)}><Icon className="inline-block mr-2" size={16}/>{title}</button>)}</div>
+      <details><summary>Switch task</summary><div role="tablist" aria-label="Work tools" className="flex flex-wrap gap-1 mb-4">{tasks.map(([id,title,,Icon])=><button key={id} role="tab" aria-selected={tab===id} className={b(tab===id)} onClick={()=>setTab(id)}><Icon className="inline-block mr-2" size={16}/>{title}</button>)}</div></details>
     {tab === 'chat'? <WorkforceIntroduction/> : tab === 'maps'?<><PublicMapPreview embedded/></>:tab === 'voice' ? <VoiceCommandPanel/> : tab === 'telecom' ? <TelecomRiskPanel activeRole={activeRole}/> : tab === 'browser' ? activeRole==='finance_cfo'?<p className="p-5 text-amber-200">Browser actions disabled in CFO demo view.</p>:<HostedExecutionPanel key="browser"/> : tab === 'docs' ? <WorkforceView onRecorded={onRecorded} /> : <div className="text-slate-100">{activeRole==='finance_cfo'?<p role="note" className="p-5 rounded border border-amber-600">Messages are disabled in the CFO demo view. The private reviewer sign-in is the named owner account, not a CFO identity. This role selector is a demo filter, not account authentication.</p>:<SynthMessagesPanel />}</div>}
     <details className="mt-6 rounded-lg border p-4"><summary>How it works & safeguards</summary><GovernanceReadiness/></details></>}
   </div>;
