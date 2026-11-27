@@ -1,4 +1,3 @@
-import {useQueueView, QueueControls} from './QueueControls';
 import {GovernanceReadiness} from './GovernanceReadiness';
 import {AgentText} from './AgentText';
 import React from 'react';
@@ -54,7 +53,6 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
   const [searchError, setSearchError] = React.useState<string | null>(null);
   const [searching, setSearching] = React.useState(false);
 
-  const auditQueue=useQueueView('audit',auditLog);
   async function handleRegulatorySearch(e: React.FormEvent) {
     e.preventDefault();
     setSearching(true);
@@ -234,7 +232,7 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
             <div className="text-xs font-semibold text-slate-300 mb-2">
               Deterministic Rule Catalogue (v1.0.0)
             </div>
-            <div tabIndex={0} role="region" aria-label="Rule catalogue" className="space-y-1.5 max-h-40 overflow-y-auto">
+            <div className="space-y-1.5 max-h-40 overflow-y-auto">
               {RULE_CATALOGUE_V1.map((r) => (
                 <div
                   key={r.rule_id}
@@ -260,7 +258,6 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
           </h2>
         </div>
         <div className="overflow-x-auto max-h-80 overflow-y-auto">
-          <QueueControls label="Audit events" queue={auditQueue}/>
           <table className="w-full text-left border-collapse text-xs">
             <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-400">
               <tr>
@@ -272,7 +269,7 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/80 font-mono text-[13px]">
-              {auditQueue.rows.map((a) => (
+              {auditLog.map((a) => (
                 <tr key={a.audit_id} className="hover:bg-slate-800/30">
                   <td className="py-2 px-4 text-slate-400 whitespace-nowrap">
                     {a.created_at.replace('T', ' ').slice(0, 19)}Z

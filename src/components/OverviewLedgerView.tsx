@@ -1,4 +1,3 @@
-import {useQueueView, QueueControls} from './QueueControls';
 import React from 'react';
 import { Check, AlertTriangle, Download, FileDown, Printer } from 'lucide-react';
 import { evaluateLedgerEntry, summarizeLedger } from '../lib/engine/ledger';
@@ -234,7 +233,6 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
     }
   }
 
-  const ledgerQueue=useQueueView('savings',filteredRows,{filters:{filter},onRestore:f=>setFilter((f.filter||'all') as LedgerFilter)});
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -491,7 +489,6 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
         </div>
 
         <div className="overflow-x-auto">
-          <QueueControls label="Savings ledger" queue={ledgerQueue}/>
           <table id="financial-ledger" className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="border-b border-slate-800 bg-slate-900/60 text-slate-400">
@@ -507,7 +504,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/80">
-              {ledgerQueue.rows.map(({ entry, evalOut }) => {
+              {filteredRows.map(({ entry, evalOut }) => {
                 const countedAmount =
                   evalOut.live_protected +
                   evalOut.net_cash_recovered +

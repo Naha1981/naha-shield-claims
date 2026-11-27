@@ -407,7 +407,8 @@ export const KpiSummaryWidget: React.FC<KpiSummaryWidgetProps> = ({
           {/* Horizontal Bar Chart of Pending Consent Categories */}
           <div
             className="space-y-2"
-            role="group" aria-label={`Pending consent breakdown across ${consentStats.pendingDistinct} flagged policies`}
+            role="img"
+            aria-label={`Pending consent breakdown across ${consentStats.pendingDistinct} flagged policies`}
           >
             {consentStats.categories.map((cat) => (
               <div key={cat.id} className="space-y-1">

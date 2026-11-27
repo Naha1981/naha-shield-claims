@@ -1,6 +1,0 @@
-import assert from 'node:assert/strict';
-import {test} from 'node:test';
-import {queuePage,validViews,DEFAULT_QUEUE_CONFIG as D} from './QueueControls';
-test('queue pagination covers all rows once and clamps stale pages',()=>{const rows=Array.from({length:23},(_,id)=>({id}));const config={...D,size:5};assert.deepEqual([1,2,3,4,5].flatMap(n=>queuePage(rows,config,n).rows),rows);assert.equal(queuePage(rows,config,99).page,5);assert.equal(queuePage(rows,config,-1).page,1);assert.equal(queuePage([],config,99).page,1);assert.equal(queuePage([],config,99).start,0)});
-test('search precedes pagination, reverse is stable, input not mutated',()=>{const rows=Array.from({length:23},(_,id)=>({id,label:id%2?'match':'other'}));const r=queuePage(rows,{...D,query:'MATCH',size:5,reverse:true},2);assert.equal(r.total,11);assert.deepEqual(r.rows.map(x=>x.id),[11,9,7,5,3]);assert.equal(rows[0].id,0);assert.equal(queuePage(rows,{...D,query:'nonexistent'},1).total,0)});
-test('saved-view schema rejects malformed values and caps browser inventory',()=>{assert.deepEqual(validViews({}),[]);assert.deepEqual(validViews([{name:'x',config:{...D,size:0},filters:{}}]),[]);const v={name:'Review',config:{...D,query:'case'},filters:{filter:'awaiting'}};assert.deepEqual(validViews([null,v]),[v]);assert.equal(validViews(Array.from({length:25},()=>v)).length,20)});

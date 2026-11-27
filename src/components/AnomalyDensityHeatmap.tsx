@@ -149,7 +149,7 @@ export const AnomalyDensityHeatmap: React.FC<AnomalyDensityHeatmapProps> = ({
                 type="button"
                 disabled={thresholdBusy}
                 onClick={() => handlePresetClick(preset.pct)}
-                aria-label={`${preset.label}, set anomaly alert threshold`}
+                aria-label={`Set anomaly alert threshold to ${preset.pct}%`}
                 className={`px-2 py-1 text-[11px] font-mono rounded transition-colors whitespace-nowrap ${
                   anomalyThresholdPct === preset.pct
                     ? 'bg-emerald-600 text-white font-semibold'
@@ -235,7 +235,7 @@ export const AnomalyDensityHeatmap: React.FC<AnomalyDensityHeatmapProps> = ({
                             patternId: pattern.id,
                           })
                         }
-                        title={`${breached?(alert?.acknowledged?'ACK ':'ALERT '):''}${cell.densityPct}% ${cell.count}/${cell.totalInSegment}, ${seg.productType} ${pattern.label}`}
+                        aria-label={`${seg.productType} ${pattern.label}: ${cell.densityPct}% (${cell.count} of ${cell.totalInSegment})`}
                         className={`relative w-full py-2.5 px-2 rounded border text-center transition-all cursor-pointer ${getCellHeatClasses(
                           cell.densityPct,
                           isSelected,
@@ -253,10 +253,10 @@ export const AnomalyDensityHeatmap: React.FC<AnomalyDensityHeatmapProps> = ({
                             {alert?.acknowledged ? 'ACK' : 'ALERT'}
                           </span>
                         )}
-                        <span className="sr-only">{seg.productType}, {pattern.label}. </span><div className="font-mono text-sm font-bold tabular-nums leading-tight">
+                        <div className="font-mono text-sm font-bold tabular-nums leading-tight">
                           {cell.densityPct}%
                         </div>
-                        <div className="font-mono text-[10px] tabular-nums mt-0.5">
+                        <div className="font-mono text-[10px] opacity-80 tabular-nums mt-0.5">
                           {cell.count}/{cell.totalInSegment}
                         </div>
                       </button>

@@ -1,4 +1,3 @@
-import {useQueueView, QueueControls} from './QueueControls';
 import React from 'react';
 import { AlertOctagon, CheckCircle2, Smartphone, ShieldAlert } from 'lucide-react';
 import {
@@ -107,8 +106,6 @@ export const ConsentDeskView: React.FC<ConsentDeskViewProps> = ({
       });
   }, [policies, gapFilter]);
 
-  const policyQueue=useQueueView('consent',evaluatedPolicies,{filters:{gapFilter},onRestore:f=>setGapFilter((f.gapFilter||'all') as typeof gapFilter)});
-  const duressQueue=useQueueView('duress',duressAlerts);
   async function handleTriggerOutcome(outcome: 'confirm' | 'decline' | 'duress') {
     if (!selectedPolicy) return;
     setSimBusy(true);
@@ -350,7 +347,7 @@ export const ConsentDeskView: React.FC<ConsentDeskViewProps> = ({
               </div>
             ) : (
               <div className="space-y-2.5">
-                <QueueControls label="Duress alerts" queue={duressQueue}/>{duressQueue.rows.map((alertPolicy) => (
+                {duressAlerts.map((alertPolicy) => (
                   <div
                     key={alertPolicy.policy_id}
                     data-testid="duress-alert-card"
@@ -429,7 +426,6 @@ export const ConsentDeskView: React.FC<ConsentDeskViewProps> = ({
         </div>
 
         <div className="overflow-x-auto max-h-[460px] overflow-y-auto">
-          <QueueControls label="Consent policies" queue={policyQueue}/>
           <table className="w-full text-left border-collapse text-xs">
             <thead className="sticky top-0 bg-slate-900 border-b border-slate-800 text-slate-400">
               <tr>
@@ -442,7 +438,7 @@ export const ConsentDeskView: React.FC<ConsentDeskViewProps> = ({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/80">
-              {policyQueue.rows.map(({ policy, evalOut }) => (
+              {evaluatedPolicies.map(({ policy, evalOut }) => (
                 <tr key={policy.policy_id} className="hover:bg-slate-800/35">
                   <td className="py-2.5 px-4 font-mono text-slate-200 whitespace-nowrap">
                     <div>{policy.policy_id}</div>

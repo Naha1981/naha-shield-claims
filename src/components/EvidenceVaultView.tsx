@@ -1,4 +1,3 @@
-import {useQueueView, QueueControls} from './QueueControls';
 import React from 'react';
 import { CheckCircle2, RotateCcw, ShieldAlert, ShieldCheck, Plus } from 'lucide-react';
 import type {
@@ -57,7 +56,6 @@ export const EvidenceVaultView: React.FC<EvidenceVaultViewProps> = ({
     return [...filtered].reverse();
   }, [items, caseFilter]);
 
-  const evidenceQueue=useQueueView('vault',visibleItems,{filters:{caseFilter},onRestore:f=>setCaseFilter(f.caseFilter||'ALL')});
   async function handleRunVerify() {
     setBusy(true);
     try {
@@ -342,8 +340,8 @@ export const EvidenceVaultView: React.FC<EvidenceVaultViewProps> = ({
             </div>
           </div>
 
-          <QueueControls label="Evidence" queue={evidenceQueue}/><div className="divide-y divide-slate-800/80">
-            {evidenceQueue.rows.map((item) => {
+          <div className="divide-y divide-slate-800/80">
+            {visibleItems.map((item) => {
               const isFailedRow =
                 !verification.valid &&
                 verification.failed_evidence_id === item.evidence_id;

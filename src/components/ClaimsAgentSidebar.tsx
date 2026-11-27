@@ -1,4 +1,3 @@
-import {useQueueView, QueueControls} from './QueueControls';
 import {AgentText} from './AgentText';
 import React from 'react';
 import {
@@ -234,9 +233,6 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
     CLAIM_AGENT_REGISTRY.find((a) => a.id === selectedAgentId) ??
     CLAIM_AGENT_REGISTRY[0];
 
-  const pendingQueue=useQueueView('pending-proposals',pendingProposals);
-  const reviewedQueue=useQueueView('reviewed-proposals',reviewedProposals);
-  const trailQueue=useQueueView('claim-audit-trail',auditTrail);
   return (
     <aside
       aria-label="Agent Interaction Sidebar"
@@ -263,7 +259,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
             type="button"
             onClick={() => void fetchAgentContext(claimId, true)}
             disabled={loadingContext || !claimId}
-            aria-label="Sync Context, refresh NahaShield claim context"
+            aria-label="Refresh NahaShield claim context"
             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-slate-700 bg-slate-900 text-[13px] font-medium text-slate-200 hover:bg-slate-800 disabled:opacity-50 whitespace-nowrap shrink-0"
           >
             <RefreshCw
@@ -310,7 +306,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
           onClick={() => setHistoryDrawerOpen(true)}
           disabled={!claimId}
           data-testid="open-action-history-drawer-btn"
-          title="Open Agent Action History drawer"
+          aria-label={`Open Agent Action History drawer (${actionHistory.length} actions)`}
           className="w-full inline-flex items-center justify-between gap-2 px-3 py-1.5 rounded border border-slate-700 bg-slate-900/90 hover:bg-slate-800 disabled:opacity-50 text-xs font-medium text-slate-200 transition-colors"
         >
           <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
@@ -683,7 +679,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
               </div>
             ) : (
               <>
-                <QueueControls label="Pending proposals" queue={pendingQueue}/>{pendingQueue.rows.map((prop) => {
+                {pendingProposals.map((prop) => {
                   const busy = reviewBusyId === prop.proposal_id;
                   return (
                     <div
@@ -798,7 +794,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
                     <div className="text-[13px] font-semibold text-slate-400">
                       Reviewed Decisions ({reviewedProposals.length})
                     </div>
-                    <QueueControls label="Reviewed proposals" queue={reviewedQueue}/>{reviewedQueue.rows.map((prop) => (
+                    {reviewedProposals.map((prop) => (
                       <div
                         key={prop.proposal_id}
                         className="p-2.5 rounded bg-slate-900/60 border border-slate-800 text-[13px] space-y-1"
@@ -857,7 +853,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
               </div>
             ) : (
               <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
-                <QueueControls label="Claim audit trail" queue={trailQueue}/>{trailQueue.rows.map((log) => (
+                {auditTrail.map((log) => (
                   <div
                     key={log.audit_id}
                     className="p-2.5 rounded bg-slate-900/80 border border-slate-800 text-[13px] space-y-1"

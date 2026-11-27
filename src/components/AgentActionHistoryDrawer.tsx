@@ -1,4 +1,3 @@
-import {useQueueView, QueueControls} from './QueueControls';
 import React from 'react';
 import {
   AlertTriangle,
@@ -117,15 +116,13 @@ export const AgentActionHistoryDrawer: React.FC<
     setSearchQuery('');
   }, [claim?.claim_id]);
 
-
+  if (!open) return null;
 
   const filteredActions = filterClaimAgentActionHistory(
     actions,
     categoryFilter,
     searchQuery,
   );
-  const historyQueue=useQueueView('claim-action-history',filteredActions,{filters:{categoryFilter,searchQuery},onRestore:f=>{setCategoryFilter((f.categoryFilter||'all') as FilterOption);setSearchQuery(f.searchQuery||'')}});
-  if (!open) return null;
   const runsCount = actions.filter((a) => a.category === 'analysis_run').length;
   const checksCount = actions.filter(
     (a) => a.category === 'automated_check' || a.category === 'guardrail_lint',
@@ -293,7 +290,7 @@ export const AgentActionHistoryDrawer: React.FC<
               data-testid="agent-action-history-list"
               className="divide-y divide-slate-800 border border-slate-800 rounded-md bg-[#131C31]/50"
             >
-              <QueueControls label="Claim action history" queue={historyQueue}/>{historyQueue.rows.map((item) => {
+              {filteredActions.map((item) => {
                 const badge = outcomeBadge(item.outcome_status);
                 return (
                   <div

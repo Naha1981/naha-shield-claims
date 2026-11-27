@@ -600,7 +600,7 @@ export const EvidenceIngestion: React.FC<EvidenceIngestionProps> = ({
             >
               <input
                 ref={fileInputRef}
-                id="evidence-ingestion-file-input" aria-label="Evidence file upload"
+                id="evidence-ingestion-file-input"
                 type="file"
                 accept={ACCEPTED_FILE_EXTENSIONS}
                 className="sr-only"
