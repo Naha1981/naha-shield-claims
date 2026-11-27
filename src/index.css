@@ -92,3 +92,9 @@ html[data-theme="light"] button[class*="bg-emerald-9"] { background-color: #d1fa
 /* Additive readability and keyboard focus. */
 button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible{outline:3px solid #38bdf8;outline-offset:3px}
 .text-slate-400{color:#aebdd0}.text-slate-500{color:#9aacc2}
+/* Keep action labels readable against filled buttons in the light palette. */
+html[data-theme="light"] button[class*="bg-sky-7"],
+html[data-theme="light"] button[class*="bg-sky-8"],
+html[data-theme="light"] button[class*="bg-emerald-8"],
+html[data-theme="light"] a[class*="bg-sky-8"],
+html[data-theme="light"] button[class*="bg-slate-6"] { color:#fff !important; }
