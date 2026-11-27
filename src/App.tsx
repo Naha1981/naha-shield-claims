@@ -1,3 +1,4 @@
+import{ExecutionView,PublicMapPreview}from'./components/ExecutionView';
 import{WorkforceTabs}from'./components/WorkforceTabs';
 import React from 'react';
 import { LayoutShell, type NavRoute } from './components/LayoutShell';
@@ -71,7 +72,7 @@ function parseRouteFromLocation(): NavRoute {
     '/vault',
     '/consent',
     '/claims',
-    '/compliance','/workforce',
+    '/compliance','/workforce','/execution',
   ];
   return valid.includes(path) ? path : '/';
 }
@@ -299,6 +300,7 @@ export default function App() {
       onInspectHeatmap={handleInspectHeatmap}
       onOpenReadout={handleOpenReadout}
     >
+      {route === '/execution' && <ExecutionView/>}
       {route === '/workforce' && <WorkforceTabs activeRole={activeRole} onRecorded={()=>loadState(activeRole)}/>}
       {route === '/' && (
         <OverviewLedgerView

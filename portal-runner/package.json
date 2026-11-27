@@ -1,0 +1,19 @@
+{
+  "name": "nahashield-portal-runner",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "description": "Isolated synthetic portal runner + shared capture executor for NahaShield. Loopback-only; fills drafts, screenshots, never submits.",
+  "scripts": {
+    "runner": "node computer-mcp.mjs",
+    "executor": "node executor-http.mjs",
+    "reviewer": "node staging-server.mjs",
+    "seal": "node seal-to-vault.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "e2e": "node tests/e2e-proof.mjs"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "playwright": "^1.49.0"
+  }
+}

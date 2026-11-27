@@ -1,3 +1,4 @@
+import{executionRoutes}from'./server/execution';
 import{workforceRoutes}from'./server/workforce';
 import{SynthChat,synthChatRoutes}from'./server/synthChat';
 import { fetchOfficialResearch, extractResearchText, safeResearchQuestion } from './server/researchFallback';
@@ -111,13 +112,11 @@ async function startServer() {
   const app = express();
   app.set('trust proxy',1);
   app.use(express.json({ limit: '8mb' }));
-  const workforce = workforceRoutes(store);
-  app.use('/api/workforce', workforce);
-  // Synthetic test inbox: in-memory, no external sends. Auth = the shared private reviewer session; no header-based roles.
-  const synthChat = new SynthChat({
-    sink: (e) => store.logAudit({ actor_role: 'head_of_forensics', actor_id: e.actor_id, action: e.action, object_type: 'claim', object_id: e.object_id, details: e.details }),
-  });
-  app.use('/api/workforce/chat', synthChatRoutes(synthChat, { authorize: (req) => workforce.principal(req) }));
+  const workforce=workforceRoutes(store);
+  app.use('/api/workforce',workforce);
+  const synthChat=new SynthChat({sink:e=>store.logAudit({actor_role:'head_of_forensics',actor_id:e.actor_id,action:e.action,object_type:'claim',object_id:e.object_id,details:e.details})});
+  app.use('/api/workforce/chat',synthChatRoutes(synthChat,{authorize:req=>workforce.principal(req)}));
+  app.use('/api/execution',executionRoutes(store));
 
   // Health endpoint for Render & monitoring
   app.get('/api/health', (_req, res) => {
@@ -662,7 +661,11 @@ async function startServer() {
 
       const binarySha256 = createHash('sha256').update(bytes).digest('hex');
       const captureMode: IngestionCaptureMode =
-        req.body?.capture_mode === 'camera' ? 'camera' : 'drag_drop';
+        req.body?.capture_mode === 'camera'
+          ? 'camera'
+          : req.body?.capture_mode === 'agent_capture'
+            ? 'agent_capture'
+            : 'drag_drop';
       const rawDims = req.body?.image_dimensions;
       const imageDimensions =
         rawDims &&
@@ -704,7 +707,9 @@ async function startServer() {
         source_adapter:
           captureMode === 'camera'
             ? `Secure Camera Capture (${processed.meta.document_class})`
-            : `Secure Document Drop (${processed.meta.document_class})`,
+            : captureMode === 'agent_capture'
+              ? `Synthetic Portal Runner Capture (${processed.meta.document_class})`
+              : `Secure Document Drop (${processed.meta.document_class})`,
         uploader_id: actor.userId,
         actor_role: actor.role,
         access_authority: String(

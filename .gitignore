@@ -7,5 +7,9 @@ coverage/
 .env*
 !.env.example
 
-# Local synthetic runtime, never publish
+# Portal runner runtime state (never commit: logs, profiles, evidence, reviewer credentials)
+portal-runner/evidence/
+portal-runner/data/
+portal-runner/computer/
+portal-runner/skills/
 .data/

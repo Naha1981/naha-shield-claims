@@ -27,7 +27,7 @@ export type NavRoute =
   | '/consent'
   | '/claims'
   | '/compliance'
-  | '/workforce';
+  | '/workforce' | '/execution';
 
 interface LayoutShellProps {
   activeRoute: NavRoute;
@@ -50,6 +50,7 @@ const NAV_ITEMS: Array<{
   sublabel: string;
   icon: React.ComponentType<{ className?: string }>;
 }> = [
+ {route:'/execution',label:'Claims-Agents',sublabel:'Commands · Evidence · Approvals',icon:ShieldCheck},
  {route:'/workforce',label:'AI Workforce',sublabel:'Synthetic uploads · Human review',icon:ShieldCheck},
   {
     route: '/',

@@ -1,6 +1,6 @@
 import { sanitizePopiaText } from './popia';
 
-export type IngestionCaptureMode = 'drag_drop' | 'camera';
+export type IngestionCaptureMode = 'drag_drop' | 'camera' | 'agent_capture';
 
 export type AllowedEvidenceMime =
   | 'application/pdf'
@@ -382,7 +382,11 @@ export function processEvidencePayload(params: {
 
   const totalRedactions = extractRedactions + noteRedactions;
   const modeLabel =
-    params.captureMode === 'camera' ? 'Camera Capture' : 'Drag-and-Drop';
+    params.captureMode === 'camera'
+      ? 'Camera Capture'
+      : params.captureMode === 'agent_capture'
+        ? 'Agent Portal Capture'
+        : 'Drag-and-Drop';
   const refNote =
     extractedRefs.length > 0 ? ` · Refs: ${extractedRefs.join(', ')}` : '';
   const piiNote =
