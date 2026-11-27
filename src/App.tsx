@@ -1,4 +1,4 @@
-import{WorkforceView}from'./components/WorkforceView';
+import{WorkforceTabs}from'./components/WorkforceTabs';
 import React from 'react';
 import { LayoutShell, type NavRoute } from './components/LayoutShell';
 import { OverviewLedgerView } from './components/OverviewLedgerView';
@@ -299,7 +299,7 @@ export default function App() {
       onInspectHeatmap={handleInspectHeatmap}
       onOpenReadout={handleOpenReadout}
     >
-      {route === '/workforce' && <WorkforceView onRecorded={()=>loadState(activeRole)}/>}
+      {route === '/workforce' && <WorkforceTabs activeRole={activeRole} onRecorded={()=>loadState(activeRole)}/>}
       {route === '/' && (
         <OverviewLedgerView
           orgId={data.org_id}

@@ -1,4 +1,5 @@
 import{workforceRoutes}from'./server/workforce';
+import{SynthChat,synthChatRoutes}from'./server/synthChat';
 import { fetchOfficialResearch, extractResearchText, safeResearchQuestion } from './server/researchFallback';
 import { runFreeModelChain } from './server/freeModelChain';
 import 'dotenv/config';
@@ -110,7 +111,13 @@ async function startServer() {
   const app = express();
   app.set('trust proxy',1);
   app.use(express.json({ limit: '8mb' }));
-  app.use('/api/workforce',workforceRoutes(store));
+  const workforce = workforceRoutes(store);
+  app.use('/api/workforce', workforce);
+  // Synthetic test inbox: in-memory, no external sends. Auth = the shared private reviewer session; no header-based roles.
+  const synthChat = new SynthChat({
+    sink: (e) => store.logAudit({ actor_role: 'head_of_forensics', actor_id: e.actor_id, action: e.action, object_type: 'claim', object_id: e.object_id, details: e.details }),
+  });
+  app.use('/api/workforce/chat', synthChatRoutes(synthChat, { authorize: (req) => workforce.principal(req) }));
 
   // Health endpoint for Render & monitoring
   app.get('/api/health', (_req, res) => {
