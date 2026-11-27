@@ -1,3 +1,5 @@
+import {RelationshipGraph} from './components/RelationshipGraph';
+import './network.css';
 import {WorkforceView} from './components/WorkforceView';
 import{WorkforceTabs}from'./components/WorkforceTabs';
 import React from 'react';
@@ -72,7 +74,7 @@ function parseRouteFromLocation(): NavRoute {
     '/vault',
     '/consent',
     '/claims',
-    '/compliance','/workforce',
+    '/compliance','/workforce','/network',
   ];
   return valid.includes(path) ? path : '/';
 }
@@ -106,7 +108,7 @@ export default function App() {
   }, []);
 
   React.useEffect(() => {
-    loadState(activeRole);
+    if(route!=='/network')loadState(activeRole);
   }, [activeRole, loadState]);
 
   React.useEffect(() => {
@@ -261,6 +263,7 @@ export default function App() {
     }, 60);
   }
 
+  if(route==='/network')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Synthetic graph preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RelationshipGraph/></LayoutShell>;
   if (loading && !data) {
     return (
       <div className="min-h-screen bg-[#0B1120] text-slate-300 flex items-center justify-center p-6 text-sm font-mono">

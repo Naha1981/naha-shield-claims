@@ -1,3 +1,4 @@
+import {graphRoutes} from './server/syntheticGraph';
 import {reviewerGate} from './server/reviewerGate';
 import {workspaceIsolation} from './server/workspaceIsolation';
 import {insuranceTeamRoutes} from './server/insuranceTeam';
@@ -125,6 +126,7 @@ async function startServer() {
   app.use(express.json({ limit: '8mb' }));
   app.use('/api',isolation.middleware);
   app.use('/api/insurance-team',insuranceTeamRoutes());
+  app.use('/api/synthetic-graph',graphRoutes());
   const workforce = workforceRoutes(store);
   app.use('/api/workforce', workforce);
   // Synthetic test inbox: in-memory, no external sends. Auth = the shared private reviewer session; no header-based roles.

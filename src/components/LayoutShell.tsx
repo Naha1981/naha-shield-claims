@@ -28,7 +28,8 @@ export type NavRoute =
   | '/consent'
   | '/claims'
   | '/compliance'
-  | '/workforce';
+  | '/workforce'
+  | '/network';
 
 interface LayoutShellProps {
   activeRoute: NavRoute;
@@ -51,6 +52,7 @@ const NAV_ITEMS: Array<{
   sublabel: string;
   icon: React.ComponentType<{ className?: string }>;
 }> = [
+ {route:'/network',label:'Relationships',sublabel:'Fictional graph · Review leads',icon:ShieldAlert},
  {route:'/workforce',label:'AI team',sublabel:'Synthetic uploads · Human review',icon:ShieldCheck},
   {
     route: '/',
@@ -385,6 +387,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
           <button
             type="button"
             onClick={onOpenReadout}
+            hidden={activeRoute==='/network'}
             className="px-2 sm:px-4 py-1 sm:py-1.5 text-[13px] sm:text-xs font-semibold rounded-md bg-emerald-600 hover:bg-emerald-500 text-white transition-colors whitespace-nowrap shrink-0"
           >
             <span className="sm:hidden">Export</span>
@@ -393,7 +396,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
         </div>
       </header>
 
-      <nav className="mock-topnav" aria-label="Quick modules">{[['/','Overview'],['/claims','Claims'],['/workforce','AI team'],['/recovery','Recovery'],['/vault','Evidence'],['/compliance','Audit']].map(([route,label])=><button key={route} onClick={()=>onNavigate(route as NavRoute)}>{label}</button>)}</nav>
+      <nav className="mock-topnav" aria-label="Quick modules">{[['/network','Relationships'],['/','Overview'],['/claims','Claims'],['/workforce','AI team'],['/recovery','Recovery'],['/vault','Evidence'],['/compliance','Audit']].map(([route,label])=><button key={route} onClick={()=>onNavigate(route as NavRoute)}>{label}</button>)}</nav>
       <div className="flex-1 flex relative">
         {mobileMenuOpen && (
           <div
