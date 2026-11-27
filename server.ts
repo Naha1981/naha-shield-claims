@@ -1,3 +1,4 @@
+import {insuranceTeamRoutes} from './server/insuranceTeam';
 import React from'react';
 import{renderToString}from'react-dom/server';
 import{PublicReview}from'./src/components/PublicReview';
@@ -117,6 +118,7 @@ async function startServer() {
   const app = express();
   app.set('trust proxy',1);
   app.use(express.json({ limit: '8mb' }));
+  app.use('/api/insurance-team',insuranceTeamRoutes());
   const workforce = workforceRoutes(store);
   app.use('/api/workforce', workforce);
   // Synthetic test inbox: in-memory, no external sends. Auth = the shared private reviewer session; no header-based roles.
