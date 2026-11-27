@@ -393,6 +393,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
         </div>
       </header>
 
+      <nav className="mock-topnav" aria-label="Quick modules">{[['/','Overview'],['/claims','Claims'],['/workforce','AI team'],['/recovery','Recovery'],['/vault','Evidence'],['/compliance','Audit']].map(([route,label])=><button key={route} onClick={()=>onNavigate(route as NavRoute)}>{label}</button>)}</nav>
       <div className="flex-1 flex relative">
         {mobileMenuOpen && (
           <div
@@ -424,7 +425,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
             </div>
             <div>
               <p className="text-[13px] font-medium text-slate-400 px-2 mb-2">
-                Workspace
+                WORKSPACE
               </p>
               <div className="px-2.5 py-2 rounded-md bg-slate-900/90 border border-slate-800 text-xs text-slate-200 leading-snug">
                 <div className="font-medium truncate">{orgName}</div>
