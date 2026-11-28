@@ -227,3 +227,32 @@ html[data-theme="light"] button[class*="bg-emerald-"]:enabled:hover,html[data-th
 .dark .today-chip.amber{background:#3a2f14;color:#fbbf24}
 .dark .today-rule-pill{background:#1c2340;color:#93a5fd}
 .dark .today-btn{background:#2b4bd8}
+
+/* Light-surface cards keep their light background in both themes, so text inside
+   must stay dark and AA-contrasted even when the app is in dark mode. */
+.ns-light-surface { color:#13283f; }
+.ns-light-surface h1,.ns-light-surface h2,.ns-light-surface h3,.ns-light-surface h4 { color:#13283f; }
+.ns-light-surface .text-slate-400,.ns-light-surface .text-slate-500 { color:#526578; }
+.ns-light-surface .text-slate-600 { color:#40556a; }
+.ns-light-surface .text-red-600 { color:#b42337; }
+.ns-light-surface .text-amber-600 { color:#86530c; }
+.ns-light-surface .text-emerald-600,.ns-light-surface .text-emerald-700 { color:#08694f; }
+
+/* Page-level (on app background) links and notes stay readable in both themes. */
+.ns-page-link { color:#0f766e; }
+.dark .ns-page-link { color:#2dd4bf; }
+.ns-page-note { color:#526578; }
+.dark .ns-page-note { color:#9db3c7; }
+
+/* Dark-theme AA contrast for the Today hero accents and vault strip. */
+.dark .today-hero [data-tone="blue"]{color:#60a5fa}
+.dark .today-hero [data-tone="green"]{color:#34d399}
+.dark .today-hero [data-tone="purple"]{color:#a78bfa}
+.dark .today-foot a{color:#93b8fa}
+.dark .today-vault-t{color:#34d399}
+.dark .today-vault-ring{border-color:#34d399}
+.ns-page-text { color:#475569; }
+.dark .ns-page-text { color:#a8bccf; }
+/* The alert count badge keeps white text on its red chip in both themes. */
+html[data-theme="light"] [data-testid="header-anomaly-alert-badge"].bg-red-600{color:#fff!important}
+html[data-theme="light"] button[class*="bg-amber-7"]{background-color:#86530c!important;color:#fff!important;border-color:#86530c!important}

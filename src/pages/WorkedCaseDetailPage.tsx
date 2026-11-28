@@ -30,19 +30,19 @@ export function WorkedCaseDetailPage({ caseId, onBack }: { caseId: string; onBac
   if (!workedCase) return <div style={{ padding: 16 }}>Loading worked example...</div>;
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '16px 12px 48px', color: '#0f172a' }}>
-      <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#0f766e', fontSize: 14, fontWeight: 700, cursor: 'pointer', padding: 0, marginBottom: 8 }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '16px 12px 48px' }}>
+      <button onClick={onBack} className="ns-page-link" style={{ background: 'none', border: 'none', fontSize: 14, fontWeight: 700, cursor: 'pointer', padding: 0, marginBottom: 8 }}>
         &larr; All worked examples
       </button>
       <span style={badge}>SAMPLE DATA</span>
-      <div style={card}><CaseHeader workedCase={workedCase} /></div>
-      <div style={card}><CaseTimeline steps={workedCase.timeline} /></div>
-      {workedCase.indicators.length > 0 ? <div style={card}><IndicatorPanel indicators={workedCase.indicators} /></div> : null}
-      <div style={card}><EvidencePanel evidence={workedCase.evidence} /></div>
-      <div style={card}><DecisionPanel decision={workedCase.case_decision} /></div>
-      <div style={card}><ValuePanel value={workedCase.value} /></div>
-      <div style={card}><ShieldExplainer explanation={workedCase.shield_explanation} /></div>
-      <p style={{ fontSize: 12, color: '#94a3b8', textAlign: 'center' }}>
+      <div style={card} className="ns-light-surface"><CaseHeader workedCase={workedCase} /></div>
+      <div style={card} className="ns-light-surface"><CaseTimeline steps={workedCase.timeline} /></div>
+      {workedCase.indicators.length > 0 ? <div style={card} className="ns-light-surface"><IndicatorPanel indicators={workedCase.indicators} /></div> : null}
+      <div style={card} className="ns-light-surface"><EvidencePanel evidence={workedCase.evidence} /></div>
+      <div style={card} className="ns-light-surface"><DecisionPanel decision={workedCase.case_decision} /></div>
+      <div style={card} className="ns-light-surface"><ValuePanel value={workedCase.value} /></div>
+      <div style={card} className="ns-light-surface"><ShieldExplainer explanation={workedCase.shield_explanation} /></div>
+      <p className="ns-page-note" style={{ fontSize: 12, textAlign: 'center' }}>
         Fictional sample data. Sample rands. Nothing is sent to anyone.
       </p>
     </div>

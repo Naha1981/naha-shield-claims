@@ -34,22 +34,22 @@ export function WorkedCaseLanding({ onOpenCase, onSeed }: { onOpenCase: (caseId:
   };
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto', padding: '16px 12px 48px', color: '#0f172a' }}>
+    <div style={{ maxWidth: 720, margin: '0 auto', padding: '16px 12px 48px' }}>
       <h1 style={{ fontSize: 22, margin: '4px 0 2px' }}>See worked-out case example<span style={badge}>SAMPLE DATA</span></h1>
-      <p style={{ fontSize: 14, color: '#475569', margin: '0 0 12px' }}>
+      <p className="ns-page-text" style={{ fontSize: 14, margin: '0 0 12px' }}>
         Explore how NahaShield protects revenue, prevents fraud, and pays valid claims quickly. Fictional sample data. Nothing is sent to anyone.
       </p>
 
-      <label style={{ ...lab, display: 'block', marginBottom: 4 }}>Insurer name (fills the example)</label>
+      <label className="ns-page-note" style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.4, display: 'block', marginBottom: 4 }}>Insurer name (fills the example)</label>
       <input
         aria-label="Insurer name"
         value={insurer}
         onChange={(e) => setInsurer(e.target.value)}
         placeholder="Your insurer's name"
-        style={{ width: '100%', boxSizing: 'border-box', fontSize: 16, padding: '10px 12px', borderRadius: 10, border: '1px solid #cbd5e1', marginBottom: 16 }}
+        style={{ width: '100%', boxSizing: 'border-box', fontSize: 16, padding: '10px 12px', borderRadius: 10, border: '1px solid #cbd5e1', marginBottom: 16, background: '#fff', color: '#13283f' }}
       />
 
-      <div style={card}>
+      <div style={card} className="ns-light-surface">
         <div style={{ fontSize: 16, fontWeight: 800, marginBottom: 8 }}>Six months at {insurer}<span style={badge}>SAMPLE</span></div>
         <ExecutiveValueBoard
           protectedAmount={BOARD.protectedCents}
@@ -75,7 +75,7 @@ export function WorkedCaseLanding({ onOpenCase, onSeed }: { onOpenCase: (caseId:
 
       <WorkedCaseSelector cases={cases} isLoading={isLoading} onOpen={onOpenCase} />
 
-      <div style={card}>
+      <div style={card} className="ns-light-surface">
         <button onClick={seed} style={{ background: '#0f766e', color: '#fff', border: 'none', borderRadius: 10, padding: '12px 16px', fontSize: 15, fontWeight: 700, width: '100%', cursor: 'pointer' }}>
           Load these cases into the live workspace
         </button>
@@ -87,7 +87,7 @@ export function WorkedCaseLanding({ onOpenCase, onSeed }: { onOpenCase: (caseId:
         ) : null}
       </div>
 
-      <div style={card}>
+      <div style={card} className="ns-light-surface">
         <div style={{ fontSize: 16, fontWeight: 800 }}>What it would cost<span style={badge}>SAMPLE PRICING - NOT AN OFFER</span></div>
         <p style={{ fontSize: 13, color: '#475569', margin: '4px 0 10px' }}>NahaLabs earns only on value people have verified. Protected revenue is never billed.</p>
         {FEE_ROWS.map((f) => (
@@ -112,7 +112,7 @@ export function WorkedCaseLanding({ onOpenCase, onSeed }: { onOpenCase: (caseId:
         </details>
       </div>
 
-      <p style={{ fontSize: 12, color: '#94a3b8', textAlign: 'center' }}>
+      <p className="ns-page-note" style={{ fontSize: 12, textAlign: 'center' }}>
         All figures on this page are sample figures for demonstration. Recovered counts only after bank reconciliation. Nothing here is sent, billed, or owed.
       </p>
     </div>
