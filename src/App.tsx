@@ -11,6 +11,7 @@ import {WorkforceView} from './components/WorkforceView';
 import{WorkforceTabs}from'./components/WorkforceTabs';
 import React from 'react';
 import { LayoutShell, type NavRoute } from './components/LayoutShell';
+import { parseRouteFromLocation } from './routes';
 import { OverviewLedgerView } from './components/OverviewLedgerView';
 import { RecoveryDeskView } from './components/RecoveryDeskView';
 import { EvidenceVaultView } from './components/EvidenceVaultView';
@@ -71,22 +72,6 @@ interface AppBootstrapPayload {
     userId: string;
     displayName: string;
   };
-}
-
-function parseRouteFromLocation(): NavRoute {
-  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-  const raw = window.location.pathname;
-  const path = ((base && raw.startsWith(base) ? raw.slice(base.length) : raw) || '/') as NavRoute;
-  const valid: NavRoute[] = [
-    '/',
-    '/recovery',
-    '/vault',
-    '/consent',
-    '/claims',
-    '/compliance','/workforce','/network','/leakage','/intake',
-  ];
-  if (valid.includes(path)) return path;
-  return import.meta.env.VITE_STATIC_PREVIEW ? '/leakage' : '/';
 }
 
 export default function App() {

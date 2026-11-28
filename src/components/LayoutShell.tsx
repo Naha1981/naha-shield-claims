@@ -23,19 +23,8 @@ import type { AnomalyAlertRecord } from '../lib/engine/anomaly';
 import type { RoleId } from '../lib/engine/types';
 import { formatZarCompact, ROLE_LABELS } from '../utils/format';
 
-export type NavRoute =
-  | '/'
-  | '/recovery'
-  | '/vault'
-  | '/consent'
-  | '/claims'
-  | '/compliance'
-  | '/workforce'
-  | '/network'
-  | '/leakage'
-  | '/intake'
-  | '/investigator'
-  | '/see-worked-case-example';
+import type { NavRoute } from '../routes';
+export type { NavRoute };
 
 interface LayoutShellProps {
   activeRoute: NavRoute;
