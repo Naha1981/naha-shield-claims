@@ -114,7 +114,7 @@ export default function App() {
 
   React.useEffect(() => {
     if(route!=='/network'&&route!=='/leakage'&&!(import.meta.env.VITE_STATIC_PREVIEW&&route==='/recovery'))loadState(activeRole);
-  }, [activeRole, loadState]);
+  }, [activeRole, route, loadState]);
 
   React.useEffect(() => {
     const onPopState = () => setRoute(parseRouteFromLocation());
@@ -270,7 +270,7 @@ export default function App() {
 
   if(route==='/network')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Synthetic graph preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RelationshipGraph/></LayoutShell>;
   if(route==='/recovery'&&import.meta.env.VITE_STATIC_PREVIEW)return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Synthetic recovery preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RecoveryDeskView cases={SYNTHETIC_RECOVERY_CASES} decisions={[]} activeRole={activeRole} activeActorName="Synthetic reviewer" onCaseAdded={async()=>{}} onDecisionRecorded={async()=>{}}/></LayoutShell>;
-  if(route==='/leakage')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Synthetic leakage preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RetrospectiveLeakageView/></LayoutShell>;
+  if(route==='/leakage')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Synthetic leakage preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RetrospectiveLeakageView onNavigate={navigate} activeRole={activeRole}/></LayoutShell>;
   if (loading && !data) {
     return (
       <div className="min-h-screen bg-[#0B1120] text-slate-300 flex items-center justify-center p-6 text-sm font-mono">
