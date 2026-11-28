@@ -40,7 +40,7 @@ export async function apiFetch<T>(
   if (import.meta.env.VITE_STATIC_PREVIEW) {
     const method = (options?.method ?? 'GET').toUpperCase();
     if (method === 'GET' && url === '/api/state') {
-      const res = await fetch(`${import.meta.env.BASE_URL}.data/state.json`, { cache: 'no-store' });
+      const res = await fetch(`${import.meta.env.BASE_URL}data/state.json`, { cache: 'no-store' });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(`Static preview snapshot missing (${res.status})`);
       return data as T;
