@@ -1,0 +1,47 @@
+# ClaimTrace CI (spec 4 section 3, adapted to this repo's stack: Vite + tsx
+# --test). His original workflow was Python/pytest-based; this one runs the
+# real gates: typecheck, unit + integration + fuzz tests, build, generator
+# determinism. Free GitHub Actions only; no secrets; no staging or live
+# targets; synthetic data only.
+name: ClaimTrace CI
+
+on:
+  push:
+    branches: [main, claims-ingest, mega-rc]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Unit, integration and fuzz tests
+        run: npm test
+      - name: Build
+        run: npx vite build
+
+  mock-data-generator:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Seed-42 generator is deterministic
+        run: |
+          python3 scripts/generate_test_data.py --seed 42 --tenants 2 --claims 200 --duplicate-claims 10 --duplicate-policies 5 --mule-accounts 5 --shared-agents 5 --shared-devices 5 --shared-addresses 5 --innocent-controls 20 --cross-insurer-cases 5 --output-dir /tmp/gen-a
+          python3 scripts/generate_test_data.py --seed 42 --tenants 2 --claims 200 --duplicate-claims 10 --duplicate-policies 5 --mule-accounts 5 --shared-agents 5 --shared-devices 5 --shared-addresses 5 --innocent-controls 20 --cross-insurer-cases 5 --output-dir /tmp/gen-b
+          diff -r /tmp/gen-a /tmp/gen-b
+
+  # k6 load/stress/soak suites live in load/k6 and run manually against a
+  # LOCAL server only (the scripts refuse non-local BASE_URL values). CI
+  # thresholds from spec 4 section 3.3: p95 < 1500ms, p99 < 3000ms,
+  # error rate < 1%, checks > 99%. Baselines must come from real local runs
+  # before these thresholds are tightened.

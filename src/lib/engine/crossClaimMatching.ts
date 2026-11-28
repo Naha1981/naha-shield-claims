@@ -135,6 +135,9 @@ const DEFS: Record<string, MatchDef> = {
   same_document_hash: { confidence: 0.97, score: 90, level: 'high', action: 'hold_and_investigate', review: true, explanations: ['The same document may be uploaded twice by mistake.'] },
   same_document_perceptual_hash: { confidence: 0.88, score: 82, level: 'high', action: 'hold_and_investigate', review: true, explanations: ['Similar-looking documents may be scans of one original.'] },
   cross_insurer_duplicate_claim: { confidence: 0.96, score: 97, level: 'high', action: 'cross_market_referral', review: true, explanations: ['A family may hold cover with more than one insurer.'] },
+  // Spec 4 TC-FUZZ additions: weak standalone signals the spec 3 table did not cover.
+  same_dob_only: { confidence: 0.25, score: 12, level: 'low', action: 'no_action', review: false, explanations: ['Many people share a date of birth.'] },
+  same_agent_only: { confidence: 0.45, score: 45, level: 'medium', action: 'monitor_only', review: true, explanations: ['A productive agent may write many legitimate policies.'] },
 };
 
 const ACTION_SEVERITY: MatchAction[] = [
@@ -297,6 +300,23 @@ export function runDuplicateCheck(claim: ClaimFacts, all: ClaimFacts[], opts: Du
       && on.trim().toLowerCase() !== deceasedName.trim().toLowerCase();
   }))) {
     add('same_surname_only', ['surname'], hit);
+  }
+
+  // Same date of birth only (spec 4 TC-FUZZ-005): too weak to act on alone.
+  if (deceasedDob
+    && !matches.some((m) => ['fuzzy_name_exact_id', 'similar_name_different_id', 'same_surname_only', 'same_deceased', 'same_deceased_policy'].includes(m.match_type))
+    && (hit = first((o) => o.insured_person?.date_of_birth === deceasedDob
+      && o.insured_person?.id_number_hash !== undefined && o.insured_person?.id_number_hash !== deceasedHash
+      && (!deceasedName || !o.insured_person?.full_name || o.insured_person.full_name.toLowerCase() !== deceasedName)))) {
+    add('same_dob_only', ['date_of_birth'], hit);
+  }
+
+  // Same agent across unrelated claims (spec 4 TC-FUZZ-010): weak on its own.
+  if (claim.agent_id
+    && !matches.some((m) => m.match_type === 'same_agent_duplicate_policy' || m.match_type === 'high_volume_agent')
+    && (hit = first((o) => o.agent_id === claim.agent_id
+      && (!deceasedHash || (o.insured_person?.id_number_hash !== undefined && o.insured_person?.id_number_hash !== deceasedHash))))) {
+    add('same_agent_only', ['agent_id'], hit);
   }
 
   // Claimant and beneficiary (TC-DUP-003, 004)

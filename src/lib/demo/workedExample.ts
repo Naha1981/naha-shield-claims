@@ -6,6 +6,11 @@
 // Counts reconciled across spec 6's tables - every change is logged in
 // docs/build-inputs/RECONCILIATION.md.
 
+import {
+  bankAccountClusterIndicator,
+  simSwapIndicator,
+} from '../connectors';
+
 export const SAMPLE_INSURER_DEFAULT = 'Sample Insurer';
 
 export interface ExampleCase {
@@ -58,8 +63,8 @@ export const CASE_2_SCORES = { fraud: 92, duplicate: 88, evidence: 78 };
 export const CASE_2_INDICATORS: { label: string; innocent: string }[] = [
   { label: 'Policy only 21 days old at date of death', innocent: 'New policies are common; many are genuine.' },
   { label: 'Cover raised from R25,000 to R75,000 ten days before death', innocent: 'Families raise cover for real reasons, like a new baby.' },
-  { label: 'SIM swap 36 hours before the bank detail change', innocent: 'People lose phones; swaps are usually innocent.' },
-  { label: 'Bank account appears on 3 unrelated claims', innocent: 'Families share accounts, especially in one household.' },
+  { label: simSwapIndicator().label, innocent: simSwapIndicator().innocent },
+  { label: bankAccountClusterIndicator().label, innocent: 'Families share accounts, especially in one household.' },
   { label: 'Funeral parlour on 11 claims in 40 days', innocent: 'A busy parlour serves many families.' },
   { label: 'Doctor on 9 claims in 40 days', innocent: 'A local doctor signs many certificates.' },
   { label: 'Claimant is not immediate family', innocent: 'Extended family often handles funerals.' },
