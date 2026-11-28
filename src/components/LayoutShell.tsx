@@ -90,8 +90,8 @@ const NAV_GROUPS: Array<{ group: string; items: NavItem[] }> = [
   {
     group: '05 · Governance & Control',
     items: [
-      { route: '/ai-ops', label: 'AI Workforce', sublabel: 'Operations console · Run detail', icon: ShieldCheck },
-      { route: '/workforce', label: 'AI team', sublabel: 'Sample uploads · Human review', icon: ShieldCheck },
+      { route: '/ai-ops', label: 'AI checks', sublabel: 'What ran · Needs your OK', icon: ShieldCheck },
+      { route: '/workforce', label: 'AI team', sublabel: 'The six helpers · Their tools', icon: ShieldCheck },
       { route: '/vault', label: 'Evidence', sublabel: 'Sources and evidence history', icon: FolderLock },
       { route: '/consent', label: 'Consent', sublabel: 'Review consent evidence', icon: UserCheck },
       { route: '/compliance', label: 'Audit', sublabel: 'Review actions and safeguards', icon: ShieldCheck },
