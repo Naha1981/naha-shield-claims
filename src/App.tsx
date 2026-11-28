@@ -109,7 +109,7 @@ export default function App() {
       setError(null);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Unable to load NahaShield state',
+        err instanceof Error ? err.message : 'Unable to load ClaimTrace state',
       );
     } finally {
       setLoading(false);
@@ -282,7 +282,7 @@ export default function App() {
   if (loading && !data) {
     return (
       <div className="min-h-screen bg-[#0B1120] text-slate-300 flex items-center justify-center p-6 text-sm font-mono">
-        Loading NahaShield forensic workspace...
+        Loading ClaimTrace forensic workspace...
       </div>
     );
   }
@@ -292,7 +292,7 @@ export default function App() {
     return (
       <div className="min-h-screen bg-[#0B1120] text-red-300 flex flex-col items-center justify-center p-6 gap-4">
         <div className="text-sm font-semibold">
-          {error ?? 'Failed to initialize NahaShield'}
+          {error ?? 'Failed to initialize ClaimTrace'}
         </div>
         {loginRequired && (
           <form

@@ -132,7 +132,7 @@ export function generateAndDownloadPopiaPdf(input: PopiaPdfReportInput): string 
   const margin = 14;
   const contentWidth = pageWidth - margin * 2;
   const datePart = input.generatedAt.slice(0, 10);
-  const filename = `nahashield-popia-ledger-report-${datePart}.pdf`;
+  const filename = `claimtrace-popia-ledger-report-${datePart}.pdf`;
 
   // Top Header Band
   doc.setFillColor(15, 23, 42); // #0F172A
@@ -141,7 +141,7 @@ export function generateAndDownloadPopiaPdf(input: PopiaPdfReportInput): string 
   doc.setTextColor(16, 185, 129); // #10B981
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(14);
-  doc.text('NahaShield', margin, 11);
+  doc.text('ClaimTrace', margin, 11);
 
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(11);
@@ -441,7 +441,7 @@ export function generateAndDownloadPopiaPdf(input: PopiaPdfReportInput): string 
     doc.setFontSize(7);
     doc.setTextColor(100, 116, 139);
     doc.text(
-      `NahaShield · POPIA s19/s71 Audit Export · Report ${input.reportId} · Only bank-reconciled cash & dual-signed incremental saves count toward Rand totals`,
+      `ClaimTrace · POPIA s19/s71 Audit Export · Report ${input.reportId} · Only bank-reconciled cash & dual-signed incremental saves count toward Rand totals`,
       margin,
       pageHeight - 7,
     );

@@ -1,7 +1,7 @@
 # Chaos experiments (reference, staging/local only, free tools)
 
 > Saved from Thabiso's spec 5. Principles apply: never against production without
-> explicit approval, limit blast radius, automatic rollback. For NahaShield these
+> explicit approval, limit blast radius, automatic rollback. For ClaimTrace these
 > would only ever run against a local or staging environment.
 
 
@@ -25,7 +25,7 @@
 | Pod crash | Traffic redistributes without downtime | One pod | No 5xx spike above threshold | Kubernetes restarts pod |
 | Redis cache failure | API remains available with higher latency | Cache only | No claim loss | Restore cache |
 | Home Affairs timeout | Verification retries and queues | One integration | No claim payment without verification | Restore integration |
-| Insurer API failure | NahaShield degrades gracefully | One insurer connector | No data loss | Restore connector |
+| Insurer API failure | ClaimTrace degrades gracefully | One insurer connector | No data loss | Restore connector |
 | Network partition | Service remains isolated and fails safely | One availability zone | No cross-tenant leakage | Restore network |
 | High CPU | Queue grows but no event loss | Duplicate-matching service | Alerts fire, autoscaling activates | Reduce load |
 

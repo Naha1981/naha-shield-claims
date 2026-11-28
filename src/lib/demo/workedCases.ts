@@ -49,7 +49,7 @@ export const WORKED_CASES: WorkedCase[] = [
     summary: 'A valid claim was verified and paid quickly without any fraud indicators.',
     timeline: [
       { step_id: 'step_001', title: 'Claim received', description: 'The agent submitted the claim through the agent app.', logic: 'Claim created and policy linked.', deliverable: 'Claim record created.' },
-      { step_id: 'step_002', title: 'Automated checks run', description: 'NahaShield ran identity, death, beneficiary, duplicate, document, and agent checks.', logic: 'All checks passed.', deliverable: 'Check results recorded.' },
+      { step_id: 'step_002', title: 'Automated checks run', description: 'ClaimTrace ran identity, death, beneficiary, duplicate, document, and agent checks.', logic: 'All checks passed.', deliverable: 'Check results recorded.' },
       { step_id: 'step_003', title: 'No fraud indicators', description: 'No fraud or duplicate-cover indicators were detected.', logic: 'Risk score below threshold.', deliverable: 'Low-risk classification.' },
       { step_id: 'step_004', title: 'Human approval', description: 'A claims assessor approved payment.', logic: 'Human approval required before payment.', deliverable: 'Payment instruction issued.' },
       { step_id: 'step_005', title: 'Claim paid', description: 'Claim paid to the verified beneficiary within 1 business day.', logic: 'Payment released after approval.', deliverable: 'Claim closed as paid.' },
@@ -94,7 +94,7 @@ export const WORKED_CASES: WorkedCase[] = [
     summary: 'Multiple high-risk indicators were detected and payment was held before payout.',
     timeline: [
       { step_id: 'step_001', title: 'Claim received', description: 'The agent submitted the claim through the agent app.', logic: 'Claim created and policy linked.', deliverable: 'Claim record created.' },
-      { step_id: 'step_002', title: 'Automated checks run', description: 'NahaShield ran identity, death, beneficiary, duplicate, payment, telecom, provider, and agent checks.', logic: 'Multiple high-risk indicators detected.', deliverable: 'High-risk classification.' },
+      { step_id: 'step_002', title: 'Automated checks run', description: 'ClaimTrace ran identity, death, beneficiary, duplicate, payment, telecom, provider, and agent checks.', logic: 'Multiple high-risk indicators detected.', deliverable: 'High-risk classification.' },
       { step_id: 'step_003', title: 'Payment held', description: 'A claims assessor held payment before payout.', logic: 'High-risk indicators require human review.', deliverable: 'Revenue protected.' },
       { step_id: 'step_004', title: 'Investigation', description: 'An investigator reviewed the evidence and linked claims.', logic: 'Cross-claim and provider patterns confirmed.', deliverable: 'Evidence pack prepared.' },
       { step_id: 'step_005', title: 'Claim declined', description: 'A senior claims manager declined the claim after 5 business days, with reasons and an appeal route.', logic: 'Material misrepresentation and invalid consent evidence.', deliverable: 'Revenue saved.' },

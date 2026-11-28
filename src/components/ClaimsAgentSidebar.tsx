@@ -263,7 +263,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
             type="button"
             onClick={() => void fetchAgentContext(claimId, true)}
             disabled={loadingContext || !claimId}
-            aria-label="Sync Context, refresh NahaShield claim context"
+            aria-label="Sync Context, refresh ClaimTrace claim context"
             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-slate-700 bg-slate-900 text-[13px] font-medium text-slate-200 hover:bg-slate-800 disabled:opacity-50 whitespace-nowrap shrink-0"
           >
             <RefreshCw
@@ -273,7 +273,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
           </button>
         </div>
 
-        {/* Scoped NahaShield Data Snapshot */}
+        {/* Scoped ClaimTrace Data Snapshot */}
         {context && (
           <div className="grid grid-cols-3 gap-2 pt-1 text-[13px]">
             <div className="rounded bg-slate-900/90 border border-slate-800 px-2.5 py-1.5">
@@ -504,7 +504,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
                   <span>Ready to Analyze {claim?.claim_id ?? 'Claim'}</span>
                 </div>
                 <p className="text-slate-400 leading-relaxed">
-                  Click <strong className="text-slate-200">Run Agent Analysis</strong> to inspect NahaShield SLA clocks, hash-chained Evidence Vault items, living-person/cluster signals, AVS-R status, and generate human-gated proposals.
+                  Click <strong className="text-slate-200">Run Agent Analysis</strong> to inspect ClaimTrace SLA clocks, hash-chained Evidence Vault items, living-person/cluster signals, AVS-R status, and generate human-gated proposals.
                 </p>
                 {context && (
                   <div className="pt-1 text-[13px] text-slate-400 font-mono">

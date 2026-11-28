@@ -139,7 +139,7 @@ export function incidentControlRoutes(): express.Router {
       inc.steps.push({ step: 'freeze_automated_action', at: now(), by: s.user_id, notes: `${b.affected_target.type} ${b.affected_target.id} disabled` });
       audit(s.user_id, 'kill_switch.disabled', { target_type: b.affected_target.type, target_id: b.affected_target.id, incident_id: inc.incident_id });
     }
-    res.status(201).json({ ...inc, response_due_within_hours: SEVERITY_RESPONSE_HOURS[inc.severity], note: 'Notifications are recorded for the on-call process; NahaShield never sends messages itself.' });
+    res.status(201).json({ ...inc, response_due_within_hours: SEVERITY_RESPONSE_HOURS[inc.severity], note: 'Notifications are recorded for the on-call process; ClaimTrace never sends messages itself.' });
   });
 
   // Record a workflow step (preserve evidence, assess impact, correct, test, resume...).

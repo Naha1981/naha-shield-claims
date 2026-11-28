@@ -234,7 +234,7 @@ export function buildSeedAgentTelemetry(params: {
       runId: 'AGRUN-SEED-002',
       createdAt: '2026-11-26T18:10:00.000Z',
       durationMs: 420,
-      providerLabel: 'Deterministic NahaShield Engine',
+      providerLabel: 'Deterministic ClaimTrace Engine',
       modelLabel: 'claims-rules-v1',
       proposalDecisions: [
         {
@@ -291,7 +291,7 @@ export function buildSeedAgentTelemetry(params: {
       runId: 'AGRUN-SEED-007',
       createdAt: '2026-11-26T21:00:00.000Z',
       durationMs: 310,
-      providerLabel: 'Deterministic NahaShield Engine',
+      providerLabel: 'Deterministic ClaimTrace Engine',
       modelLabel: 'claims-rules-v1',
       proposalDecisions: [
         {
@@ -308,7 +308,7 @@ export function buildSeedAgentTelemetry(params: {
       runId: 'AGRUN-SEED-002B',
       createdAt: '2026-11-26T21:40:00.000Z',
       durationMs: 240,
-      providerLabel: 'Deterministic NahaShield Engine',
+      providerLabel: 'Deterministic ClaimTrace Engine',
       modelLabel: 'claims-rules-v1',
       proposalDecisions: [
         {
@@ -419,7 +419,7 @@ export function buildAgentAnalyticsCsvFilename(
 ): string {
   const datePart = exportedAtIso.slice(0, 10).replace(/[^0-9-]/g, '') || 'report';
   const safeScope = String(agentFilter).replace(/[^a-z0-9_-]/gi, '_');
-  return `nahashield-agent-analytics-${safeScope}-${datePart}.csv`;
+  return `claimtrace-agent-analytics-${safeScope}-${datePart}.csv`;
 }
 
 export function buildAgentAnalyticsCsv(params: {

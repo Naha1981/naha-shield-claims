@@ -167,7 +167,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
   }
 
   const currentTitle =
-    NAV_ITEMS.find((n) => n.route === activeRoute)?.label ?? 'NahaShield';
+    NAV_ITEMS.find((n) => n.route === activeRoute)?.label ?? 'ClaimTrace';
 
   return (
     <div className="min-h-screen bg-[#0B1120] text-slate-100 flex flex-col overflow-x-hidden">
@@ -191,9 +191,13 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
               e.preventDefault();
               onNavigate('/');
             }}
-            className="font-display text-sm sm:text-base font-bold tracking-tight text-white whitespace-nowrap shrink-0"
+            className="flex items-center gap-2 font-display text-sm sm:text-base font-bold tracking-tight text-white whitespace-nowrap shrink-0"
           >
-            NahaShield
+            <span
+              aria-hidden="true"
+              className="claimtrace-mark w-9 h-9 sm:w-10 sm:h-10 shrink-0"
+            />
+            ClaimTrace
           </a>
           <span className="hidden md:inline text-slate-600" aria-hidden="true">
             /
@@ -427,7 +431,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
           <div className="p-4 space-y-6">
             <div className="flex items-center justify-between lg:hidden pb-3 border-b border-slate-800">
               <span className="font-display text-sm font-bold text-white">
-                NahaShield Navigation
+                ClaimTrace Navigation
               </span>
               <button
                 type="button"
@@ -518,7 +522,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
 
         {/* Main Viewport */}
         <main className="ns-main flex-1 min-w-0 p-4 lg:p-8 max-w-[1840px]">
-          <div className="flex flex-wrap items-start justify-between gap-3 mb-4"><div><p className="text-sm text-slate-400">NahaShield / {currentTitle}</p><h1 className="text-2xl font-semibold text-slate-100 mt-1">{currentTitle}</h1></div><details className="rounded border border-slate-700 p-3 text-sm text-slate-200"><summary className="cursor-pointer">Workspace and account</summary><p className="mt-2 max-w-sm">{orgName}. Named reviewer sign-in is under Documents or Messages. The role selector is a sample view, not account access.</p><p className="mt-2 max-w-sm">No account invitation, password reset or company onboarding is provided here. Do not enter real claimant data.</p></details></div><a href="/map-preview" className="inline-flex items-center rounded-lg border border-emerald-700 bg-emerald-800 text-white px-4 py-3 mb-4 font-semibold">Maps · Check a physical address</a><ScreenGuide route={activeRoute}/>{children}
+          <div className="flex flex-wrap items-start justify-between gap-3 mb-4"><div><p className="text-sm text-slate-400">ClaimTrace / {currentTitle}</p><h1 className="text-2xl font-semibold text-slate-100 mt-1">{currentTitle}</h1></div><details className="rounded border border-slate-700 p-3 text-sm text-slate-200"><summary className="cursor-pointer">Workspace and account</summary><p className="mt-2 max-w-sm">{orgName}. Named reviewer sign-in is under Documents or Messages. The role selector is a sample view, not account access.</p><p className="mt-2 max-w-sm">No account invitation, password reset or company onboarding is provided here. Do not enter real claimant data.</p></details></div><a href="/map-preview" className="inline-flex items-center rounded-lg border border-emerald-700 bg-emerald-800 text-white px-4 py-3 mb-4 font-semibold">Maps · Check a physical address</a><ScreenGuide route={activeRoute}/>{children}
         </main>
       </div>
     </div>

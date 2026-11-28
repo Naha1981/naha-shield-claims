@@ -465,7 +465,7 @@ export function workspaceApiRoutes(): express.Router {
       send_disabled: true, created_at: now(),
     };
     notifications.set(n.notification_id, n);
-    res.status(201).json({ ...n, message: 'Draft only. NahaShield never sends SMS or email to claimants; a person sends approved wording from the insurer\'s own systems.' });
+    res.status(201).json({ ...n, message: 'Draft only. ClaimTrace never sends SMS or email to claimants; a person sends approved wording from the insurer\'s own systems.' });
   });
 
   // 6.2 Get notification status

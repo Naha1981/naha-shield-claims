@@ -1,5 +1,5 @@
 {
-  "name": "NahaShield",
+  "name": "ClaimTrace",
   "description": "Insurance Integrity, Consent & Recovery Intelligence Platform by NahaLabs for South African life and funeral insurers.",
   "requestFramePermissions": ["camera"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
