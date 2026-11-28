@@ -56,3 +56,6 @@ Status legend: DONE (with proof) / IN PROGRESS / NOT DONE. Every DONE links to p
 - [ ] Exportable FSCA compliance report (PDF) from the compliance screen
 - [x] Approval gate wording kept as is (decision: no change)
 - Rule: never claim WORM or Merkle unless actually built (vault = SHA-256 hash chain, SQLite-backed)
+
+## Addition from 12:05 (Thabiso via parent: "Make sure this software archives that. RAND FOUND IN THEIR OWN CLAIMS AND THAT WE CAN PROTECT.")
+- [ ] One-page "Rand found" summary per insurer dataset: total rand found, rand protected/recoverable, claims list with evidence; sealed in the evidence vault; archived with date; exportable as PDF; headline number on the Savings/Value screen. SAMPLE labels on sample data, integer cents, no fake real-insurer claims. (Build approved 12:05; merge still needs Go+Sure on the tested candidate.)
