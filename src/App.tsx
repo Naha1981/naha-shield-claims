@@ -118,7 +118,24 @@ export default function App() {
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
+  // On every route change: jump to the top of the page and move focus to the
+  // page heading, whether the window or the main content area is the scroller.
+  const focusTopOfPage = React.useCallback(() => {
+    window.scrollTo(0, 0);
+    const main = document.querySelector('main.ns-main');
+    if (main) main.scrollTop = 0;
+    const heading = (main ?? document).querySelector('h1');
+    if (heading) {
+      if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
+      heading.focus({ preventScroll: true });
+    }
+  }, []);
+  React.useEffect(() => {
+    focusTopOfPage();
+  }, [route, focusTopOfPage]);
+
   function navigate(nextRoute: NavRoute) {
+    if (nextRoute === route) focusTopOfPage();
     setRoute(nextRoute);
     if (window.location.pathname !== nextRoute) {
       window.history.pushState({}, '', nextRoute);
