@@ -1,10 +1,10 @@
 # TEMPLATE - DO NOT FILL WITH SPEC EXAMPLES
 
 > Every number in this template's example text is a PLACEHOLDER from the spec
-> document, never a NahaShield result. A real report replaces every placeholder
+> document, never a ClaimTrace result. A real report replaces every placeholder
 > with measured values from an actual run, or the report is invalid.
 
-# NahaShield Cross-Claim Matching Test Execution Report (template)
+# ClaimTrace Cross-Claim Matching Test Execution Report (template)
 
 **Report ID:** TR-2026-11-28-001  
 **Build:** `nahashield-api@1.2.0`  
