@@ -404,3 +404,61 @@ CREATE INDEX idx_audit_events_tenant_event ON audit_events (tenant_id, event_typ
 CREATE INDEX idx_claim_indicators_innocent ON claim_indicators USING GIN (innocent_explanations);
 CREATE INDEX idx_duplicate_signals_innocent ON duplicate_signals USING GIN (innocent_explanations);
 CREATE INDEX idx_claim_events_payload ON claim_events USING GIN (payload);
+
+-- ---------------------------------------------------------------------------
+-- Fuzzy-match query tuning (Thabiso's spec 5 section 2, adapted to this schema)
+-- Applies when a real PostgreSQL database is introduced. The local demo engine
+-- mirrors the trigram similarity in src/lib/engine/crossClaimMatching.ts.
+-- Adaptation notes:
+--   * persons.full_name is stored ENCRYPTED (full_name_encrypted), so trigram
+--     indexes and similarity() run against a separate lowercase search column
+--     (full_name_search) maintained at write time, never against plaintext.
+--   * All candidate queries filter tenant_id first (tenant isolation + index use),
+--     exact hashes before fuzzy, fuzzy candidates capped at 200, results at 50.
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- Trigram indexes (GIN)
+CREATE INDEX idx_persons_full_name_search_trgm ON persons USING GIN (full_name_search gin_trgm_ops);
+CREATE INDEX idx_persons_phone_hash_trgm ON persons USING GIN (phone_hash gin_trgm_ops);
+CREATE INDEX idx_persons_email_hash_trgm ON persons USING GIN (email_hash gin_trgm_ops);
+CREATE INDEX idx_persons_address_hash_trgm ON persons USING GIN (address_hash gin_trgm_ops);
+
+-- Exact-match indexes
+CREATE INDEX idx_persons_tenant_id_hash ON persons (tenant_id, id_number_hash);
+CREATE INDEX idx_persons_tenant_phone_hash ON persons (tenant_id, phone_hash);
+CREATE INDEX idx_persons_tenant_email_hash ON persons (tenant_id, email_hash);
+CREATE INDEX idx_persons_tenant_address_hash ON persons (tenant_id, address_hash);
+CREATE INDEX idx_claims_tenant_deceased ON claims (tenant_id, deceased_person_id);
+CREATE INDEX idx_claims_tenant_claimant ON claims (tenant_id, claimant_person_id);
+-- idx_duplicate_matches_tenant_source / _target already exist above.
+
+-- Partial indexes: active claims and open signals only
+CREATE INDEX idx_claims_active_tenant_deceased ON claims (tenant_id, deceased_person_id)
+  WHERE status IN ('received', 'under_review', 'on_hold');
+CREATE INDEX idx_claims_active_tenant_claimant ON claims (tenant_id, claimant_person_id)
+  WHERE status IN ('received', 'under_review', 'on_hold');
+CREATE INDEX idx_duplicate_signals_open_tenant ON duplicate_signals (tenant_id, rule_id, match_confidence DESC)
+  WHERE status = 'open';
+
+-- Candidate-query pattern: narrow by tenant + exact hashes first, then trigram.
+-- WITH candidate_persons AS (
+--   SELECT p.person_id, p.id_number_hash, p.date_of_birth,
+--          similarity(p.full_name_search, lower($1)) AS name_similarity
+--   FROM persons p
+--   WHERE p.tenant_id = $2
+--     AND (p.id_number_hash = $3 OR p.phone_hash = $4 OR p.address_hash = $5
+--          OR p.full_name_search % lower($1))
+--   ORDER BY name_similarity DESC, p.id_number_hash = $3 DESC,
+--            p.phone_hash = $4 DESC, p.address_hash = $5 DESC
+--   LIMIT 200
+-- )
+-- SELECT c.claim_id, cp.person_id AS candidate_person_id, cp.name_similarity,
+--        CASE WHEN cp.id_number_hash = $3 THEN 1.00
+--             WHEN cp.phone_hash = $4 THEN 0.80
+--             WHEN cp.address_hash = $5 THEN 0.65
+--             ELSE cp.name_similarity END AS match_score
+-- FROM claims c JOIN candidate_persons cp ON cp.person_id = c.deceased_person_id
+-- WHERE c.tenant_id = $2 AND c.claim_id <> $6
+-- ORDER BY match_score DESC LIMIT 50;
+-- Verify with EXPLAIN (ANALYZE, BUFFERS); never ILIKE '%term%' without the trigram index.

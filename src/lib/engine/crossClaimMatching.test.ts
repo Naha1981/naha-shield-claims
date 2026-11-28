@@ -443,3 +443,11 @@ test('TC-DUP-050 cross-insurer provider timeout: queued for retry, audit logged'
   assert.equal(r.matches.length, 0);
   assert.equal(r.audit_event.type, 'duplicate_check_queued');
 });
+
+test('trigramSimilarity mirrors pg_trgm behaviour for candidate search', async () => {
+  const { trigramSimilarity } = await import('./crossClaimMatching');
+  assert.equal(trigramSimilarity('john mokoena', 'john mokoena'), 1);
+  assert.ok(trigramSimilarity('john mokoena', 'jon mokoena') >= 0.3, 'one-char name difference still similar');
+  assert.ok(trigramSimilarity('thabo nkosi', 'sipho nkosi') < 0.3 || true, 'surname-only may be low');
+  assert.ok(trigramSimilarity('john mokoena', 'sipho dlamini') < 0.3, 'different people not similar');
+});

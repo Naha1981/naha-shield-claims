@@ -39,3 +39,25 @@ Where specs conflicted, the stricter value was kept and the conflict is listed h
 - Deterministic mock-data generator, seed 42.
 - CI pipeline (free tier) running the suites.
 - Test execution report template: placeholders only; real numbers only from tests we run.
+
+## Spec 5 (ops artefacts) — saved, adapted, fixed
+
+- Verbatim spec saved: docs/build-inputs/spec5-observability-tuning-chaos-runbook-terraform.md.
+- Grafana dashboard JSON saved as a file only (free Grafana/Prometheus), validated as parseable
+  JSON: docs/ops/grafana/nahashield-duplicate-matching.json. Not deployed anywhere.
+- Chaos experiments and load-spike runbook saved under docs/ops/ as reference documents
+  (staging/local only per the spec's own principles; no chaos ever runs against a live system).
+- Terraform saved as docs/ops/terraform/main.tf, REFERENCE ONLY. It would cost real money if
+  ever applied (EKS, RDS, MSK, ElastiCache, WAF). There is no AWS account and nothing was
+  created or applied. It is never to be raised to Thabiso as an offer. Fixes applied to the
+  saved copy:
+  1. EKS API endpoint was internet-facing (endpoint_public_access = true) -> set to false.
+  2. Hardcoded resource names (IAM roles, node group, subnet groups, RDS identifier, Redis,
+     MSK cluster, log group, WAF) -> parameterised via var.name_prefix.
+  3. S3 backend bucket/lock table names removed from the file; they are per-deployment
+     -backend-config values and must never be committed.
+- pg_trgm tuning applied to docs/claims-workspace-schema.sql, adapted: persons.full_name is
+  encrypted in our schema, so trigram indexes/similarity target a separate lowercase
+  full_name_search column, never plaintext. Duplicate-match tenant indexes already existed.
+- Local engine: added trigramSimilarity() mirroring pg_trgm similarity() and use it next to the
+  Levenshtein check for fuzzy name matching (docs and engine now use the same operator).

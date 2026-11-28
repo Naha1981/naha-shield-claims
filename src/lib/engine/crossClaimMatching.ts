@@ -167,6 +167,23 @@ function levenshtein(a: string, b: string): number {
   return d[n];
 }
 
+// Trigram similarity mirroring PostgreSQL pg_trgm similarity(): share of
+// three-character trigrams two strings have in common. The SQL tuning in
+// docs/claims-workspace-schema.sql uses the same operator for candidate search.
+export function trigramSimilarity(a: string, b: string): number {
+  const grams = (s: string) => {
+    const padded = `  ${s.toLowerCase()} `;
+    const set = new Set<string>();
+    for (let i = 0; i + 3 <= padded.length; i++) set.add(padded.slice(i, i + 3));
+    return set;
+  };
+  const ga = grams(a), gb = grams(b);
+  if (ga.size === 0 && gb.size === 0) return 1;
+  let shared = 0;
+  for (const g of ga) if (gb.has(g)) shared++;
+  return shared / (ga.size + gb.size - shared);
+}
+
 function surname(name?: string): string | undefined {
   const parts = (name ?? '').trim().toLowerCase().split(/\s+/);
   return parts.length > 1 ? parts[parts.length - 1] : undefined;
@@ -256,7 +273,9 @@ export function runDuplicateCheck(claim: ClaimFacts, all: ClaimFacts[], opts: Du
   if (deceasedHash && (hit = first((o) => o.insured_person?.id_number_hash === deceasedHash))) {
     const otherName = hit.insured_person?.full_name?.toLowerCase();
     const otherDob = hit.insured_person?.date_of_birth;
-    if (deceasedName && otherName && deceasedName !== otherName && levenshtein(deceasedName, otherName) <= 2 && deceasedDob && deceasedDob === otherDob) {
+    const similarName = deceasedName && otherName && deceasedName !== otherName
+      && (levenshtein(deceasedName, otherName) <= 2 || trigramSimilarity(deceasedName, otherName) >= 0.3);
+    if (similarName && deceasedDob && deceasedDob === otherDob) {
       add('fuzzy_name_exact_id', ['full_name', 'date_of_birth', 'id_number_hash'], hit);
     } else if (hit.policy_id && claim.policy_id && hit.policy_id !== claim.policy_id) {
       add('same_deceased_policy', ['id_number_hash'], hit);
