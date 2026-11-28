@@ -34,6 +34,27 @@ export async function apiFetch<T>(
   role: RoleId,
   options?: RequestInit,
 ): Promise<T> {
+  // Static preview mode (GitHub Pages): no server exists. State reads come from
+  // the bundled snapshot; writes are simulated with clearly synthetic receipts so
+  // every control still responds. Nothing here touches a real record.
+  if (import.meta.env.VITE_STATIC_PREVIEW) {
+    const method = (options?.method ?? 'GET').toUpperCase();
+    if (method === 'GET' && url === '/api/state') {
+      const res = await fetch(`${import.meta.env.BASE_URL}.data/state.json`, { cache: 'no-store' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(`Static preview snapshot missing (${res.status})`);
+      return data as T;
+    }
+    if (method !== 'GET') {
+      if (url === '/api/decisions') {
+        return { ok: true, decision: { decision_id: 'STATIC-PREVIEW-RECEIPT' } } as T;
+      }
+      if (url === '/api/audit/export-pdf') {
+        return { ok: true, report_id: 'STATIC-PREVIEW-REPORT' } as T;
+      }
+      return { ok: true } as T;
+    }
+  }
   let accessCode = '';
   try { accessCode = localStorage.getItem('nahashield-access-code') ?? ''; } catch { /* storage unavailable */ }
   const res = await fetch(url, {
