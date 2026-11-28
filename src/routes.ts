@@ -4,6 +4,8 @@ export type NavRoute =
   | '/'
   | '/needs-ok'
   | '/case-workspace'
+  | '/savings-ledger'
+  | '/rand-found'
   | '/recovery'
   | '/vault'
   | '/consent'
@@ -21,6 +23,8 @@ export const ROUTE_REGISTRY: Array<{ route: NavRoute; prefix?: boolean }> = [
   { route: '/intake' },
   { route: '/needs-ok' },
   { route: '/case-workspace' },
+  { route: '/savings-ledger' },
+  { route: '/rand-found' },
   { route: '/claims' },
   { route: '/investigator' },
   { route: '/network' },

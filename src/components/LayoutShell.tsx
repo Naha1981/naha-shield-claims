@@ -79,6 +79,8 @@ const NAV_GROUPS: Array<{ group: string; items: NavItem[] }> = [
   {
     group: '04 · Financial Recovery',
     items: [
+      { route: '/savings-ledger', label: 'Savings Ledger', sublabel: 'Money states · Reconciliation', icon: FileSpreadsheet },
+      { route: '/rand-found', label: 'Rand found', sublabel: 'Sealed savings statement', icon: FileSpreadsheet },
       { route: '/recovery', label: 'Recovery', sublabel: 'Assess recovery options', icon: Scale },
     ],
   },

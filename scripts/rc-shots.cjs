@@ -56,6 +56,26 @@ const OUT = process.env.RC_OUT || '/tmp/rc-shots';
       await ctx.close();
       continue;
     }
+    if (process.env.RC_ONLY === 'savings') {
+      await page.waitForSelector('text=Financial event lifecycle', { timeout: 90000 });
+      await page.waitForTimeout(1200);
+      await page.screenshot({ path: `${OUT}/rc-savings-states-${theme}.png` });
+      console.log(`saved rc-savings-states-${theme}.png`);
+      await page.locator('text=Transaction ledger').scrollIntoViewIfNeeded();
+      await page.waitForTimeout(600);
+      await page.screenshot({ path: `${OUT}/rc-savings-ledger-${theme}.png` });
+      console.log(`saved rc-savings-ledger-${theme}.png`);
+      await ctx.close();
+      continue;
+    }
+    if (process.env.RC_ONLY === 'randfound') {
+      await page.waitForSelector('text=Savings found in the sample book', { timeout: 90000 });
+      await page.waitForTimeout(1200);
+      await page.screenshot({ path: `${OUT}/rc-randfound-${theme}.png` });
+      console.log(`saved rc-randfound-${theme}.png`);
+      await ctx.close();
+      continue;
+    }
     if (process.env.RC_ONLY === 'needsok') {
       await page.waitForSelector('h1:text-is("Needs Your OK")', { timeout: 90000 });
       await page.waitForTimeout(1200);
