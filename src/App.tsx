@@ -1,4 +1,5 @@
 import {RelationshipGraph} from './components/RelationshipGraph';
+import {BootSplash} from './components/BootSplash';
 import {RetrospectiveLeakageView} from './components/RetrospectiveLeakageView';
 import {IntakeView} from './components/IntakeView';
 import {InvestigatorView} from './components/InvestigatorView';
@@ -280,11 +281,7 @@ export default function App() {
   if(route==='/see-worked-case-example')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Worked example" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><WorkedCaseLanding onOpenCase={(id)=>navigate(`/see-worked-case-example/${id}` as NavRoute)} onSeed={()=>navigate('/investigator')}/></LayoutShell>;
   if(route.startsWith('/see-worked-case-example/'))return <LayoutShell activeRoute={'/see-worked-case-example'} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Worked example" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><WorkedCaseDetailPage caseId={route.split('/').pop() ?? ''} onBack={()=>navigate('/see-worked-case-example')}/></LayoutShell>;
   if (loading && !data) {
-    return (
-      <div className="min-h-screen bg-[#0B1120] text-slate-300 flex items-center justify-center p-6 text-sm font-mono">
-        Loading ClaimTrace forensic workspace...
-      </div>
-    );
+    return <BootSplash />;
   }
 
   if (error || !data) {

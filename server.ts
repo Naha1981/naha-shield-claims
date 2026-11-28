@@ -12,6 +12,7 @@ import {insuranceTeamRoutes} from './server/insuranceTeam';
 import React from'react';
 import{renderToString}from'react-dom/server';
 import{PublicReview}from'./src/components/PublicReview';
+import{BootSplash}from'./src/components/BootSplash';
 import{readFileSync}from'node:fs';
 import{telecomRoutes}from'./server/telecomRisk';
 import{hostedExecutorRoutes}from'./server/hostedExecutor';
@@ -1395,8 +1396,16 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     const distDir = path.resolve(__dirname, 'dist');
-    const readable:Record<string,string>={'/':'savings','/workforce':'workforce','/recovery':'recovery','/vault':'vault','/consent':'consent','/claims':'claims','/compliance':'compliance'};
-    app.get(['/', '/workforce','/recovery','/vault','/consent','/claims','/compliance','/review','/review/:module'],(req,res)=>{
+    // App routes: first paint is the branded ClaimTrace loading state (theme
+    // comes from the inline data-theme script in index.html), never a landing
+    // page. The readable no-JS review keeps its own pre-rendered routes.
+    app.get(['/', '/workforce','/recovery','/vault','/consent','/claims','/compliance'],(req,res)=>{
+      const splash=renderToString(React.createElement(BootSplash));
+      const html=readFileSync(path.join(distDir,'index.html'),'utf8').replace('<div id="root"></div>','<div id="root">'+splash+'</div>');
+      res.setHeader('Cache-Control','no-store');res.type('html').send(html);
+    });
+    const readable:Record<string,string>={'/review':'workforce'};
+    app.get(['/review','/review/:module'],(req,res)=>{
       const module=req.params.module||readable[req.path]||'workforce';
       const snapshot=renderToString(React.createElement(PublicReview,{module}));
       const html=readFileSync(path.join(distDir,'index.html'),'utf8').replace('<html lang="en">','<html lang="en" data-theme="light">').replace('<div id="root"></div>','<div id="root">'+snapshot+'</div>');
