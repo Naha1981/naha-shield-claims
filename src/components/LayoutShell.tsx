@@ -31,7 +31,8 @@ export type NavRoute =
   | '/compliance'
   | '/workforce'
   | '/network'
-  | '/leakage';
+  | '/leakage'
+  | '/intake';
 
 interface LayoutShellProps {
   activeRoute: NavRoute;
@@ -56,6 +57,7 @@ const NAV_ITEMS: Array<{
 }> = [
  {route:'/network',label:'Relationships',sublabel:'Fictional graph · Review leads',icon:ShieldAlert},
  {route:'/leakage',label:'Leakage',sublabel:'Past claims · Review leads',icon:FileSearch},
+ {route:'/intake',label:'Intake',sublabel:'Files · APIs · Webhooks',icon:FileSpreadsheet},
  {route:'/workforce',label:'AI team',sublabel:'Synthetic uploads · Human review',icon:ShieldCheck},
   {
     route: '/',
@@ -402,7 +404,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
         </div>
       </header>
 
-      <nav className="mock-topnav" aria-label="Quick modules">{[['/network','Relationships'],['/leakage','Leakage'],['/','Overview'],['/claims','Claims'],['/workforce','AI team'],['/recovery','Recovery'],['/vault','Evidence'],['/compliance','Audit']].map(([route,label])=><button key={route} onClick={()=>onNavigate(route as NavRoute)}>{label}</button>)}</nav>
+      <nav className="mock-topnav" aria-label="Quick modules">{[['/network','Relationships'],['/leakage','Leakage'],['/intake','Intake'],['/','Overview'],['/claims','Claims'],['/workforce','AI team'],['/recovery','Recovery'],['/vault','Evidence'],['/compliance','Audit']].map(([route,label])=><button key={route} onClick={()=>onNavigate(route as NavRoute)}>{label}</button>)}</nav>
       <div className="flex-1 flex relative">
         {mobileMenuOpen && (
           <div

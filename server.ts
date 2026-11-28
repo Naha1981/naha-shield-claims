@@ -1,5 +1,6 @@
 import {graphRoutes} from './server/syntheticGraph';
 import {leakageRoutes} from './server/retrospectiveLeakage';
+import {intakeRoutes} from './server/insurerIntake';
 import {reviewerGate} from './server/reviewerGate';
 import {workspaceIsolation} from './server/workspaceIsolation';
 import {insuranceTeamRoutes} from './server/insuranceTeam';
@@ -125,10 +126,27 @@ async function startServer() {
   const app = express();
   app.set('trust proxy',1);
   app.use(express.json({ limit: '8mb' }));
+
+  // One-switch login. Off by default while Lawrence tests; set
+  // NAHASHIELD_LOGIN=on and NAHASHIELD_ACCESS_CODE to require an access code
+  // on every /api route (health and the synthetic mock feeds stay open).
+  const LOGIN_ON = process.env.NAHASHIELD_LOGIN === 'on';
+  const ACCESS_CODE = process.env.NAHASHIELD_ACCESS_CODE || '';
+  app.use('/api',(req,res,next)=>{
+    if(!LOGIN_ON)return next();
+    if(req.path==='/health'||req.path.startsWith('/mock-insurer/'))return next();
+    const code=String(req.headers['x-nahashield-access-code']||'');
+    if(code&&code===ACCESS_CODE)return next();
+    res.status(401).json({error:'Login is on. An access code is required.',login_on:true});
+  });
+
   app.use('/api',isolation.middleware);
   app.use('/api/insurance-team',insuranceTeamRoutes());
   app.use('/api/synthetic-graph',graphRoutes());
   app.use('/api/leakage',leakageRoutes());
+  const intake=intakeRoutes();
+  app.use('/api/intake',intake.router);
+  app.use('/api/mock-insurer',intake.mockRouter);
   const workforce = workforceRoutes(store);
   app.use('/api/workforce', workforce);
   // Synthetic test inbox: in-memory, no external sends. Auth = the shared private reviewer session; no header-based roles.
@@ -154,6 +172,7 @@ async function startServer() {
       vault_valid: snap.vault_verification.valid,
       psi_phase3_unlocked: snap.psi_phase3_unlocked,
       residency_region: snap.residency_region,
+      login_on: LOGIN_ON,
     });
   });
 

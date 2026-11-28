@@ -23,7 +23,7 @@ const RECOVERY_PREFILL_KEY='nahashield-recovery-prefill';
 
 function monthLabel(iso:string){return new Date(iso+'T00:00:00').toLocaleDateString('en-ZA',{month:'short',year:'numeric'});}
 
-function FileCheckCard({report,sheetName}:{report:IngestReport;sheetName?:string}){
+export function FileCheckCard({report,sheetName}:{report:IngestReport;sheetName?:string}){
  return <section className="network-box"><h3>File check</h3><p className="network-muted">What was understood from the uploaded file{sheetName?` (sheet: ${sheetName})`:''}.</p>
  <div className="network-stats">
   <span><b>{report.rows_used}</b> claims{report.rows_read!==report.rows_used?` (${report.rows_read} read)`:''}</span>
@@ -61,6 +61,18 @@ export function RetrospectiveLeakageView({onNavigate,activeRole}:{onNavigate?:(r
   f.text().then(csv=>{fetch('/api/leakage/analyse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({csv,file_name:f.name})}).then(async r=>{const body=await r.json().catch(()=>({}));if(!r.ok)throw Error((body as {error?:string}).error||'api unavailable');return body as Analysis;}).then(setData).catch(err=>{try{const ingested=ingestCsvText(csv,f.name,parseCsv);setData({file_name:f.name,synthetic:false,format:'csv',ingest_report:ingested.report,...analyseRows(ingested.rows)})}catch(e2){setError('Could not read this file: '+(err as Error).message)}}).finally(()=>setBusy(false));});
  };
  React.useEffect(()=>{if(window.location.hash==='#demo')demo();},[]);
+ // Handoff from the Intake screen: an analysis produced there opens here.
+ const[intakeSource,setIntakeSource]=React.useState('');
+ React.useEffect(()=>{
+  try{
+   const raw=localStorage.getItem('nahashield-intake-analysis');
+   if(!raw)return;
+   localStorage.removeItem('nahashield-intake-analysis');
+   const payload=JSON.parse(raw) as Analysis;
+   setIntakeSource(payload.file_name||'intake');
+   setData(payload);
+  }catch{/* ignore an unreadable handoff */}
+ },[]);
  const groups=React.useMemo(()=>{const m=new Map<string,Finding[]>();for(const f of data?.findings??[])if(ruleFilter==='all'||f.rule===ruleFilter){if(!m.has(f.rule))m.set(f.rule,[]);m.get(f.rule)!.push(f);}return m;},[data,ruleFilter]);
  const totalToChase=React.useMemo(()=>(data?.recovery_candidates??[]).reduce((t,c)=>t+c.paid_zar,0),[data]);
  const sendToRecovery=(c:Candidate,i:number)=>{
@@ -86,6 +98,7 @@ export function RetrospectiveLeakageView({onNavigate,activeRole}:{onNavigate?:(r
  };
  return <div className="network-page"><header><span className="network-kicker">PAST-CLAIMS LEAKAGE CHECK</span><h2>Ingest past claims, find the leakage</h2><p className="network-sub">Upload six months of claims. See what to <mark>investigate first</mark> and what to <mark>recover</mark>.</p><p className="network-safety">Read-only · leads, not proof · files analysed in memory and discarded</p><details className="network-info"><summary>ⓘ How it works</summary><p>Upload a claims export as it comes: CSV or Excel, your own column names, gaps and duplicates included. The file check below shows exactly what was understood before any finding is trusted.</p><p>It marks the claims a human investigator should open first, with the evidence rows attached. Uploaded files are analysed in memory and discarded. No claim, payment or recovery action is taken.</p><p>Built for the retrospective assignment: <strong>find leakage in past claims, prove it, then recover.</strong> Duplicates, shared accounts, reused documents, repeat beneficiaries, early claims and originator concentration are flagged with their amounts. Post-payment findings become ranked recovery candidates with a rand value and a next step. Every amount comes from the supplied file only.</p></details></header>
  <section className="network-box"><div className="network-controls"><label>Upload claims file (CSV or Excel)<input aria-label="Upload claims file" type="file" accept=".csv,.xlsx,.xlsm,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={onFile} disabled={busy}/></label><label>Or try the demo<button type="button" className="network-cta" onClick={demo} disabled={busy}>{busy?'Analysing...':'Load demo file'}</button><small>38 fictional claims · 6 months</small></label></div><details className="network-info"><summary>Columns and template</summary><p className="network-muted">Your own column names are fine: "Claim No", "Amount Paid", "Date of Loss" and similar are recognised automatically, and the file check shows what each column was read as. Only a claim reference column is required. The fullest template: {`claim_ref, policy_ref, insured_id, insured_name, policyholder_id, claimant_name, beneficiary_name, bank_account, phone, document_hash, funeral_parlour, doctor, agent, amount_zar, claim_date, policy_inception_date, status, household`}. Dates can be YYYY-MM-DD, DD/MM/YYYY or Excel dates; amounts in rand. Only rows with status other than declined count as paid.</p><button type="button" onClick={()=>download('nahashield-claims-template.csv',TEMPLATE)}>Download template CSV</button></details>{error&&<p role="alert">{error}</p>}</section>
+ {intakeSource&&<p className="network-safety">From Intake: {intakeSource} · analysed in memory, nothing stored</p>}
  {data&&<>
  <div className="network-stats"><span><b>{data.summary.claims_analysed}</b> claims</span><span><b>{formatZar(data.summary.total_paid_zar)}</b> paid</span><span><b>{data.summary.findings_count}</b> findings</span><span><b>{formatZar(data.summary.flagged_paid_zar)}</b> flagged</span></div>
  {data.ingest_report&&<FileCheckCard report={data.ingest_report} sheetName={data.sheet_name}/>}
