@@ -255,13 +255,13 @@ export function ingestClaimRows(
     );
   }
   if (!mapping.matched.amount_zar) {
-    warnings.push('No amount column was recognised, so rand values read as R0. Check the column names against the template.');
+    warnings.push('No amount column recognised; rands read as R0.');
   }
   if (!mapping.matched.status) {
-    warnings.push('No status column was recognised, so every row is counted as paid. Declined claims should carry a "declined" status.');
+    warnings.push('No status column recognised; every row counts as paid.');
   }
   if (!mapping.matched.claim_date) {
-    warnings.push('No claim date column was recognised, so date coverage and early-claim timing cannot be checked.');
+    warnings.push('No claim date column recognised; timing not checked.');
   }
 
   const rows: ClaimRow[] = [];
@@ -327,11 +327,12 @@ export function ingestClaimRows(
         )
       : null;
 
-  if (rowsMissingRef > 0) warnings.push(`${rowsMissingRef} row(s) had no claim reference; they were kept and labelled row-1, row-2...`);
-  if (rowsMissingAmount > 0) warnings.push(`${rowsMissingAmount} row(s) had no amount; they count as R0 in the totals.`);
-  if (rowsMissingDate > 0) warnings.push(`${rowsMissingDate} row(s) had no readable claim date.`);
-  if (datesNotUnderstood > 0) warnings.push(`${datesNotUnderstood} date value(s) could not be understood and were left out of date checks.`);
-  if (duplicateRowsRemoved > 0) warnings.push(`${duplicateRowsRemoved} exact duplicate row(s) were removed so one export line is not counted twice.`);
+  const rowsWord = (n: number) => `${n} row${n === 1 ? '' : 's'}`;
+  if (rowsMissingRef > 0) warnings.push(`${rowsWord(rowsMissingRef)} had no claim number: kept as row-N`);
+  if (rowsMissingAmount > 0) warnings.push(`${rowsWord(rowsMissingAmount)} had no amount; counted as R0.`);
+  if (rowsMissingDate > 0) warnings.push(`${rowsWord(rowsMissingDate)} had no readable claim date.`);
+  if (datesNotUnderstood > 0) warnings.push(`${datesNotUnderstood} date${datesNotUnderstood === 1 ? '' : 's'} not understood; skipped in date checks.`);
+  if (duplicateRowsRemoved > 0) warnings.push(`${duplicateRowsRemoved} duplicate export row${duplicateRowsRemoved === 1 ? '' : 's'} removed.`);
 
   return {
     rows,

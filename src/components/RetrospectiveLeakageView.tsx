@@ -24,15 +24,16 @@ const RECOVERY_PREFILL_KEY='nahashield-recovery-prefill';
 function monthLabel(iso:string){return new Date(iso+'T00:00:00').toLocaleDateString('en-ZA',{month:'short',year:'numeric'});}
 
 function FileCheckCard({report,sheetName}:{report:IngestReport;sheetName?:string}){
- const rows:Array<[string,string]>=[
-  ['Rows read',`${report.rows_read} rows · ${report.rows_used} used`],
-  ['Dates covered',report.first_claim_date&&report.last_claim_date?`${monthLabel(report.first_claim_date)} to ${monthLabel(report.last_claim_date)}${report.months_covered?` (${report.months_covered} months)`:''}`:'No readable claim dates'],
- ];
- return <section className="network-box"><h3>File check</h3><p className="network-muted">What was understood from the uploaded file{sheetName?` (sheet: ${sheetName})`:''}, in plain words.</p>
- <div className="network-stats">{rows.map(([k,v])=><span key={k}><b>{v}</b> {k.toLowerCase()}</span>)}</div>
+ return <section className="network-box"><h3>File check</h3><p className="network-muted">What was understood from the uploaded file{sheetName?` (sheet: ${sheetName})`:''}.</p>
+ <div className="network-stats">
+  <span><b>{report.rows_used}</b> claims{report.rows_read!==report.rows_used?` (${report.rows_read} read)`:''}</span>
+  <span><b>{report.months_covered?`${report.months_covered} months`:'No dates'}</b>{report.first_claim_date&&report.last_claim_date&&<><br/><small>{monthLabel(report.first_claim_date)} to {monthLabel(report.last_claim_date)}</small></>}</span>
+ </div>
+ <details className="network-info"><summary>What was understood</summary>
  {report.columns_mapped.length>0&&<p className="network-muted"><strong>Columns understood:</strong> {report.columns_mapped.map(m=>`${m.from} → ${m.to}`).join(' · ')}</p>}
  {report.columns_ignored.length>0&&<p className="network-muted"><strong>Columns not used:</strong> {report.columns_ignored.join(', ')}</p>}
- {report.warnings.length>0?<ul className="network-links">{report.warnings.map(w=><li key={w}>{w}</li>)}</ul>:<p className="network-muted">No gaps or duplicates found in the used columns.</p>}
+ </details>
+ {report.warnings.length>0?<ul className="network-links">{report.warnings.map(w=><li key={w}>{w}</li>)}</ul>:<p className="network-muted">No gaps or duplicates found.</p>}
  </section>;
 }
 

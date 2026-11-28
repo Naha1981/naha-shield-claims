@@ -29,11 +29,24 @@ const SHOT = (n) => `/tmp/e2e-${n}.png`;
   );
   let text = await page.evaluate(() => document.body.innerText);
   check('phone CSV upload: file check appears', text.includes('File check'));
-  check('phone CSV: rows read', /2\d rows/.test(text));
+  check('phone CSV: claims tile shows count', text.includes('21'));
   check('phone CSV: duplicate payment finding', text.includes('Possible duplicate payment'));
   check('phone CSV: money to recover section', text.includes('Money to recover'));
   check('phone CSV: recover up to rand value', /Recover up to R/.test(text));
-  check('phone CSV: columns understood', text.includes('Claim No → claim_ref'));
+  check('phone CSV: compact stat tiles', /\b21\s*\n*claims/.test(text) && text.includes('6 months'));
+  // Open the "What was understood" toggle before checking the mapping text.
+  await page.evaluate(() => {
+    const s = [...document.querySelectorAll('summary')].find((x) => x.textContent.includes('What was understood'));
+    s?.click();
+  });
+  text = await page.evaluate(() => document.body.innerText);
+  check('phone CSV: columns understood behind toggle', text.includes('Claim No → claim_ref'));
+  await page.evaluate(() => {
+    const el = [...document.querySelectorAll('h3')].find((e) => e.textContent.includes('File check'));
+    el?.scrollIntoView();
+  });
+  await new Promise((r) => setTimeout(r, 400));
+  await page.screenshot({ path: SHOT('phone-filecheck') });
   await page.screenshot({ path: SHOT('phone-csv-top') });
   // Scroll to recovery section and screenshot.
   await page.evaluate(() => {
