@@ -50,19 +50,19 @@ export const ExecutiveBoard: React.FC<{ summary: LedgerSummary }> = ({ summary }
         <div>
           <p className="text-[13px] text-slate-400 mb-2">Financial attribution</p>
           <div className="grid grid-cols-3 gap-2 items-end">
-            <div className="rounded-lg bg-slate-800 p-3">
+            <div className="rounded-lg bg-slate-800 p-2 sm:p-3 min-w-0">
               <p className="text-[13px] text-slate-400">Gross prevented</p>
-              <p className="text-lg font-semibold text-slate-100 mt-1">{formatZar(grossPrevented)}</p>
+              <p className="text-base sm:text-lg font-semibold text-slate-100 mt-1 break-words">{formatZar(grossPrevented)}</p>
               <p className="text-[13px] text-slate-400 mt-1">Protected + saved</p>
             </div>
-            <div className="rounded-lg bg-slate-800 p-3">
+            <div className="rounded-lg bg-slate-800 p-2 sm:p-3 min-w-0">
               <p className="text-[13px] text-slate-400">Less deductions</p>
-              <p className="text-lg font-semibold text-slate-100 mt-1">−{formatZar(deductions)}</p>
+              <p className="text-base sm:text-lg font-semibold text-slate-100 mt-1 break-words">−{formatZar(deductions)}</p>
               <p className="text-[13px] text-slate-400 mt-1">Review + legal costs</p>
             </div>
-            <div className="rounded-lg border border-emerald-700 bg-emerald-950 p-3">
+            <div className="rounded-lg border border-emerald-700 bg-emerald-950 p-2 sm:p-3 min-w-0 overflow-hidden">
               <p className="text-[13px] text-emerald-300">Net attributable</p>
-              <p className="text-2xl font-semibold text-emerald-200 mt-1">{formatZar(netAttributable)}</p>
+              <p className="text-lg sm:text-2xl font-semibold text-emerald-200 mt-1 break-words leading-tight">{formatZar(netAttributable)}</p>
               <p className="text-[13px] text-emerald-300/80 mt-1">Waterfall, not three pools</p>
             </div>
           </div>
