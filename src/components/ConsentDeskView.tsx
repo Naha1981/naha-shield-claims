@@ -24,15 +24,15 @@ const LANGUAGE_TEMPLATES: Record<
   (proposer: string, cover: string, mult: number) => string
 > = {
   English: (proposer, cover, mult) =>
-    `NahaShield Cover Check: ${proposer} applied to insure your life for ${cover} (${mult}x accidental cover). Do you know and consent to this policy? Reply 1 Confirm, 2 Decline, or 9 Not Me.`,
+    `ClaimTrace Cover Check: ${proposer} applied to insure your life for ${cover} (${mult}x accidental cover). Do you know and consent to this policy? Reply 1 Confirm, 2 Decline, or 9 Not Me.`,
   isiZulu: (proposer, cover, mult) =>
-    `Isiqinisekiso seNahaShield: U-${proposer} ufake isicelo somshwalense wempilo yakho ka-${cover} (${mult}x ingozi). Uyazi futhi uyavuma? Phendula 1 Vuma, 2 Nqaba, noma 9 Akumina.`,
+    `Isiqinisekiso seClaimTrace: U-${proposer} ufake isicelo somshwalense wempilo yakho ka-${cover} (${mult}x ingozi). Uyazi futhi uyavuma? Phendula 1 Vuma, 2 Nqaba, noma 9 Akumina.`,
   isiXhosa: (proposer, cover, mult) =>
-    `Uqinisekiso lweNahaShield: U-${proposer} ufake isicelo sepolisi yobomi bakho ye-${cover} (${mult}x ingozi). Uyazi kwaye uyavuma? Phendula 1 Vuma, 2 Yala, okanye 9 Asindim.`,
+    `Uqinisekiso lweClaimTrace: U-${proposer} ufake isicelo sepolisi yobomi bakho ye-${cover} (${mult}x ingozi). Uyazi kwaye uyavuma? Phendula 1 Vuma, 2 Yala, okanye 9 Asindim.`,
   Sesotho: (proposer, cover, mult) =>
-    `Netefatso ya NahaShield: ${proposer} o kentse kopo ya inshorense ya bophelo ba hao ya ${cover} (${mult}x kotsi). Na o a tseba mme o a dumela? Araba 1 Dumela, 2 Hana, kapa 9 Ha se nna.`,
+    `Netefatso ya ClaimTrace: ${proposer} o kentse kopo ya inshorense ya bophelo ba hao ya ${cover} (${mult}x kotsi). Na o a tseba mme o a dumela? Araba 1 Dumela, 2 Hana, kapa 9 Ha se nna.`,
   Afrikaans: (proposer, cover, mult) =>
-    `NahaShield Dekking-toets: ${proposer} het aansoek gedoen vir lewensdekking op u naam van ${cover} (${mult}x ongeluksdekking). Stem u saam? Antwoord 1 Bevestig, 2 Weier, of 9 Nie Ek Nie.`,
+    `ClaimTrace Dekking-toets: ${proposer} het aansoek gedoen vir lewensdekking op u naam van ${cover} (${mult}x ongeluksdekking). Stem u saam? Antwoord 1 Bevestig, 2 Weier, of 9 Nie Ek Nie.`,
 };
 
 export const ConsentDeskView: React.FC<ConsentDeskViewProps> = ({

@@ -1,7 +1,7 @@
 # Load-spike incident runbook (reference)
 
 > Saved from Thabiso's spec 5. Commands assume a Kubernetes deployment; adapt when
-> and if NahaShield ever runs somewhere real.
+> and if ClaimTrace ever runs somewhere real.
 
 
 ### 4.1 Severity levels

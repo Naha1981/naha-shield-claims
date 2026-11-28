@@ -2,7 +2,7 @@
   "entities": {
     "StakeholderProfile": {
       "title": "StakeholderProfile",
-      "description": "Authenticated NahaShield stakeholder profile with verified identity and RBAC assignment.",
+      "description": "Authenticated ClaimTrace stakeholder profile with verified identity and RBAC assignment.",
       "type": "object",
       "properties": {
         "uid": {

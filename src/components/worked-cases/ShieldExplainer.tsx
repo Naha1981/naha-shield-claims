@@ -2,8 +2,8 @@ import type { ShieldExplanation } from '../../lib/demo/workedCases';
 
 export function ShieldExplainer({ explanation }: { explanation: ShieldExplanation }) {
   return (
-    <details aria-label="Why NahaShield said this" style={{ marginTop: 8 }}>
-      <summary style={{ fontSize: 16, fontWeight: 800, cursor: 'pointer' }}>Why NahaShield said this</summary>
+    <details aria-label="Why ClaimTrace said this" style={{ marginTop: 8 }}>
+      <summary style={{ fontSize: 16, fontWeight: 800, cursor: 'pointer' }}>Why ClaimTrace said this</summary>
       <div style={{ fontSize: 14, color: '#334155', marginTop: 6 }}>
         <p style={{ margin: '0 0 6px' }}><strong>{explanation.bottom_line}</strong></p>
         <ul style={{ margin: '0 0 6px', paddingLeft: 18 }}>
