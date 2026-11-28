@@ -104,7 +104,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
     } catch {
       // Ignore an unreadable prefill payload.
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
 
   React.useEffect(() => {

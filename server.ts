@@ -43,7 +43,7 @@ import {
   type IngestionCaptureMode,
 } from './src/lib/engine/evidenceIngestion';
 import { ADAPTER_INVENTORY } from './src/lib/adapters/index';
-import type { EvidenceTag, RecoveryCaseInput, RoleId } from './src/lib/engine/types';
+import type { ClaimAgentId, EvidenceTag, RecoveryCaseInput, RoleId } from './src/lib/engine/types';
 import {
   buildRegulatoryFeedPrompt,
   extractGroundingMetadata,
@@ -67,7 +67,6 @@ import {
   canRoleApproveAgentProposal,
   getClaimAgentById,
 } from './src/lib/engine/claimsAgents';
-import type { ClaimAgentId } from './src/lib/engine/types';
 import { SYNTHETIC_USERS } from './db/seeds/syntheticData';
 
 const __filename = fileURLToPath(import.meta.url);

@@ -1,0 +1,7 @@
+dataset_label,payment_id,claim_id,supplier_alias,invoice_ref,invoice_total_cents,approved_gross_cents,contractual_excess_cents,paid_cents,payment_date,notification_date,loss_date,required_documents,received_documents
+SYNTHETIC / FICTIONAL TEST DATA,PAY-1001,CLM-9001,Highveld Dignity Funerals,INV-HDF-2210,5800000,6000000,500000,5800000,2026-09-14,2026-09-02,2026-08-30,death_certificate|claim_form,death_certificate|claim_form
+SYNTHETIC / FICTIONAL TEST DATA,PAY-1047,CLM-9001,Highveld Dignity Funerals,INV-HDF-2210,5800000,6000000,500000,5800000,2026-10-02,2026-09-02,2026-08-30,death_certificate|claim_form,death_certificate|claim_form
+SYNTHETIC / FICTIONAL TEST DATA,PAY-1052,CLM-9007,Ubuntu Care Parlour,INV-UCP-0931,4500000,4000000,250000,4400000,2026-10-19,2026-10-05,2026-09-28,death_certificate|claim_form,death_certificate|claim_form
+SYNTHETIC / FICTIONAL TEST DATA,PAY-1060,CLM-9011,Cape Metro Funerals,INV-CMF-1102,3200000,3200000,0,3200000,2026-11-03,2026-10-20,2026-10-12,death_certificate|claim_form|bank_proof,death_certificate|claim_form
+SYNTHETIC / FICTIONAL TEST DATA,PAY-1066,CLM-9014,Eastern Star Parlour,INV-ESP-5540,2750000,2750000,0,2750000,2026-11-20,2026-11-15,2026-08-01,death_certificate|claim_form,death_certificate|claim_form
+SYNTHETIC / FICTIONAL TEST DATA,PAY-1071,CLM-9018,Tshwane Heritage Parlour,INV-THP-7702,3100000,3100000,0,3100000,2026-11-22,2026-11-18,2026-11-10,death_certificate|claim_form,death_certificate|claim_form

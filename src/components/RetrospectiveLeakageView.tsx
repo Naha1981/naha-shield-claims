@@ -1,9 +1,8 @@
 import React from 'react';
 import {formatZar} from '../utils/format';
 import {analyseLeakage,analyseRows,demoCsv,parseCsv} from '../lib/engine/leakageEngine';
-import {ingestCsvText} from '../lib/engine/claimsFileIngest';
+import {ingestCsvText, type IngestReport} from '../lib/engine/claimsFileIngest';
 import type {Finding} from '../../server/retrospectiveLeakage';
-import type {IngestReport} from '../lib/engine/claimsFileIngest';
 import type {RecoveryCaseInput, RoleId} from '../lib/engine/types';
 import type {NavRoute} from './LayoutShell';
 

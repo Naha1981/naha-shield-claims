@@ -4,11 +4,9 @@ import {
   connectorIngestReport,
   type InsurerProfile,
 } from '../src/lib/engine/insurerProfiles';
-import { parseClaimDate, type IngestReport } from '../src/lib/engine/claimsFileIngest';
-import { analyseRows, parseCsv } from '../src/lib/engine/leakageEngine';
-import { ingestClaimRows } from '../src/lib/engine/claimsFileIngest';
+import { ingestClaimRows, parseClaimDate, type IngestReport } from '../src/lib/engine/claimsFileIngest';
+import { analyseRows, parseCsv, type ClaimRow } from '../src/lib/engine/leakageEngine';
 import { rowsFromXlsx } from './claimsFileParse';
-import type { ClaimRow } from '../src/lib/engine/leakageEngine';
 
 // Generic insurer connector: pulls claim records from any configured REST JSON
 // endpoint or HTTPS file drop, normalises dates, and hands canonical rows to

@@ -151,7 +151,7 @@ export function validateProfile(p: unknown): string[] {
         problems.push(`field_map: "${from}" points at unknown column "${to}". Known columns: ${CANONICAL_COLUMNS.join(', ')}.`);
       }
     }
-  } else if (o.field_map != null) {
+  } else if (o.field_map !== null && o.field_map !== undefined) {
     problems.push('field_map must be an object of insurer field -> canonical column.');
   }
   if (o.paging && !['none', 'page_param', 'offset_param'].includes(String(o.paging.style))) problems.push('paging.style must be none, page_param or offset_param.');
@@ -206,7 +206,7 @@ export function mapInsurerRecords(
     for (const c of CANONICAL_COLUMNS) row[c] = '';
     for (const [from, to] of Object.entries(resolved)) {
       const v = rec[from];
-      row[to] = v == null ? '' : String(v).trim();
+      row[to] = v === null || v === undefined ? '' : String(v).trim();
     }
     return row;
   });

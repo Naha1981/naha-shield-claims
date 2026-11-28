@@ -1,5 +1,4 @@
-import type { CaseValue } from '../../lib/demo/workedCases';
-import { fmtCents } from '../../lib/demo/workedCases';
+import { fmtCents, type CaseValue } from '../../lib/demo/workedCases';
 import { big, lab } from './shared';
 
 export function ValuePanel({ value }: { value: CaseValue }) {

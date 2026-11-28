@@ -244,7 +244,7 @@ export function generateAndDownloadPopiaPdf(input: PopiaPdfReportInput): string 
     },
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   cursorY = (doc as any).lastAutoTable.finalY + 7;
 
   // Section 2: Real-Time KPI Summary (Cross-Module Engine Metrics)
@@ -305,7 +305,7 @@ export function generateAndDownloadPopiaPdf(input: PopiaPdfReportInput): string 
     },
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   cursorY = (doc as any).lastAutoTable.finalY + 7;
 
   // Section 3: Internal Audit Trail — Timestamped KPI Governance Notes
@@ -359,7 +359,7 @@ export function generateAndDownloadPopiaPdf(input: PopiaPdfReportInput): string 
     },
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   cursorY = (doc as any).lastAutoTable.finalY + 7;
 
   // Section 4: Dual-Signed Savings & Recovery Ledger Table

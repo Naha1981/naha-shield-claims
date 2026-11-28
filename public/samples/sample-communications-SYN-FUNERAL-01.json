@@ -1,0 +1,21 @@
+{
+  "dataset_label": "SYNTHETIC / FICTIONAL TEST DATA",
+  "case_id": "SYN-FUNERAL-01",
+  "records": [
+    {
+      "id": "msg-1",
+      "channel": "whatsapp",
+      "text": "SYNTHETIC / FICTIONAL TEST DATA. Good news - we approved the full R65,000.00 for the funeral claim. Payout on Friday."
+    },
+    {
+      "id": "msg-2",
+      "channel": "email",
+      "text": "SYNTHETIC / FICTIONAL TEST DATA. Confirming there is no excess on this policy, the family pays nothing."
+    },
+    {
+      "id": "msg-3",
+      "channel": "call_transcript",
+      "text": "SYNTHETIC / FICTIONAL TEST DATA. Caller asked which documents are outstanding; agent confirmed the signed claim form is still needed."
+    }
+  ]
+}

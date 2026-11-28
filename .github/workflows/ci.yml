@@ -21,7 +21,9 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Typecheck
-        run: npx tsc --noEmit
+        run: node --stack-size=8000 node_modules/typescript/bin/tsc --noEmit
+      - name: ESLint
+        run: npx eslint .
       - name: Unit, integration and fuzz tests
         run: npm test
       - name: Build

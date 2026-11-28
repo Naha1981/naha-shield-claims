@@ -15,18 +15,18 @@ export function WorkforceTabs({ onRecorded, activeRole }: { onRecorded: () => vo
   React.useEffect(()=>{const change=()=>{if(location.hash==='#agent-chat')setTab('chat');if(location.hash==='#workforce-tools')setTab('docs');if(location.hash==='#commands')setTab('voice')};window.addEventListener('hashchange',change);return()=>window.removeEventListener('hashchange',change)},[]);
   const b = (on: boolean) => `px-4 py-2 rounded-t-lg text-sm ${on ? 'bg-slate-900 text-white border border-b-0 border-slate-700' : 'text-slate-400 hover:text-slate-200'}`;
   const tasks = [
-    ['docs','Read a file','Read fictional PDFs & spreadsheets',FileText,'#e2f2ff'],
+    ['docs','Read a file','Try built-in fictional files',FileText,'#e2f2ff'],
     ['chat','Ask the team','Ask 12 specialist agents',MessageCircle,'#eee8ff'],
     ['maps','Check an address','Inspect public maps & images',MapPin,'#dcf5ec'],
-    ['messages','Review messages','Review supplied test messages',Mail,'#fff0d9'],
-    ['browser','Run a browser task','Run approved synthetic tasks',Globe,'#e1f1ff'],
-    ['telecom','Check a SIM','Inspect synthetic SIM / RICA signals',Smartphone,'#ffe7ec'],
-    ['voice','Open a tool','Typed commands',Command,'#eeeaff'],
+    ['messages','Review messages','Named reviewer inbox',Mail,'#fff0d9'],
+    ['browser','Run a browser task','Named reviewer tool',Globe,'#e1f1ff'],
+    ['telecom','Check a SIM','Sample SIM / RICA signals',Smartphone,'#ffe7ec'],
+    ['voice','Open a tool','Speak or type a command',Command,'#eeeaff'],
   ] as const;
   return <div className="visual-workspace">
     {tab === 'home' ? <>
       <section className="visual-welcome" aria-label="Choose a task">
-        <div><span className="visual-eyebrow">YOUR AI WORKSPACE · DESIGN PREVIEW</span><h2>What shall we check?</h2><p>Pick a task. You stay in charge.</p><span className="visual-safety">Synthetic examples only · Human review</span></div>
+        <div><span className="visual-eyebrow">YOUR AI WORKSPACE · SAMPLE</span><h2>What shall we check?</h2><p>Pick a task. You stay in charge.</p><span className="visual-safety">Fictional examples only · Human review</span></div>
         <div className="intelligence-diagram" aria-label="Identity, address, policy and evidence checks require human review"><span><Fingerprint/>Identity</span><span><MapPin/>Address</span><ShieldCheck className="diagram-shield"/><span><FileText/>Policy</span><span><FolderLock/>Evidence</span></div>
       </section>
       <h3 className="specialist-title">Choose a specialist</h3><div className="visual-task-grid">{tasks.map(([id,title,hint,Icon,color])=><button key={id} className="visual-task" onClick={()=>setTab(id)}><span className="visual-task-icon" style={{background:color}}><Icon size={34} strokeWidth={1.8}/></span><strong>{title}</strong><small>{hint}</small><span className="visual-task-arrow" aria-hidden="true">↗</span></button>)}</div>

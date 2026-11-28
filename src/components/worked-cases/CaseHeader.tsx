@@ -1,5 +1,4 @@
-import type { WorkedCase } from '../../lib/demo/workedCases';
-import { fmtCents } from '../../lib/demo/workedCases';
+import { fmtCents, type WorkedCase } from '../../lib/demo/workedCases';
 import { big, lab } from './shared';
 
 export function CaseHeader({ workedCase }: { workedCase: WorkedCase }) {

@@ -1,5 +1,4 @@
-import type { WorkedCaseSummary } from '../../lib/demo/workedCases';
-import { fmtCents } from '../../lib/demo/workedCases';
+import { fmtCents, type WorkedCaseSummary } from '../../lib/demo/workedCases';
 import { card, lab } from './shared';
 
 type Props = { cases: WorkedCaseSummary[]; isLoading: boolean; onOpen: (caseId: string) => void };

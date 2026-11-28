@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "tsx --test src/lib/engine/*.test.ts server/*.test.ts tests/worked-cases/*.spec.ts tests/fuzz/*.spec.ts tests/connectors/*.spec.ts",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "node --stack-size=8000 node_modules/typescript/bin/tsc --noEmit",
+    "lint:eslint": "eslint ."
   },
   "dependencies": {
     "@firebase/eslint-plugin-security-rules": "^0.0.2",
@@ -44,10 +45,13 @@
     "@types/node": "^22.14.0",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@typescript-eslint/eslint-plugin": "^8.74.0",
+    "@typescript-eslint/parser": "^8.74.0",
     "autoprefixer": "^10.4.21",
     "esbuild": "^0.28.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.21.0",
-    "typescript": "^7.0.2"
+    "typescript": "^6.0.3"
   }
 }
