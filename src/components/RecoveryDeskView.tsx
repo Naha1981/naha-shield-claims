@@ -83,6 +83,29 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
     ring_flag: false,
   });
   const [importError, setImportError] = React.useState<string | null>(null);
+  const [importNote, setImportNote] = React.useState<string | null>(null);
+
+  // A Leakage review candidate can prefill this form. The claims file only
+  // knows who was paid and why the claim was flagged; the recoveries lead
+  // completes asset, title and employment fields before registering.
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem('nahashield-recovery-prefill');
+      if (!raw) return;
+      localStorage.removeItem('nahashield-recovery-prefill');
+      const pre = JSON.parse(raw) as Partial<RecoveryCaseInput> & { leakage_note?: string };
+      const { leakage_note, ...fields } = pre;
+      setNewCaseForm((f) => ({ ...f, ...fields }));
+      setImportNote(
+        leakage_note ??
+          'Prefilled from a Leakage review. Complete the asset, title and employment fields before registering.',
+      );
+      setImportOpen(true);
+    } catch {
+      // Ignore an unreadable prefill payload.
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   React.useEffect(() => {
     setReviewerId(activeActorName);
@@ -168,7 +191,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
       .filter(Boolean);
 
     if (!reviewerId.trim()) {
-      setDecisionError('A named human reviewer ID is required by this demo control.');
+      setDecisionError('A named human reviewer ID is required by this sample control.');
       return;
     }
     if (reasons.length === 0) {
@@ -794,6 +817,11 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
               </button>
             </div>
 
+            {importNote && (
+              <p className="p-2.5 rounded bg-amber-500/10 border border-amber-700/50 text-amber-200 text-[13px]">
+                {importNote}
+              </p>
+            )}
             <div className="p-2.5 rounded bg-slate-900/90 border border-slate-800 flex items-center justify-between gap-2 text-[13px]">
               <span className="text-slate-400">
                 Optional: load single-row CSV (case_id, policy_ref, alias, payout, title_type, proceeds, bonds, arrears, costs, employment)

@@ -223,7 +223,12 @@ export function demoCsv(): string {
 }
 
 export function analyseLeakage(csvText: string) {
-  const rows = rowsFromCsv(csvText);
+  return analyseRows(rowsFromCsv(csvText));
+}
+
+// Analysis over canonical claim rows, however they arrived (clean template CSV
+// or a messy insurer export already mapped by claimsFileIngest).
+export function analyseRows(rows: ClaimRow[]) {
   const findings: Finding[] = [];
   const add = (
     rule: string,
@@ -364,7 +369,7 @@ export function analyseLeakage(csvText: string) {
     const key = norm(r.claimant_name) || 'unknown';
     if (!candidates.has(key)) candidates.set(key, { subject: r.claimant_name || 'Unknown claimant', claims: [], paid_zar: 0, rules: new Set() });
     const c = candidates.get(key)!;
-    c.claims.push(r.claim_ref);
+    if (!c.claims.includes(r.claim_ref)) c.claims.push(r.claim_ref);
     c.paid_zar += parseAmount(r.amount_zar);
     for (const x of rules) c.rules.add(x);
   }

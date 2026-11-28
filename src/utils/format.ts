@@ -34,11 +34,14 @@ export async function apiFetch<T>(
   role: RoleId,
   options?: RequestInit,
 ): Promise<T> {
+  let accessCode = '';
+  try { accessCode = localStorage.getItem('nahashield-access-code') ?? ''; } catch { /* storage unavailable */ }
   const res = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
       'x-nahashield-role': role,
+      ...(accessCode ? { 'x-nahashield-access-code': accessCode } : {}),
       ...(options?.headers ?? {}),
     },
   });

@@ -18,7 +18,7 @@ test('CSV parser handles quotes, commas inside fields and CRLF', () => {
   assert.deepEqual(parseCsv('a,b\n')[0], ['a', 'b']);
 });
 
-test('demo file exercises every rule family and stays fully synthetic', () => {
+test('sample file exercises every rule family and stays fully synthetic', () => {
   const csv = demoCsv();
   assert(csv.startsWith(LEAKAGE_COLUMNS.join(',')));
   const out = analyseLeakage(csv);

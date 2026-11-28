@@ -133,11 +133,11 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
                   {g.id} · {g.statute}
                 </span>
                 <span className="text-[13px] font-mono text-slate-300">
-                  Synthetic rule demo
+                  Synthetic rule sample
                 </span>
               </div>
               <div className="text-xs font-semibold text-white">{g.title}</div>
-              <p className="text-xs text-slate-400 leading-relaxed">{g.id==='CG-03'?'Stored content and links can be checked with SHA-256. Current demo file storage is not an independently immutable evidence system.':g.id==='CG-10'?'Separate synthetic browser workspaces with a named reviewer workspace. Production company identity, tenant RLS and account provisioning are not established by this demo.':g.detail}</p>
+              <p className="text-xs text-slate-400 leading-relaxed">{g.id==='CG-03'?'Stored content and links can be checked with SHA-256. Current sample file storage is not an independently immutable evidence system.':g.id==='CG-10'?'Separate synthetic browser workspaces with a named reviewer workspace. Production company identity, tenant RLS and account provisioning are not established by this sample.':g.detail}</p>
             </div>
           ))}
         </div>
@@ -176,7 +176,7 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
               SA Insurance Regulatory Research (Free Provider Chain)
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Selects an official topic and optional section number from your query. Only that topic, section and official text go to free models, not your query. Demo research only; do not enter personal or claim data. Published versions may omit later amendments.
+              Selects an official topic and optional section number from your query. Only that topic, section and official text go to free models, not your query. Sample research only; do not enter personal or claim data. Published versions may omit later amendments.
             </p>
           </div>
           <form onSubmit={handleRegulatorySearch} className="flex gap-2">

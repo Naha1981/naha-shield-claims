@@ -1,5 +1,9 @@
 import {RelationshipGraph} from './components/RelationshipGraph';
 import {RetrospectiveLeakageView} from './components/RetrospectiveLeakageView';
+import {IntakeView} from './components/IntakeView';
+import {InvestigatorView} from './components/InvestigatorView';
+import {WorkedCaseLanding} from './pages/WorkedCaseLanding';
+import {WorkedCaseDetailPage} from './pages/WorkedCaseDetailPage';
 import { SYNTHETIC_RECOVERY_CASES } from '../db/seeds/syntheticData';
 import './network.css';
 import {WorkforceView} from './components/WorkforceView';
@@ -78,7 +82,7 @@ function parseRouteFromLocation(): NavRoute {
     '/vault',
     '/consent',
     '/claims',
-    '/compliance','/workforce','/network','/leakage',
+    '/compliance','/workforce','/network','/leakage','/intake',
   ];
   if (valid.includes(path)) return path;
   return import.meta.env.VITE_STATIC_PREVIEW ? '/leakage' : '/';
@@ -114,7 +118,7 @@ export default function App() {
 
   React.useEffect(() => {
     if(route!=='/network'&&route!=='/leakage'&&!(import.meta.env.VITE_STATIC_PREVIEW&&route==='/recovery'))loadState(activeRole);
-  }, [activeRole, loadState]);
+  }, [activeRole, route, loadState]);
 
   React.useEffect(() => {
     const onPopState = () => setRoute(parseRouteFromLocation());
@@ -270,7 +274,11 @@ export default function App() {
 
   if(route==='/network')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Synthetic graph preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RelationshipGraph/></LayoutShell>;
   if(route==='/recovery'&&import.meta.env.VITE_STATIC_PREVIEW)return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Synthetic recovery preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RecoveryDeskView cases={SYNTHETIC_RECOVERY_CASES} decisions={[]} activeRole={activeRole} activeActorName="Synthetic reviewer" onCaseAdded={async()=>{}} onDecisionRecorded={async()=>{}}/></LayoutShell>;
-  if(route==='/leakage')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Synthetic leakage preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RetrospectiveLeakageView/></LayoutShell>;
+  if(route==='/leakage')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Synthetic leakage preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RetrospectiveLeakageView onNavigate={navigate} activeRole={activeRole}/></LayoutShell>;
+  if(route==='/intake')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Insurer intake" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><IntakeView onNavigate={navigate} activeRole={activeRole}/></LayoutShell>;
+  if(route==='/investigator')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Claims investigation" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><InvestigatorView activeRole={activeRole} onOpenExample={()=>navigate('/see-worked-case-example')}/></LayoutShell>;
+  if(route==='/see-worked-case-example')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Worked example" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><WorkedCaseLanding onOpenCase={(id)=>navigate(`/see-worked-case-example/${id}` as NavRoute)} onSeed={()=>navigate('/investigator')}/></LayoutShell>;
+  if(route.startsWith('/see-worked-case-example/'))return <LayoutShell activeRoute={'/see-worked-case-example'} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Worked example" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><WorkedCaseDetailPage caseId={route.split('/').pop() ?? ''} onBack={()=>navigate('/see-worked-case-example')}/></LayoutShell>;
   if (loading && !data) {
     return (
       <div className="min-h-screen bg-[#0B1120] text-slate-300 flex items-center justify-center p-6 text-sm font-mono">
@@ -280,11 +288,36 @@ export default function App() {
   }
 
   if (error || !data) {
+    const loginRequired = Boolean(error && error.includes('access code'));
     return (
       <div className="min-h-screen bg-[#0B1120] text-red-300 flex flex-col items-center justify-center p-6 gap-4">
         <div className="text-sm font-semibold">
           {error ?? 'Failed to initialize NahaShield'}
         </div>
+        {loginRequired && (
+          <form
+            className="flex items-center gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const input = (e.target as HTMLFormElement).elements.namedItem('access_code') as HTMLInputElement;
+              try { localStorage.setItem('nahashield-access-code', input.value.trim()); } catch { /* storage unavailable */ }
+              setError(null);
+              setLoading(true);
+              loadState(activeRole);
+            }}
+          >
+            <input
+              name="access_code"
+              type="password"
+              placeholder="Access code"
+              aria-label="Access code"
+              className="px-3 py-2 text-xs rounded bg-slate-900 border border-slate-700 text-slate-200"
+            />
+            <button type="submit" className="px-4 py-2 text-xs font-semibold rounded bg-emerald-600 text-white">
+              Sign in
+            </button>
+          </form>
+        )}
         <button
           type="button"
           onClick={() => loadState(activeRole)}

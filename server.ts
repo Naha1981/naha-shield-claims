@@ -1,5 +1,11 @@
 import {graphRoutes} from './server/syntheticGraph';
 import {leakageRoutes} from './server/retrospectiveLeakage';
+import {intakeRoutes} from './server/insurerIntake';
+import {authRoutes, requireAuth} from './server/auth';
+import {recoveryRoutes} from './server/recoveryApi';
+import {workspaceApiRoutes} from './server/workspaceApi';
+import {incidentControlRoutes} from './server/incidentControl';
+import {workedExampleRoutes, workedCasesRoutes} from './server/workedExample';
 import {reviewerGate} from './server/reviewerGate';
 import {workspaceIsolation} from './server/workspaceIsolation';
 import {insuranceTeamRoutes} from './server/insuranceTeam';
@@ -125,12 +131,36 @@ async function startServer() {
   const app = express();
   app.set('trust proxy',1);
   app.use(express.json({ limit: '8mb' }));
+
+  // One-switch login. Off by default while Lawrence tests; set
+  // NAHASHIELD_LOGIN=on to require sign-in on every /api route (health,
+  // the login endpoint and the synthetic mock feeds stay open). Sign-in is a
+  // bearer token from /api/auth/login; the bootstrap access code
+  // (NAHASHIELD_ACCESS_CODE) still works as a fallback.
+  const LOGIN_ON = process.env.NAHASHIELD_LOGIN === 'on';
+  app.use('/api/auth',authRoutes());
+  app.use('/api',(req,res,next)=>{
+    if(!LOGIN_ON)return next();
+    if(req.path==='/health'||req.path.startsWith('/mock-insurer/')||req.path.startsWith('/auth/'))return next();
+    // Insurer webhook pushes authenticate with their shared secret, not a user login.
+    if(req.path.startsWith('/intake/webhook/'))return next();
+    return requireAuth()(req,res,next);
+  });
+
   app.use('/api',isolation.middleware);
   app.use('/api/insurance-team',insuranceTeamRoutes());
   app.use('/api/synthetic-graph',graphRoutes());
   app.use('/api/leakage',leakageRoutes());
+  const intake=intakeRoutes();
+  app.use('/api/intake',intake.router);
+  app.use('/api/mock-insurer',intake.mockRouter);
   const workforce = workforceRoutes(store);
   app.use('/api/workforce', workforce);
+  app.use('/api/v1/recovery-cases', recoveryRoutes());
+  app.use('/api/v1/worked-example', workedExampleRoutes());
+  app.use('/api/v1', workedCasesRoutes());
+  app.use('/api/v1', workspaceApiRoutes());
+  app.use('/api/ops', incidentControlRoutes());
   // Synthetic test inbox: in-memory, no external sends. Auth = the shared private reviewer session; no header-based roles.
   const synthChat = new SynthChat({
     sink: (e) => store.logAudit({ actor_role: 'head_of_forensics', actor_id: e.actor_id, action: e.action, object_type: 'claim', object_id: e.object_id, details: e.details }),
@@ -142,7 +172,7 @@ async function startServer() {
   // Original reviewer records require the named authenticated principal, never a role header.
   app.use('/api',reviewerGate(isolation.current,workforce.principal));
 
-  app.post('/api/demo-view-audit',async(req,res)=>{const role=String(req.body?.role||'');if(!VALID_ROLES.has(role as RoleId))return res.status(400).json({error:'Unknown demo view'});await store.logAudit({actor_role:'head_of_forensics',actor_id:'demo-view-session',action:'DEMO_VIEW_FILTER_CHANGED_NOT_AUTHORITY',object_type:'claim',object_id:'SYN-DEMO-VIEW',details:{selected_view:role,permission_changed:false}});res.json({ok:true,permission_changed:false})});
+  app.post('/api/demo-view-audit',async(req,res)=>{const role=String(req.body?.role||'');if(!VALID_ROLES.has(role as RoleId))return res.status(400).json({error:'Unknown sample view'});await store.logAudit({actor_role:'head_of_forensics',actor_id:'demo-view-session',action:'DEMO_VIEW_FILTER_CHANGED_NOT_AUTHORITY',object_type:'claim',object_id:'SYN-DEMO-VIEW',details:{selected_view:role,permission_changed:false}});res.json({ok:true,permission_changed:false})});
 
   // Health endpoint for Render & monitoring
   app.get('/api/health', (_req, res) => {
@@ -154,6 +184,7 @@ async function startServer() {
       vault_valid: snap.vault_verification.valid,
       psi_phase3_unlocked: snap.psi_phase3_unlocked,
       residency_region: snap.residency_region,
+      login_on: LOGIN_ON,
     });
   });
 
