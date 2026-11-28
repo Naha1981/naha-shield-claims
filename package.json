@@ -8,7 +8,7 @@
     "build": "vite build",
     "start": "tsx server.ts",
     "preview": "vite preview",
-    "test": "tsx --test src/lib/engine/*.test.ts server/*.test.ts tests/worked-cases/*.spec.ts tests/fuzz/*.spec.ts",
+    "test": "tsx --test src/lib/engine/*.test.ts server/*.test.ts tests/worked-cases/*.spec.ts tests/fuzz/*.spec.ts tests/connectors/*.spec.ts",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit"
   },

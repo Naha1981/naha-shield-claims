@@ -1,13 +1,13 @@
-# NahaShield CI (spec 4 section 3, adapted to this repo's stack: Vite + tsx
+# ClaimTrace CI (spec 4 section 3, adapted to this repo's stack: Vite + tsx
 # --test). His original workflow was Python/pytest-based; this one runs the
 # real gates: typecheck, unit + integration + fuzz tests, build, generator
 # determinism. Free GitHub Actions only; no secrets; no staging or live
 # targets; synthetic data only.
-name: NahaShield CI
+name: ClaimTrace CI
 
 on:
   push:
-    branches: [main, claims-ingest]
+    branches: [main, claims-ingest, mega-rc]
   pull_request:
 
 jobs:
