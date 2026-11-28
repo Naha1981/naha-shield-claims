@@ -2,6 +2,7 @@
 // this list. Add a route here, never in two places.
 export type NavRoute =
   | '/'
+  | '/needs-ok'
   | '/recovery'
   | '/vault'
   | '/consent'
@@ -17,6 +18,7 @@ export type NavRoute =
 export const ROUTE_REGISTRY: Array<{ route: NavRoute; prefix?: boolean }> = [
   { route: '/' },
   { route: '/intake' },
+  { route: '/needs-ok' },
   { route: '/claims' },
   { route: '/investigator' },
   { route: '/network' },

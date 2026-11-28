@@ -5,13 +5,14 @@ Status legend: DONE (with proof) / IN PROGRESS / NOT DONE. Every DONE links to p
 
 ## RC build order (Thabiso 13:04, audit-rc branch, proof per screen: phone light+dark)
 - [DONE] Screen 1 - Navigation in 5 enterprise groups + Executive intelligence board (financial attribution waterfall: gross prevented - deductions = net attributable; outcome states cash received / still held / illustrative fee fields base-15%-adjustments-final; trust-status badges; all figures computed from the live sample ledger). Proof: RC preview screenshots rc-board-light/dark + rc-nav-light/dark, gates 257/257 tests + tsc + eslint + build green.
-- [ ] Screen 2 - Needs Your OK three-pane adjudication workstation (queue | evidence | decision panel; inspection sequence replaces 10s countdown)
+- [DONE] Screen 2 - Needs Your OK three-pane adjudication workstation (/needs-ok: queue ranked by deadline+rands with priority badges | evidence with what/why/exposure/timeline/source | decision panel with recommendation, innocent explanation, 5-step inspection sequence replacing the 10s countdown, authority line, reasoned decision required). Decisions record through the real POST /api/decisions into the visitor's isolated sample store (RBAC roles enforced). Proof: screenshots screen2-*.png; automated decide-flow pass in both themes (DECIDE-FLOW-OK); gates 257/257 + tsc + eslint + build. Contrast fix: active queue card no longer trips the light-mode filled-button override.
 - [ ] Screen 3 - Case workspace tabs (overview, timeline, identity & death with 7-point matrix, relationships, geospatial, SIM/RICA/bank, documents, AI findings, human decisions, audit)
 - [ ] Screen 4 - Savings ledger lifecycle states + Rand found page (12:05 order)
 - [ ] Screen 5 - AI workforce runs (operations console, run detail fields)
 - [ ] Screen 6 - Reports (executive briefing, forensic report, finance & assurance statement; every number links to source)
 
 ## refactoring-ui applied (source: github.com/edisonmbli/refactoring-ui-skill, MIT licence, attribution in NOTICE)
+- [DONE] Needs Your OK: one primary action (record decision) with two secondary; emphasis by de-emphasis (queue cards quiet, selected outlined not filled); inspection sequence as grouped checklist; measure kept under 75ch; no colour-only signals (priority badges carry text labels).
 - [DONE] Executive Board + navigation: hierarchy via one primary figure (net attributable) with de-emphasised secondary legs; section titles as small tracked labels; three text colours only; group spacing exceeds item spacing; no grey text on coloured backgrounds; tokens drawn from the existing project scale (no new deps). Before/after: before = flat Savings hero (screenshots 101800/101819 set), after = rc-board/rc-nav set.
 
 ## Phase 1 - Critical UX defects

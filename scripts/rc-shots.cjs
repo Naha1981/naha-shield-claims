@@ -15,8 +15,36 @@ const OUT = process.env.RC_OUT || '/tmp/rc-shots';
     await ctx.addInitScript((t) => { try { localStorage.setItem('nahashield-theme', t); } catch (e) {} }, theme);
     const page = await ctx.newPage();
     page.on('pageerror', (e) => console.log('PAGEERROR:', String(e).slice(0, 300)));
-    await page.goto(BASE + '/', { waitUntil: 'load', timeout: 90000 });
+    await page.goto(BASE + (process.env.RC_ROUTE || '/'), { waitUntil: 'load', timeout: 90000 });
     await page.waitForSelector('header', { timeout: 90000 });
+    if (process.env.RC_ONLY === 'needsok-decide') {
+      await page.waitForSelector('h1:text-is("Needs Your OK")', { timeout: 90000 });
+      await page.waitForTimeout(1000);
+      const boxes = page.locator('[aria-label="Decision panel"] input[type=checkbox]');
+      const n = await boxes.count();
+      for (let i = 0; i < n; i++) await boxes.nth(i).check();
+      await page.fill('[aria-label="Reasoned decision"]', 'Sample walkthrough: evidence checked, innocent explanation weighed, no payout implied.');
+      await page.click('text=Record: keep investigating');
+      await page.waitForSelector('text=Decision recorded', { timeout: 20000 });
+      console.log('DECIDE-FLOW-OK');
+      await page.locator('[aria-label="Decision panel"]').scrollIntoViewIfNeeded();
+      await page.screenshot({ path: `${OUT}/rc-needsok-receipt-${theme}.png` });
+      console.log(`saved rc-needsok-receipt-${theme}.png`);
+      await ctx.close();
+      continue;
+    }
+    if (process.env.RC_ONLY === 'needsok') {
+      await page.waitForSelector('h1:text-is("Needs Your OK")', { timeout: 90000 });
+      await page.waitForTimeout(1200);
+      await page.screenshot({ path: `${OUT}/rc-needsok-queue-${theme}.png` });
+      console.log(`saved rc-needsok-queue-${theme}.png`);
+      await page.locator('[aria-label="Decision panel"]').scrollIntoViewIfNeeded();
+      await page.waitForTimeout(500);
+      await page.screenshot({ path: `${OUT}/rc-needsok-decision-${theme}.png` });
+      console.log(`saved rc-needsok-decision-${theme}.png`);
+      await ctx.close();
+      continue;
+    }
     await page.waitForSelector('text=Executive intelligence board', { timeout: 90000 });
     await page.waitForTimeout(1500);
     await page.screenshot({ path: `${OUT}/rc-board-${theme}${width === 390 ? '' : '-' + width}.png` });

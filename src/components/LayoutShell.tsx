@@ -62,6 +62,7 @@ const NAV_GROUPS: Array<{ group: string; items: NavItem[] }> = [
     group: '02 · Claims Operations',
     items: [
       { route: '/intake', label: 'Intake', sublabel: 'Files · APIs · Webhooks', icon: FileSpreadsheet },
+      { route: '/needs-ok', label: 'Needs Your OK', sublabel: 'Review queue · Human decisions', icon: ShieldAlert },
       { route: '/claims', label: 'Claims', sublabel: 'Timing and payment checks', icon: ShieldAlert },
       { route: '/investigator', label: 'Investigate', sublabel: 'Queue · Cases · Decisions', icon: FileSearch },
     ],

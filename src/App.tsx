@@ -13,6 +13,7 @@ import React from 'react';
 import { LayoutShell, type NavRoute } from './components/LayoutShell';
 import { parseRouteFromLocation } from './routes';
 import { OverviewLedgerView } from './components/OverviewLedgerView';
+import { NeedsOkView } from './components/NeedsOkView';
 import { RecoveryDeskView } from './components/RecoveryDeskView';
 import { EvidenceVaultView } from './components/EvidenceVaultView';
 import { ConsentDeskView } from './components/ConsentDeskView';
@@ -327,6 +328,7 @@ export default function App() {
       onOpenReadout={handleOpenReadout}
     >
       {route === '/workforce' && <WorkforceTabs activeRole={activeRole} onRecorded={()=>loadState(activeRole)}/>}
+      {route === '/needs-ok' && <NeedsOkView claims={data.claims_preview ?? []} activeRole={activeRole} onChanged={()=>loadState(activeRole)}/>}
       {route === '/' && (
         <OverviewLedgerView
           orgId={data.org_id}
