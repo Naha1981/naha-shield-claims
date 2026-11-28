@@ -82,3 +82,17 @@ Where specs conflicted, the stricter value was kept and the conflict is listed h
 - S7-5 Indicator "submitted one day after death" vs spec 6 dates (death 3 June, submitted 5 June) -> "within two days of death".
 - S7-6 Indicator set is the union: spec 7's 8 plus spec 6's "claimant not immediate family" = 9.
 - S7-7 All approver/person names replaced with neutral roles; insurer placeholder "Sample Insurer" served by the API; viewer-typed name only fills the landing page heading locally.
+
+## Spec 4 build-out - TC-FUZZ reconciliations (28 Nov 2026)
+
+- S4-FUZZ-001: TC-FUZZ-001 expects confidence 1.00 for an exact ID match; the spec 3 TC-DUP suite pins 0.99. Kept 0.99 (spec 3 pinned value).
+- S4-FUZZ-002: TC-FUZZ-002 expects 0.98 for a one-character name difference with the same ID; spec 3 pins 0.96. Kept 0.96.
+- S4-FUZZ-006/007/008/009: spec 4 expects 0.55 (phone), 0.50 (address), 0.60 (device), 0.85 (bank). The engine's spec 3 values are stricter: 0.80, 0.65, 0.78, 0.97. Kept the stricter values.
+- S4-FUZZ-011/012: spec 4 expects 0.40 for parlour-only and doctor-only; the engine's spec 3 values are 0.35. Kept 0.35.
+- S4-FUZZ-016..020: spec 4 differentiates name-variation confidence (0.85-0.95); the engine treats any close name variation with a matching ID+DOB as fuzzy_name_exact_id 0.96 (stricter). Kept 0.96.
+- S4-FUZZ-021..030: spec 4 degrades confidence (0.75-0.95) when corroborating fields are missing; the engine keeps the exact-ID match at 0.99 (stricter). Kept 0.99.
+- S4-FUZZ-005/010: two standalone signals spec 3 did not cover were ADDED: same_dob_only (0.25, low, no action) and same_agent_only (0.45, medium, monitor only).
+- S4-GEN: his generator was not deterministic (wall-clock submitted_at and unseeded policy UUIDs). Fixed: seeded timestamps and UUIDs; two seed-42 runs now produce byte-identical output (proven with diff -r).
+- S4-CI: his CI was Python/pytest; rewritten for this repo (npm ci, tsc, npm test incl. fuzz, vite build, generator determinism job). Thresholds kept from 3.3 (p95<1500ms, p99<3000ms, errors<1%, checks>99%) but flagged: they must be baselined from real local runs before tightening.
+- S4-K6: k6 load/stress/soak scripts saved to load/k6/ with a hard guard that refuses any non-local BASE_URL. Local/synthetic only.
+- S4-RPT: report template saved to docs/build-inputs/test-execution-report-template.md with a banner marking every example number a placeholder, never our results.
