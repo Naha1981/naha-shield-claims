@@ -17,17 +17,16 @@ import type {
 import { TodayHero } from './TodayHero';
 import { ExecutiveBoard } from './ExecutiveBoard';
 import { apiFetch, formatZar } from '../utils/format';
-import { generateAndDownloadPopiaPdf } from '../utils/pdfReport';
 import { AnomalyDensityHeatmap } from './AnomalyDensityHeatmap';
 import type { AnomalyAlertRecord } from '../lib/engine/anomaly';
 import { KpiSummaryWidget } from './KpiSummaryWidget';
 import { RegulatoryNewsFeedWidget } from './RegulatoryNewsFeedWidget';
 import { InfrastructureHealthWidget } from './InfrastructureHealthWidget';
-import {
-  StakeholderApprovalWorkflow,
-  type ApplyDigitalSignaturePayload,
-  type ApplyDigitalSignatureResult,
+import type {
+  ApplyDigitalSignaturePayload,
+  ApplyDigitalSignatureResult,
 } from './StakeholderApprovalWorkflow';
+const StakeholderApprovalWorkflow = React.lazy(() => import('./StakeholderApprovalWorkflow').then(m => ({ default: m.StakeholderApprovalWorkflow })));
 import {
   isLedgerEntryVerified,
   type LedgerApprovalWorkflowRecord,
@@ -206,6 +205,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
         }),
       });
 
+      const { generateAndDownloadPopiaPdf } = await import('../utils/pdfReport');
       const filename = generateAndDownloadPopiaPdf({
         reportId: auditMeta.report_id,
         generatedAt: auditMeta.generated_at,
@@ -460,6 +460,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
 
       {/* Stakeholder Dual-Factor Approval Workflow (Head of Forensics + CFO) */}
       <div id="approvals-tray" className="scroll-mt-20">
+      <React.Suspense fallback={<div className="p-6 text-sm text-slate-500">Loading approvals…</div>}>
       <StakeholderApprovalWorkflow
         orgId={orgId}
         entries={entries}
@@ -468,6 +469,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
         activeActorName={activeActorName}
         onApplyDigitalSignature={onApplyDigitalSignature}
       />
+      </React.Suspense>
       </div>
 
       {/* Ledger Controls & Table */}

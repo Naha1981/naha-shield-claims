@@ -7,8 +7,8 @@ import {WorkedCaseLanding} from './pages/WorkedCaseLanding';
 import {WorkedCaseDetailPage} from './pages/WorkedCaseDetailPage';
 import { SYNTHETIC_RECOVERY_CASES } from '../db/seeds/syntheticData';
 import './network.css';
-import {WorkforceView} from './components/WorkforceView';
-import{WorkforceTabs}from'./components/WorkforceTabs';
+const WorkforceView = React.lazy(() => import('./components/WorkforceView').then(m => ({ default: m.WorkforceView })));
+const WorkforceTabs = React.lazy(() => import('./components/WorkforceTabs').then(m => ({ default: m.WorkforceTabs })));
 import React from 'react';
 import { LayoutShell, type NavRoute } from './components/LayoutShell';
 import { parseRouteFromLocation } from './routes';
@@ -22,7 +22,7 @@ import { RecoveryDeskView } from './components/RecoveryDeskView';
 import { EvidenceVaultView } from './components/EvidenceVaultView';
 import { ConsentDeskView } from './components/ConsentDeskView';
 import { ClaimsPreviewView } from './components/ClaimsPreviewView';
-import { ComplianceAuditView } from './components/ComplianceAuditView';
+const ComplianceAuditView = React.lazy(() => import('./components/ComplianceAuditView').then(m => ({ default: m.ComplianceAuditView })));
 import type {
   AuditLogRecord,
   ClaimAgentProposalRecord,
@@ -312,7 +312,7 @@ export default function App() {
           className="px-4 py-2 text-xs font-semibold rounded bg-emerald-600 text-white"
         >
           Retry Connection
-        </button><a href="/review" className="underline">Open the public sample review</a><div className="w-full max-w-2xl"><WorkforceView onRecorded={()=>void loadState(activeRole)}/></div>
+        </button><a href="/review" className="underline">Open the public sample review</a><div className="w-full max-w-2xl"><React.Suspense fallback={<div className="p-6 text-sm text-slate-500">Loading…</div>}><WorkforceView onRecorded={()=>void loadState(activeRole)}/></React.Suspense></div>
       </div>
     );
   }
@@ -331,7 +331,7 @@ export default function App() {
       onInspectHeatmap={handleInspectHeatmap}
       onOpenReadout={handleOpenReadout}
     >
-      {route === '/workforce' && <WorkforceTabs activeRole={activeRole} onRecorded={()=>loadState(activeRole)}/>}
+      {route === '/workforce' && <React.Suspense fallback={<div className="p-6 text-sm text-slate-500">Loading workforce…</div>}><WorkforceTabs activeRole={activeRole} onRecorded={()=>loadState(activeRole)}/></React.Suspense>}
       {route === '/needs-ok' && <NeedsOkView claims={data.claims_preview ?? []} activeRole={activeRole} onChanged={()=>loadState(activeRole)}/>}
       {route === '/reports' && <ReportsView claims={data.claims_preview ?? []} entries={data.ledger_entries ?? []} recoveryCases={data.recovery_cases ?? []} decisions={data.decisions ?? []} agentRuns={data.agent_runs ?? []} activeRole={activeRole} onNavigate={navigate}/>}
       {route === '/ai-ops' && <AiOperationsView agentRuns={data.agent_runs ?? []} agentProposals={data.agent_proposals ?? []} claims={data.claims_preview ?? []} activeRole={activeRole} onNavigate={navigate}/>}
@@ -405,6 +405,7 @@ export default function App() {
       )}
 
       {route === '/compliance' && (
+        <React.Suspense fallback={<div className="p-6 text-sm text-slate-500">Loading governance…</div>}>
         <ComplianceAuditView
           guardrails={data.guardrails}
           adapters={data.adapters}
@@ -415,6 +416,7 @@ export default function App() {
           activeRole={activeRole}
           onRefresh={() => loadState(activeRole)}
         />
+        </React.Suspense>
       )}
     </LayoutShell>
   );

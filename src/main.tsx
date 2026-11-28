@@ -1,6 +1,7 @@
 import {WorkspaceNotice} from './components/WorkspaceNotice';
-import{PublicReview}from'./components/PublicReview';
-import{PublicMapPreview}from'./components/PublicMapPreview';
+import React from 'react';
+const PublicReview = React.lazy(() => import('./components/PublicReview').then(m => ({ default: m.PublicReview })));
+const PublicMapPreview = React.lazy(() => import('./components/PublicMapPreview').then(m => ({ default: m.PublicMapPreview })));
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import {ErrorBoundary} from './components/ErrorBoundary.tsx';
@@ -11,7 +12,7 @@ async function mount(){
 await fetch('/api/workspace');
 createRoot(document.getElementById('root')!).render(
   <ErrorBoundary>
-    {location.pathname.startsWith('/review')?<><WorkspaceNotice/><PublicReview module={location.pathname.split('/')[2]||'workforce'}/></>:location.pathname==='/map-preview'?<><WorkspaceNotice/><PublicMapPreview/></>:<App/>}
+    {location.pathname.startsWith('/review')?<React.Suspense fallback={null}><WorkspaceNotice/><PublicReview module={location.pathname.split('/')[2]||'workforce'}/></React.Suspense>:location.pathname==='/map-preview'?<React.Suspense fallback={null}><WorkspaceNotice/><PublicMapPreview/></React.Suspense>:<App/>}
   </ErrorBoundary>,
 );
 
