@@ -479,7 +479,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
               {liveTriage.rule_46a_flag && (
                 <div className="p-3 rounded bg-slate-900 border border-amber-500/40 text-xs text-amber-200">
                   <span className="font-semibold">Uniform Rule 46A Primary Residence: </span>
-                  Judicial oversight & reserve-price auction delay must be modelled prior to execution.
+                  Judicial oversight and reserve-price auction delays are included before any execution spend.
                 </div>
               )}
               {liveTriage.ipilra_pto_flag && (
