@@ -12,6 +12,7 @@ Status legend: DONE (with proof) / IN PROGRESS / NOT DONE. Every DONE links to p
 - [ ] Screen 6 - Reports (executive briefing, forensic report, finance & assurance statement; every number links to source)
 
 ## refactoring-ui applied (source: github.com/edisonmbli/refactoring-ui-skill, MIT licence, attribution in NOTICE)
+- [DONE] AI Workforce console: pending approvals ranked first, runs as quiet rows opening detail in place, engineering metrics behind a disclosure, no terminal theatrics.
 - [DONE] Savings Ledger + Rand found: state cards with big figures first, bridge as plain arithmetic lines, ledger detail behind a disclosure; costs visually de-emphasised vs savings; exact cents where money is stated.
 - [DONE] Case Workspace: one case per screen with tabs for focus; quiet record rows with text-labelled state chips (never colour-only); details behind the inspector instead of dense pages; matrix table scrolls horizontally under the fold on phone.
 - [DONE] Needs Your OK: one primary action (record decision) with two secondary; emphasis by de-emphasis (queue cards quiet, selected outlined not filled); inspection sequence as grouped checklist; measure kept under 75ch; no colour-only signals (priority badges carry text labels).

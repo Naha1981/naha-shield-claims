@@ -76,6 +76,24 @@ const OUT = process.env.RC_OUT || '/tmp/rc-shots';
       await ctx.close();
       continue;
     }
+    if (process.env.RC_ONLY === 'aiops') {
+      await page.waitForSelector('text=AI operations and orchestration', { timeout: 90000 });
+      await page.waitForTimeout(1200);
+      await page.screenshot({ path: `${OUT}/rc-aiops-${theme}.png` });
+      console.log(`saved rc-aiops-${theme}.png`);
+      const runBtn = page.locator('button[aria-label^="Open run detail"]').first();
+      if (await runBtn.count()) {
+        await runBtn.click();
+        await page.waitForTimeout(600);
+        await page.locator('text=Final run outcome').scrollIntoViewIfNeeded();
+        await page.waitForTimeout(400);
+        await page.screenshot({ path: `${OUT}/rc-aiops-run-${theme}.png` });
+        console.log(`saved rc-aiops-run-${theme}.png`);
+        console.log('RUN-DETAIL-OK');
+      }
+      await ctx.close();
+      continue;
+    }
     if (process.env.RC_ONLY === 'needsok') {
       await page.waitForSelector('h1:text-is("Needs Your OK")', { timeout: 90000 });
       await page.waitForTimeout(1200);

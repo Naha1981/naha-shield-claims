@@ -16,6 +16,7 @@ import { OverviewLedgerView } from './components/OverviewLedgerView';
 import { NeedsOkView } from './components/NeedsOkView';
 import { CaseWorkspaceView } from './components/CaseWorkspaceView';
 import { SavingsLedgerView, RandFoundView } from './components/SavingsLedgerView';
+import { AiOperationsView } from './components/AiOperationsView';
 import { RecoveryDeskView } from './components/RecoveryDeskView';
 import { EvidenceVaultView } from './components/EvidenceVaultView';
 import { ConsentDeskView } from './components/ConsentDeskView';
@@ -331,6 +332,7 @@ export default function App() {
     >
       {route === '/workforce' && <WorkforceTabs activeRole={activeRole} onRecorded={()=>loadState(activeRole)}/>}
       {route === '/needs-ok' && <NeedsOkView claims={data.claims_preview ?? []} activeRole={activeRole} onChanged={()=>loadState(activeRole)}/>}
+      {route === '/ai-ops' && <AiOperationsView agentRuns={data.agent_runs ?? []} agentProposals={data.agent_proposals ?? []} claims={data.claims_preview ?? []} activeRole={activeRole} onNavigate={navigate}/>}
       {route === '/savings-ledger' && <SavingsLedgerView entries={data.ledger_entries ?? []} recoveryCases={data.recovery_cases ?? []} activeRole={activeRole} onNavigate={navigate}/>}
       {route === '/rand-found' && <RandFoundView entries={data.ledger_entries ?? []} recoveryCases={data.recovery_cases ?? []} vaultValid={Boolean(data.vault_verification?.valid)} activeRole={activeRole}/>}
       {route === '/case-workspace' && <CaseWorkspaceView claims={data.claims_preview ?? []} decisions={data.decisions ?? []} auditLog={data.audit_log ?? []} evidenceItems={data.evidence_items ?? []} activeRole={activeRole} onNavigate={navigate}/>}
