@@ -256,3 +256,14 @@ html[data-theme="light"] button[class*="bg-emerald-"]:enabled:hover,html[data-th
 /* The alert count badge keeps white text on its red chip in both themes. */
 html[data-theme="light"] [data-testid="header-anomaly-alert-badge"].bg-red-600{color:#fff!important}
 html[data-theme="light"] button[class*="bg-amber-7"]{background-color:#86530c!important;color:#fff!important;border-color:#86530c!important}
+
+/* ClaimTrace brand mark: transparent mask tinted per theme so it takes the header colour. */
+.claimtrace-mark {
+  display: inline-block;
+  background-color: #166534; /* deep green on the light header */
+  -webkit-mask: url(/claimtrace-mark.png) center / contain no-repeat;
+  mask: url(/claimtrace-mark.png) center / contain no-repeat;
+}
+.dark .claimtrace-mark {
+  background-color: #86efac; /* bright green on the dark header */
+}

@@ -193,10 +193,9 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
             }}
             className="flex items-center gap-2 font-display text-sm sm:text-base font-bold tracking-tight text-white whitespace-nowrap shrink-0"
           >
-            <img
-              src="/claimtrace-logo.png"
-              alt="ClaimTrace logo"
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-md shrink-0"
+            <span
+              aria-hidden="true"
+              className="claimtrace-mark w-9 h-9 sm:w-10 sm:h-10 shrink-0"
             />
             ClaimTrace
           </a>
