@@ -1,4 +1,4 @@
-# NahaShield — Execution Plan (`execution-plan.md`)
+# ClaimTrace — Execution Plan (`execution-plan.md`)
 
 | | |
 |---|---|
@@ -183,7 +183,7 @@ Engage ASISA's Information Sharing Working Group from Q2 2027; support insurers'
 ### G3 — Phase 3 entry
 - [ ] Information Regulator prior authorisation (POPIA s57/58) or approved industry code of conduct
 - [ ] Competition Act / ASISA governance sign-off
-- [ ] At least two insurers running NahaShield internally
+- [ ] At least two insurers running ClaimTrace internally
 
 ---
 

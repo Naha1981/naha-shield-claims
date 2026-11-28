@@ -1,8 +1,8 @@
-# NahaShield — Build Plan (`plan.md`)
+# ClaimTrace — Build Plan (`plan.md`)
 
 | | |
 |---|---|
-| **Product** | NahaShield — Insurance Integrity, Consent & Recovery Intelligence Platform |
+| **Product** | ClaimTrace — Insurance Integrity, Consent & Recovery Intelligence Platform |
 | **Company** | NahaLabs (Pty) Ltd |
 | **Jurisdiction** | Republic of South Africa (data subjects, insurers, regulators) |
 | **Basis** | PRD v1.0 (25 Nov 2026), UX/deliverables brief, ROI proof brief, PRD v0.1 |
@@ -151,7 +151,7 @@ All eight value layers are stored; the workbook shows the five that drive routin
 5. Rule 46A flag adds a reserve-price / unsold-auction delay assumption to the NRV timeline.
 
 ### 6.3 Ledger counting rules (software-enforced; mirrors `Ledger`)
-- **Protected (live)** counts only if: flagged by NahaShield *before* payout/issuance **and** existing controls had *not* flagged it **and** a human confirmed the outcome **and** Head of Forensics **and** Finance both signed. Cancelled unauthorised policies book at an agreed **booking factor**, not full cover.
+- **Protected (live)** counts only if: flagged by ClaimTrace *before* payout/issuance **and** existing controls had *not* flagged it **and** a human confirmed the outcome **and** Head of Forensics **and** Finance both signed. Cancelled unauthorised policies book at an agreed **booking factor**, not full cover.
 - **Backtest** values are stored in a separate column and labelled *would have protected*.
 - **Net cash recovered** = bank-reconciled receipt − legal/tracing/sheriff cost. Judgments, orders, arrests and repayment promises never count.
 - **Futile spend avoided** counts only when triage halted litigation and the outcome is confirmed and signed.
@@ -178,7 +178,7 @@ Messages are lint-checked against a tipping-off phrase list (FIC s29(4)/s53) and
 ### 6.5 Timer service (M3)
 - Business-day calendar with SA public holidays; **2-business-day** decision clock (Rule 2A.8.1) starts at claim receipt.
 - **14-business-day** dispute opens only with an objective discrepancy, a named assessor and a Basdeo-compliant notice (stated reason + end date; no indefinite holds).
-- FIC s29 clock is advisory to the insurer's MLRO only; NahaShield never files an STR.
+- FIC s29 clock is advisory to the insurer's MLRO only; ClaimTrace never files an STR.
 
 ### 6.6 Rules v1 starter catalogue (thresholds are per-insurer parameters, never hard-coded)
 | Module | Rules |
