@@ -60,7 +60,7 @@ button svg { flex-shrink:0; }
 input:not([type="checkbox"]):not([type="range"]),select,textarea { min-height:44px;border-radius:8px; padding:10px 12px;line-height:1.4; }
 input[type="checkbox"] { width:18px;height:18px;vertical-align:middle;accent-color:#087864; }
 summary {min-height:40px;cursor:pointer;align-content:center;font-weight:600;}
-:focus-visible {outline:3px solid #1c85d9!important;outline-offset:3px;}
+:focus-visible {outline:3px solid #087864!important;outline-offset:3px;}
 html[data-theme="light"] { color-scheme:light; --ns-ground:#f2f5f8; --ns-surface:#fff;--ns-ink:#13283f;--ns-secondary:#526578;--ns-rule:#d9e1e9;--color-slate-950:#f2f5f8;--color-slate-900:#fff;--color-slate-800:#e5ebf1;--color-slate-700:#cad5e0;--color-slate-600:#506478;--color-slate-500:#617387;--color-slate-400:#526578;--color-slate-300:#40556a;--color-slate-200:#263f55;--color-slate-100:#162e44; }
 html[data-theme="light"] body {background:var(--ns-ground);color:var(--ns-ink);}
 html[data-theme="light"] [class*="bg-[#0B1120]"], html[data-theme="light"] [class*="bg-slate-950"] {background-color:var(--ns-ground)!important;}
@@ -267,3 +267,5 @@ html[data-theme="light"] button[class*="bg-amber-7"]{background-color:#86530c!im
 .dark .claimtrace-mark {
   background-color: #86efac; /* bright green on the dark header */
 }
+/* Programmatic scroll-to-top focus on route change is not keyboard focus: no ring. Keyboard users still get the green focus ring via :focus-visible elsewhere. */
+.ns-main h1[tabindex="-1"]:focus,.ns-main h1[tabindex="-1"]:focus-visible{outline:none!important}
