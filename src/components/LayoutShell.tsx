@@ -207,7 +207,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
           </span>
           <span
             className="demo-pill"
-            title="Demonstration workspace: synthetic data only, no live actions or payments"
+            title="Sample workspace: synthetic data only, no live actions or payments"
           >
             SAMPLE · fictional data
           </span>
