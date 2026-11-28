@@ -21,7 +21,7 @@ Synthetic data only. Nothing released.
 | e2e intake (phone, dark) | Pass |
 | e2e ingest (Excel, sample file) | Pass |
 | WCAG AA contrast audit, both themes | Pass (all screens) |
-| k6 load/stress/soak | Not run here — local-only suites in load/k6, thresholds p95 < 1500ms, p99 < 3000ms (need a scheduled local run) |
+| k6 load profile (1 min, 10 VUs, local :3100) | Pass — 303,083 duplicate-check iterations, 5,042 req/s, 909,249/909,249 checks, 0.00% failures, p95 4.2ms vs 1500ms threshold (k6 v0.55.0) |
 | bun.lock vs package.json (Railway bun install) | Consistent (esbuild 0.28.2 satisfies ^0.28.0) |
 
 ## 2. Scope of this build
@@ -74,8 +74,14 @@ Synthetic data only. Nothing released.
 
 ## 5. Known not-done (honest gaps)
 
-- k6 profiles exist but were not executed in this run (need a local k6 binary
-  and a timed run; scripts refuse non-local targets).
+- k6 load profile executed and green (table above). The first execution
+  exposed three harness bugs, all fixed in load/k6/*.js: wrong API prefix
+  (/v1 -> /api/v1), no claim seeding (duplicate-checks require an existing
+  claim with a matchable signal), and no workspace-cookie reuse (cookie-less
+  requests each created a synthetic workspace and hit the 200-workspace cap
+  with 503s). Idempotent 202 replays (TC-DUP-031) are now asserted as passes.
+  The stress (30 min) and soak (4 h) profiles received the same fixes but were
+  not run to duration here; they stay local-only scheduled runs.
 - Connectors have no screen of their own; they surface through indicator text
   and the worked-case example, per the order. A connectors/audit-log view is
   a candidate next item only if he wants one.
