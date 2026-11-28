@@ -41,55 +41,57 @@ interface LayoutShellProps {
   children: React.ReactNode;
 }
 
-const NAV_ITEMS: Array<{
+type NavItem = {
   route: NavRoute;
   label: string;
   sublabel: string;
   icon: React.ComponentType<{ className?: string }>;
-}> = [
- {route:'/network',label:'Relationships',sublabel:'Fictional graph · Review leads',icon:ShieldAlert},
- {route:'/leakage',label:'Leakage',sublabel:'Past claims · Review leads',icon:FileSearch},
- {route:'/intake',label:'Intake',sublabel:'Files · APIs · Webhooks',icon:FileSpreadsheet},
- {route:'/investigator',label:'Investigate',sublabel:'Queue · Cases · Decisions',icon:FileSearch},
- {route:'/see-worked-case-example',label:'Example',sublabel:'Worked case · Sample data',icon:FileSearch},
- {route:'/workforce',label:'AI team',sublabel:'Sample uploads · Human review',icon:ShieldCheck},
+};
+
+// Enterprise navigation: five workspaces per the 28 Nov alignment review.
+// New destinations (Needs Your OK, Case Workspace, Savings Ledger, Reports)
+// join their group as those screens land on the audit-rc branch.
+const NAV_GROUPS: Array<{ group: string; items: NavItem[] }> = [
   {
-    route: '/',
-    label: 'Savings',
-    sublabel: 'Review example amounts',
-    icon: FileSpreadsheet,
+    group: '01 · Overview',
+    items: [
+      { route: '/', label: 'Executive Board', sublabel: 'Money states · Sample', icon: FileSpreadsheet },
+    ],
   },
   {
-    route: '/recovery',
-    label: 'Recovery',
-    sublabel: 'Assess recovery options',
-    icon: Scale,
+    group: '02 · Claims Operations',
+    items: [
+      { route: '/intake', label: 'Intake', sublabel: 'Files · APIs · Webhooks', icon: FileSpreadsheet },
+      { route: '/claims', label: 'Claims', sublabel: 'Timing and payment checks', icon: ShieldAlert },
+      { route: '/investigator', label: 'Investigate', sublabel: 'Queue · Cases · Decisions', icon: FileSearch },
+    ],
   },
   {
-    route: '/vault',
-    label: 'Evidence',
-    sublabel: 'Sources and evidence history',
-    icon: FolderLock,
+    group: '03 · Investigation Intelligence',
+    items: [
+      { route: '/network', label: 'Relationships', sublabel: 'Fictional graph · Review leads', icon: ShieldAlert },
+      { route: '/leakage', label: 'Leakage scan', sublabel: 'Past claims · Review leads', icon: FileSearch },
+      { route: '/see-worked-case-example', label: 'Example', sublabel: 'Worked case · Sample data', icon: FileSearch },
+    ],
   },
   {
-    route: '/consent',
-    label: 'Consent',
-    sublabel: 'Review consent evidence',
-    icon: UserCheck,
+    group: '04 · Financial Recovery',
+    items: [
+      { route: '/recovery', label: 'Recovery', sublabel: 'Assess recovery options', icon: Scale },
+    ],
   },
   {
-    route: '/claims',
-    label: 'Claims',
-    sublabel: 'Timing and payment checks',
-    icon: ShieldAlert,
-  },
-  {
-    route: '/compliance',
-    label: 'Audit',
-    sublabel: 'Review actions and safeguards',
-    icon: ShieldCheck,
+    group: '05 · Governance & Control',
+    items: [
+      { route: '/workforce', label: 'AI team', sublabel: 'Sample uploads · Human review', icon: ShieldCheck },
+      { route: '/vault', label: 'Evidence', sublabel: 'Sources and evidence history', icon: FolderLock },
+      { route: '/consent', label: 'Consent', sublabel: 'Review consent evidence', icon: UserCheck },
+      { route: '/compliance', label: 'Audit', sublabel: 'Review actions and safeguards', icon: ShieldCheck },
+    ],
   },
 ];
+
+const NAV_ITEMS: NavItem[] = NAV_GROUPS.flatMap((g) => g.items);
 
 export const LayoutShell: React.FC<LayoutShellProps> = ({
   activeRoute,
@@ -469,38 +471,47 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
               </div>
             </div>
 
-            <button className="hidden lg:block text-sm text-sky-300 underline mb-3" onClick={()=>setCollapsed(!collapsed)} aria-expanded={!collapsed}>{collapsed?'Expand navigation':'Collapse navigation'}</button><nav aria-label="Primary modules" className="space-y-1">
-              {NAV_ITEMS.map((item) => {
-                const Icon = item.icon;
-                const active = activeRoute === item.route;
-                return (
-                  <button
-                    key={item.route}
-                    title={item.label+": "+item.sublabel}
-                    aria-label={item.label}
-                    type="button"
-                    onClick={() => {
-                      onNavigate(item.route);
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2.5 rounded-md flex items-start gap-3 transition-colors ${
-                      active
-                        ? 'bg-emerald-500/12 text-emerald-300 border border-emerald-500/30'
-                        : 'text-slate-300 hover:bg-slate-800/60 border border-transparent'
-                    }`}
-                  >
-                    <span className="visual-nav-icon"><Icon className="w-6 h-6 shrink-0" /></span>
-                    <div className={collapsed?'lg:hidden min-w-0':'min-w-0'}>
-                      <div className="text-sm font-semibold whitespace-normal">
-                        {item.label}
-                      </div>
-                      <div className="nav-description text-[13px] text-slate-400 whitespace-normal">
-                        {item.sublabel}
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
+            <button className="hidden lg:block text-sm text-sky-300 underline mb-3" onClick={()=>setCollapsed(!collapsed)} aria-expanded={!collapsed}>{collapsed?'Expand navigation':'Collapse navigation'}</button><nav aria-label="Primary modules" className="space-y-4">
+              {NAV_GROUPS.map((section) => (
+                <div key={section.group}>
+                  <p className={`text-[11px] font-semibold tracking-widest uppercase text-slate-500 px-2 mb-1 ${collapsed?'lg:hidden':''}`}>
+                    {section.group}
+                  </p>
+                  <div className="space-y-1">
+                    {section.items.map((item) => {
+                      const Icon = item.icon;
+                      const active = activeRoute === item.route;
+                      return (
+                        <button
+                          key={item.route}
+                          title={item.label+": "+item.sublabel}
+                          aria-label={item.label}
+                          type="button"
+                          onClick={() => {
+                            onNavigate(item.route);
+                            setMobileMenuOpen(false);
+                          }}
+                          className={`w-full text-left px-3 py-2.5 rounded-md flex items-start gap-3 transition-colors ${
+                            active
+                              ? 'bg-emerald-500/12 text-emerald-300 border border-emerald-500/30'
+                              : 'text-slate-300 hover:bg-slate-800/60 border border-transparent'
+                          }`}
+                        >
+                          <span className="visual-nav-icon"><Icon className="w-6 h-6 shrink-0" /></span>
+                          <div className={collapsed?'lg:hidden min-w-0':'min-w-0'}>
+                            <div className="text-sm font-semibold whitespace-normal">
+                              {item.label}
+                            </div>
+                            <div className="nav-description text-[13px] text-slate-400 whitespace-normal">
+                              {item.sublabel}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </nav><a href="/map-preview" className="mt-3 flex rounded-lg border border-emerald-700 bg-emerald-800 px-4 py-3 font-semibold text-white">Maps &amp; address evidence</a>
 
             {/* Vault Integrity & Phase 3 Locked Status */}

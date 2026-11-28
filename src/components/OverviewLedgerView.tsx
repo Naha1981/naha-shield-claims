@@ -15,6 +15,7 @@ import type {
   VaultVerificationResult,
 } from '../lib/engine/types';
 import { TodayHero } from './TodayHero';
+import { ExecutiveBoard } from './ExecutiveBoard';
 import { apiFetch, formatZar } from '../utils/format';
 import { generateAndDownloadPopiaPdf } from '../utils/pdfReport';
 import { AnomalyDensityHeatmap } from './AnomalyDensityHeatmap';
@@ -246,6 +247,8 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
 
   return (
     <div className="space-y-6">
+      {/* Executive intelligence board: 28 Nov alignment review, screen 1 (audit-rc) */}
+      <ExecutiveBoard summary={summary} />
       {/* Today hero: approved Screen Designs borrow (owner Go+Sure 28 Nov) */}
       <TodayHero
         exposure={summary.confirmed_fraudulent_loss}

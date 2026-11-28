@@ -3,6 +3,17 @@
 Source: Thabiso's pasted audit (WhatsApp 11:46) + order 11:56 to build all six phases.
 Status legend: DONE (with proof) / IN PROGRESS / NOT DONE. Every DONE links to proof (release, screenshot, CI run).
 
+## RC build order (Thabiso 13:04, audit-rc branch, proof per screen: phone light+dark)
+- [DONE] Screen 1 - Navigation in 5 enterprise groups + Executive intelligence board (financial attribution waterfall: gross prevented - deductions = net attributable; outcome states cash received / still held / illustrative fee fields base-15%-adjustments-final; trust-status badges; all figures computed from the live sample ledger). Proof: RC preview screenshots rc-board-light/dark + rc-nav-light/dark, gates 257/257 tests + tsc + eslint + build green.
+- [ ] Screen 2 - Needs Your OK three-pane adjudication workstation (queue | evidence | decision panel; inspection sequence replaces 10s countdown)
+- [ ] Screen 3 - Case workspace tabs (overview, timeline, identity & death with 7-point matrix, relationships, geospatial, SIM/RICA/bank, documents, AI findings, human decisions, audit)
+- [ ] Screen 4 - Savings ledger lifecycle states + Rand found page (12:05 order)
+- [ ] Screen 5 - AI workforce runs (operations console, run detail fields)
+- [ ] Screen 6 - Reports (executive briefing, forensic report, finance & assurance statement; every number links to source)
+
+## refactoring-ui applied (source: github.com/edisonmbli/refactoring-ui-skill, MIT licence, attribution in NOTICE)
+- [DONE] Executive Board + navigation: hierarchy via one primary figure (net attributable) with de-emphasised secondary legs; section titles as small tracked labels; three text colours only; group spacing exceeds item spacing; no grey text on coloured backgrounds; tokens drawn from the existing project scale (no new deps). Before/after: before = flat Savings hero (screenshots 101800/101819 set), after = rc-board/rc-nav set.
+
 ## Phase 1 - Critical UX defects
 - [DONE] Route registry defect: /investigator and /see-worked-case-example (incl. nested case route) missing from the parser's valid list; reload/back/forward falls to overview. One route source of truth consumed by parser and navigation.
 - [DONE] Public map page shows private-tool sign-in error -> clean "signed-in reviewer tool" card with guided-sample link (HostedExecutionPanel visitor state; commit 37aecd6d).
@@ -28,7 +39,7 @@ Status legend: DONE (with proof) / IN PROGRESS / NOT DONE. Every DONE links to p
 
 ## Phase 4 - Enterprise UX (RC branch)
 - [ ] Case-centred pattern across Claims/Evidence/Relationships/Consent/Investigation/Recovery (record header + 5-step progression).
-- [ ] Grouped navigation (Overview / Claims operations / Intelligence & evidence / Financial recovery / Governance); remove redundant map buttons from headers.
+- [DONE] Grouped navigation (5 groups per 12:06 alignment review: Overview / Claims Operations / Investigation Intelligence / Financial Recovery / Governance & Control) - RC preview rc-nav-light/dark.png. Still open: remove redundant map buttons from headers.
 - [ ] Global search for claims, entities, evidence refs; consistent filters; last-updated timestamps.
 - [ ] Meaningful empty states; confirmation dialogs; unsaved-changes indicators; activity history with named reviewer; persistent synthetic/simulated/verified indicator.
 - [ ] Keyboard operation: graph, tables, menus, dialogs, forms; clickable rows keyboard-accessible.
