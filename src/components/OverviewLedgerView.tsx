@@ -5,6 +5,7 @@ import { evaluateLedgerEntry, summarizeLedger } from '../lib/engine/ledger';
 import { summarizeRecoveryPortfolio } from '../lib/engine/triage';
 import { summarizeConsentAudit } from '../lib/engine/consent';
 import type {
+  ClaimPreviewRecord,
   ConsentPolicyInput,
   EvidenceItemRecord,
   KpiAuditNoteRecord,
@@ -13,6 +14,7 @@ import type {
   RoleId,
   VaultVerificationResult,
 } from '../lib/engine/types';
+import { TodayHero } from './TodayHero';
 import { apiFetch, formatZar } from '../utils/format';
 import { generateAndDownloadPopiaPdf } from '../utils/pdfReport';
 import { AnomalyDensityHeatmap } from './AnomalyDensityHeatmap';
@@ -38,6 +40,7 @@ interface OverviewLedgerViewProps {
   consentPolicies: ConsentPolicyInput[];
   evidenceItems: EvidenceItemRecord[];
   vaultVerification: VaultVerificationResult;
+  claims?: ClaimPreviewRecord[];
   anomalyThresholdPct: number;
   anomalyAlerts: AnomalyAlertRecord[];
   kpiAuditNotes: KpiAuditNoteRecord[];
@@ -83,6 +86,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
   consentPolicies,
   evidenceItems,
   vaultVerification,
+  claims = [],
   anomalyThresholdPct,
   anomalyAlerts,
   kpiAuditNotes,
@@ -235,10 +239,30 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
   }
 
   const ledgerQueue=useQueueView('savings',filteredRows,{filters:{filter},onRestore:f=>setFilter((f.filter||'all') as LedgerFilter)});
+  function handleOpenApprovals() {
+    const el = document.getElementById('approvals-tray');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   return (
     <div className="space-y-6">
+      {/* Today hero: approved Screen Designs borrow (owner Go+Sure 28 Nov) */}
+      <TodayHero
+        exposure={summary.confirmed_fraudulent_loss}
+        protectedLive={summary.incremental_protected_live}
+        savedAvoided={summary.futile_spend_avoided}
+        recoveredCash={summary.bank_reconciled_cash_received}
+        caseCount={recoverySummary.case_count}
+        claims={claims}
+        awaitingSignoffCount={summary.awaiting_signoff_count}
+        vaultVerification={vaultVerification}
+        evidenceCount={evidenceItems.length}
+        onNavigate={onNavigate ? (route) => onNavigate(route) : undefined}
+        onOpenApprovals={handleOpenApprovals}
+      />
+
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800 pb-4">
+      <div id="savings-detail" className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
           <h2 className="font-display text-2xl font-bold text-white tracking-tight">
             Synthetic financial overview
@@ -432,6 +456,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
       />
 
       {/* Stakeholder Dual-Factor Approval Workflow (Head of Forensics + CFO) */}
+      <div id="approvals-tray" className="scroll-mt-20">
       <StakeholderApprovalWorkflow
         orgId={orgId}
         entries={entries}
@@ -440,6 +465,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
         activeActorName={activeActorName}
         onApplyDigitalSignature={onApplyDigitalSignature}
       />
+      </div>
 
       {/* Ledger Controls & Table */}
       <section className="rounded-md bg-[#131C31] border border-slate-800 overflow-hidden">

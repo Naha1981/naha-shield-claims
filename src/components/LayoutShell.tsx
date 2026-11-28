@@ -165,10 +165,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
 
   return (
     <div className="min-h-screen bg-[#0B1120] text-slate-100 flex flex-col overflow-x-hidden">
-      {/* Mandatory Environment & Residency Banner */}
-      <div className="bg-slate-900 border-b border-slate-800 px-3 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-[13px] font-mono tracking-wide text-slate-400 text-center leading-tight">
-        DEMONSTRATION · Synthetic data only · No live actions or payments
-      </div>
+      {/* Environment marker: one honest pill, approved Screen Designs borrow (28 Nov) */}
 
       {/* Top Bar (Strict 3-Zone Contract) */}
       <header className="sticky top-0 z-30 bg-[#0F172A]/95 backdrop-blur border-b border-slate-800 px-3 sm:px-4 lg:px-6 min-h-12 sm:h-14 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 sm:gap-4 py-1 sm:py-0">
@@ -197,6 +194,12 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
           </span>
           <span className="hidden md:inline text-sm text-slate-300 truncate">
             {currentTitle}
+          </span>
+          <span
+            className="demo-pill"
+            title="Demonstration workspace: synthetic data only, no live actions or payments"
+          >
+            DEMO · fictional data
           </span>
         </div>
 

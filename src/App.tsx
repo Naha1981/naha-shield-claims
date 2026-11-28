@@ -319,6 +319,7 @@ export default function App() {
           consentPolicies={data.consent_policies}
           evidenceItems={data.evidence_items}
           vaultVerification={data.vault_verification}
+          claims={data.claims_preview ?? []}
           anomalyThresholdPct={data.anomaly_threshold_pct ?? 75}
           anomalyAlerts={data.anomaly_alerts ?? []}
           kpiAuditNotes={data.kpi_audit_notes ?? []}

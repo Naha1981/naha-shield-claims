@@ -19,6 +19,19 @@ export const ClaimsPreviewView: React.FC<ClaimsPreviewViewProps> = ({
   onRefresh,
 }) => {
   const claimQueue=useQueueView('claims',claims);
+  React.useEffect(() => {
+    // Command-bar handoff from the Today screen: seed the queue search once.
+    try {
+      const seeded = sessionStorage.getItem('nahashield-cmdq');
+      if (seeded) {
+        sessionStorage.removeItem('nahashield-cmdq');
+        claimQueue.setConfig((c) => ({ ...c, query: seeded }));
+      }
+    } catch {
+      /* storage may be unavailable */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const referenceNowIso = '2026-11-25T12:00:00Z';
   const [selectedClaimId, setSelectedClaimId] = React.useState(
     claims[0]?.claim_id ?? '',
@@ -78,6 +91,7 @@ export const ClaimsPreviewView: React.FC<ClaimsPreviewViewProps> = ({
           <p className="text-sm text-slate-400 mt-1">
             Choose a claim to inspect its supporting documents, timing and simulated bank-check indicators.
           </p>
+          <p className="text-xs text-slate-400 mt-1">Ranked by deadline, then rands.</p>
         </div>
         <span className="text-[13px] font-mono text-slate-400 shrink-0">
           SIMULATED ADAPTER (DHA / VerifyNow · AVS-R · XTND / Astute)
