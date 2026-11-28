@@ -1,6 +1,7 @@
 import {graphRoutes} from './server/syntheticGraph';
 import {leakageRoutes} from './server/retrospectiveLeakage';
 import {intakeRoutes} from './server/insurerIntake';
+import {authRoutes, requireAuth} from './server/auth';
 import {reviewerGate} from './server/reviewerGate';
 import {workspaceIsolation} from './server/workspaceIsolation';
 import {insuranceTeamRoutes} from './server/insuranceTeam';
@@ -128,16 +129,18 @@ async function startServer() {
   app.use(express.json({ limit: '8mb' }));
 
   // One-switch login. Off by default while Lawrence tests; set
-  // NAHASHIELD_LOGIN=on and NAHASHIELD_ACCESS_CODE to require an access code
-  // on every /api route (health and the synthetic mock feeds stay open).
+  // NAHASHIELD_LOGIN=on to require sign-in on every /api route (health,
+  // the login endpoint and the synthetic mock feeds stay open). Sign-in is a
+  // bearer token from /api/auth/login; the bootstrap access code
+  // (NAHASHIELD_ACCESS_CODE) still works as a fallback.
   const LOGIN_ON = process.env.NAHASHIELD_LOGIN === 'on';
-  const ACCESS_CODE = process.env.NAHASHIELD_ACCESS_CODE || '';
+  app.use('/api/auth',authRoutes());
   app.use('/api',(req,res,next)=>{
     if(!LOGIN_ON)return next();
-    if(req.path==='/health'||req.path.startsWith('/mock-insurer/'))return next();
-    const code=String(req.headers['x-nahashield-access-code']||'');
-    if(code&&code===ACCESS_CODE)return next();
-    res.status(401).json({error:'Login is on. An access code is required.',login_on:true});
+    if(req.path==='/health'||req.path.startsWith('/mock-insurer/')||req.path.startsWith('/auth/'))return next();
+    // Insurer webhook pushes authenticate with their shared secret, not a user login.
+    if(req.path.startsWith('/intake/webhook/'))return next();
+    return requireAuth()(req,res,next);
   });
 
   app.use('/api',isolation.middleware);

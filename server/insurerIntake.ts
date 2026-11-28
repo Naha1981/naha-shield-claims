@@ -180,6 +180,14 @@ const MOCK_FEEDS: Record<string, (page: number, size: number) => { key: string; 
 
 const MAX_FILE_BASE64_CHARS = 14_000_000;
 
+// Real insurer data only moves once sign-in is ON and Thabiso agrees. Mock
+// feeds stay open in every mode so connectors can always be proven first.
+function realDataGate(baseUrl: string): { ok: true } | { ok: false; message: string } {
+  if (/\/mock-insurer\//.test(baseUrl)) return { ok: true };
+  if (process.env.NAHASHIELD_LOGIN === 'on') return { ok: true }; // auth enforced by the global middleware
+  return { ok: false, message: 'Sign-in is OFF. Real insurer data only comes in once the login switch is ON and Thabiso agrees. Test with the mock feed.' };
+}
+
 export function intakeRoutes() {
   const r = express.Router();
 
@@ -224,6 +232,8 @@ export function intakeRoutes() {
       profile = resolveProfile(req.body ?? {});
       if (!profile) return res.status(404).json({ error: 'Unknown connector profile.' });
       const baseUrl = String(req.body?.base_url ?? '');
+      const gate = realDataGate(baseUrl);
+      if (!gate.ok) return res.status(403).json({ error: gate.message });
       const result = await testConnection(profile, baseUrl);
       logIntakeEvent({ kind: 'test-connection', source: profile.label, status: result.ok ? 'ok' : 'error', claims: 0, findings: 0, flagged_zar: 0, message: result.message });
       res.json(result);
@@ -240,6 +250,8 @@ export function intakeRoutes() {
       profile = resolveProfile(req.body ?? {});
       if (!profile) return res.status(404).json({ error: 'Unknown connector profile.' });
       const baseUrl = String(req.body?.base_url ?? '');
+      const gate = realDataGate(baseUrl);
+      if (!gate.ok) return res.status(403).json({ error: gate.message });
       const result = profile.protocol === 'file_url'
         ? await pullClaimsFile(profile, baseUrl)
         : await pullClaims(profile, baseUrl);
@@ -265,6 +277,9 @@ export function intakeRoutes() {
     const profile = getProfile(String(req.params.profileId), customProfiles);
     if (!profile) return res.status(404).json({ error: 'Unknown connector profile.' });
     const expectedSecret = process.env[profile.webhook_secret_env];
+    if (process.env.NAHASHIELD_LOGIN === 'on' && !expectedSecret) {
+      return res.status(503).json({ error: 'Sign-in is ON but this connector has no webhook secret configured. Set the secret env var before receiving real pushes.' });
+    }
     if (expectedSecret) {
       const got = String(req.headers['x-webhook-secret'] ?? '');
       if (got !== expectedSecret) {
