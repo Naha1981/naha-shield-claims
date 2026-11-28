@@ -10,7 +10,7 @@ export function CaseHeader({ workedCase }: { workedCase: WorkedCase }) {
     </div>
   );
   return (
-    <header>
+    <section aria-label="Case summary">
       <div style={{ fontSize: 13, color: '#64748b' }}>{workedCase.insurer} - {workedCase.product} (sample)</div>
       <h1 style={{ fontSize: 20, margin: '4px 0' }}>{workedCase.title}</h1>
       <div style={{ fontSize: 13, color: '#475569' }}>Claim reference: {workedCase.claim_reference}</div>
@@ -25,6 +25,6 @@ export function CaseHeader({ workedCase }: { workedCase: WorkedCase }) {
         {metric('Evidence strength', workedCase.evidence_strength)}
         {metric('Revenue protected', fmtCents(workedCase.revenue_protected) + ' (sample)')}
       </div>
-    </header>
+    </section>
   );
 }

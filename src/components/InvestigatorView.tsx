@@ -99,7 +99,7 @@ export function InvestigatorView({activeRole,onOpenExample}:{activeRole:RoleId;o
  });
 
  const kpiCard=(label:string,value:string,tone:string='')=>(
-  <div className="rounded-2xl border border-slate-200 bg-white p-4 text-center">
+  <div className="rounded-2xl border border-slate-200 bg-white ns-light-surface p-4 text-center">
    <div className={`text-3xl font-bold ${tone}`}>{value}</div>
    <div className="text-xs text-slate-500 mt-1">{label}</div>
   </div>
@@ -111,7 +111,7 @@ export function InvestigatorView({activeRole,onOpenExample}:{activeRole:RoleId;o
    <div className="space-y-4 p-4">
     <button className="text-sm underline" onClick={()=>{setSelected(null);setDraft(null);}}>Back to queue</button>
     {/* ClaimHeader */}
-    <div className="rounded-2xl border border-slate-200 bg-white p-4">
+    <div className="rounded-2xl border border-slate-200 bg-white ns-light-surface p-4">
      <div className="flex items-baseline justify-between">
       <div className="text-2xl font-bold">{formatZar(c.amount_claimed_cents/100)}</div>
       <div className="text-xs uppercase tracking-wide text-slate-500">{c.status.replace(/_/g,' ')}</div>
@@ -121,13 +121,13 @@ export function InvestigatorView({activeRole,onOpenExample}:{activeRole:RoleId;o
     </div>
     {/* RiskSummaryCard: three big numbers */}
     <div className="grid grid-cols-3 gap-2">
-     <div className="rounded-2xl border border-slate-200 bg-white p-3 text-center"><div className={`text-2xl font-bold ${bandClass(c.fraud_risk_score)}`}>{c.fraud_risk_score??'-'}</div><div className="text-[11px] text-slate-500">Fraud</div></div>
-     <div className="rounded-2xl border border-slate-200 bg-white p-3 text-center"><div className={`text-2xl font-bold ${bandClass(c.duplicate_risk_score)}`}>{c.duplicate_risk_score??'-'}</div><div className="text-[11px] text-slate-500">Duplicate</div></div>
-     <div className="rounded-2xl border border-slate-200 bg-white p-3 text-center"><div className={`text-2xl font-bold ${bandClass(c.evidence_strength_score)}`}>{c.evidence_strength_score??'-'}</div><div className="text-[11px] text-slate-500">Evidence</div></div>
+     <div className="rounded-2xl border border-slate-200 bg-white ns-light-surface p-3 text-center"><div className={`text-2xl font-bold ${bandClass(c.fraud_risk_score)}`}>{c.fraud_risk_score??'-'}</div><div className="text-[11px] text-slate-500">Fraud</div></div>
+     <div className="rounded-2xl border border-slate-200 bg-white ns-light-surface p-3 text-center"><div className={`text-2xl font-bold ${bandClass(c.duplicate_risk_score)}`}>{c.duplicate_risk_score??'-'}</div><div className="text-[11px] text-slate-500">Duplicate</div></div>
+     <div className="rounded-2xl border border-slate-200 bg-white ns-light-surface p-3 text-center"><div className={`text-2xl font-bold ${bandClass(c.evidence_strength_score)}`}>{c.evidence_strength_score??'-'}</div><div className="text-[11px] text-slate-500">Evidence</div></div>
     </div>
     {/* IndicatorList: one card per indicator, spec 9.3 */}
     {c.indicators.filter(i=>i.status==='open').map(i=>(
-     <div key={i.indicator_id} className="rounded-2xl border border-amber-300 bg-amber-50 p-4">
+     <div key={i.indicator_id} className="rounded-2xl border border-amber-300 bg-amber-50 ns-light-surface p-4">
       <div className="flex items-baseline justify-between">
        <div className="font-semibold">Possible duplicate signal</div>
        <div className={`text-xs font-bold ${i.severity==='high'?'text-red-600':'text-amber-600'}`}>{i.severity.toUpperCase()}</div>
@@ -144,7 +144,7 @@ export function InvestigatorView({activeRole,onOpenExample}:{activeRole:RoleId;o
      </div>
     ))}
     {/* ShieldPanel: plain-language answer, spec 9.4 */}
-    <div className="rounded-2xl border border-slate-200 bg-white p-4">
+    <div className="rounded-2xl border border-slate-200 bg-white ns-light-surface p-4">
      <div className="font-semibold">Why is this claim flagged?</div>
      {c.indicators.some(i=>i.status==='open')?(
       <div className="text-sm mt-2 space-y-1">
@@ -159,17 +159,17 @@ export function InvestigatorView({activeRole,onOpenExample}:{activeRole:RoleId;o
      ):<p className="text-sm mt-2 text-slate-600">No open flags on this claim.</p>}
     </div>
     {/* Evidence + documents behind a toggle */}
-    <details className="rounded-2xl border border-slate-200 bg-white p-4 text-sm">
+    <details className="rounded-2xl border border-slate-200 bg-white ns-light-surface p-4 text-sm">
      <summary className="cursor-pointer font-semibold">Documents and evidence</summary>
      <DocumentsPanel role={activeRole} claim={c}/>
     </details>
     {/* DecisionPanel, spec 9.5 */}
-    <div className="rounded-2xl border border-slate-200 bg-white p-4">
+    <div className="rounded-2xl border border-slate-200 bg-white ns-light-surface p-4">
      <div className="font-semibold">Decision</div>
      <div className="text-xs text-slate-500 mt-1">Recommended: {c.next_action==='review_duplicate_signal'?'Hold and investigate':'Normal review'} · Approval required: claims manager</div>
      <input className="mt-2 w-full rounded-lg border border-slate-300 p-2 text-sm" placeholder="Insurer name (required for drafts)" value={insurerName} onChange={e=>setInsurerName(e.target.value)}/>
      <div className="grid grid-cols-2 gap-2 mt-2">
-      <button disabled={busy!==''} onClick={holdClaim} className="rounded-xl bg-amber-600 px-3 py-2 text-sm font-semibold text-white">Hold claim</button>
+      <button disabled={busy!==''} onClick={holdClaim} className="rounded-xl bg-amber-700 px-3 py-2 text-sm font-semibold text-white">Hold claim</button>
       <button disabled={busy!==''} onClick={requestDocs} className="rounded-xl bg-slate-800 px-3 py-2 text-sm font-semibold text-white">Request documents</button>
       <button disabled={busy!==''} onClick={requestCallback} className="rounded-xl bg-slate-800 px-3 py-2 text-sm font-semibold text-white">Request call-back</button>
       <button disabled={busy!==''} onClick={escalate} className="rounded-xl bg-slate-800 px-3 py-2 text-sm font-semibold text-white">Escalate</button>
@@ -177,7 +177,7 @@ export function InvestigatorView({activeRole,onOpenExample}:{activeRole:RoleId;o
      </div>
      {notice&&<p className="text-sm text-emerald-700 mt-2">{notice}</p>}
      {draft&&(
-      <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
+      <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 ns-light-surface p-3 text-sm">
        <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Draft ({draft.status.replace(/_/g,' ')})</div>
        <p className="mt-1">{draft.body}</p>
        <p className="mt-1 text-xs text-slate-500">Nothing was sent. A person sends approved wording from the insurer's own system.</p>
@@ -223,7 +223,7 @@ export function InvestigatorView({activeRole,onOpenExample}:{activeRole:RoleId;o
    {claims.length===0?<p className="text-sm text-slate-500 p-2">No claims in the workspace yet. Bring claims in through Intake, or create one through the claims API.</p>:(
     <div className="space-y-2">
      {claims.map(c=>(
-      <button key={c.claim_id} onClick={()=>void openCase(c)} className="w-full rounded-2xl border border-slate-200 bg-white p-3 text-left">
+      <button key={c.claim_id} onClick={()=>void openCase(c)} className="w-full rounded-2xl border border-slate-200 bg-white ns-light-surface p-3 text-left">
        <div className="flex items-baseline justify-between">
         <span className="text-xl font-bold">{formatZar(c.amount_claimed_cents/100)}</span>
         <span className={`text-xs font-bold ${bandClass(c.duplicate_risk_score)}`}>{band(c.duplicate_risk_score)}</span>

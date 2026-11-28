@@ -13,10 +13,10 @@ export function WorkedCaseSelector({ cases, isLoading, onOpen }: Props) {
         <button
           key={workedCase.case_id}
           onClick={() => onOpen(workedCase.case_id)}
-          style={{ ...card, display: 'block', width: '100%', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' }}
+          className="ns-light-surface" style={{ ...card, display: 'block', width: '100%', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' }}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-            <span style={{ ...lab, background: '#f1f5f9', borderRadius: 999, padding: '2px 10px' }}>{workedCase.case_type === 'no_fraud' ? 'Clean claim' : 'Fraud pattern'}</span>
+            <span style={{ ...lab, color: '#40556a', background: '#f1f5f9', borderRadius: 999, padding: '2px 10px' }}>{workedCase.case_type === 'no_fraud' ? 'Clean claim' : 'Fraud pattern'}</span>
             <span style={{ fontSize: 12, fontWeight: 700, borderRadius: 999, padding: '2px 10px', background: workedCase.outcome === 'cleared' ? '#dcfce7' : '#fee2e2', color: workedCase.outcome === 'cleared' ? '#166534' : '#b91c1c' }}>{workedCase.outcome_label}</span>
           </div>
           <div style={{ fontSize: 16, fontWeight: 800, marginTop: 8 }}>{workedCase.title}</div>
