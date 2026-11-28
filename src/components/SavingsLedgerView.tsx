@@ -78,6 +78,14 @@ export const SavingsLedgerView: React.FC<{
     [entries],
   );
   const grossProtected = stages[0].amount + stages[1].amount;
+  // Thabiso's worked fee example (28 Nov): R22.45m base at 15% vs R3.24m reconciled.
+  // Fields computed from constants; illustrative sample only, never settled money.
+  const feeExample = React.useMemo(() => {
+    const base = 22_450_000;
+    const expected = Math.round(base * 0.15 * 100) / 100;
+    const reconciled = 3_240_000;
+    return { base, expected, reconciled, variance: Math.round((expected - reconciled) * 100) / 100 };
+  }, []);
 
   return (
     <section aria-label="Savings ledger">
@@ -110,6 +118,20 @@ export const SavingsLedgerView: React.FC<{
           <div className="flex justify-between gap-3"><dt className="text-slate-300">Legal costs and fees spent</dt><dd className="font-semibold text-slate-400 shrink-0">-{formatZar(summary.legal_costs_spent)}</dd></div>
           <div className="flex justify-between gap-3 border-t border-slate-700 pt-2"><dt className="text-slate-300">Would have protected (backtest only, never a live outcome)</dt><dd className="font-semibold text-slate-400 shrink-0">{formatZar(summary.would_have_protected_backtest)}</dd></div>
         </dl>
+      </div>
+
+      {/* Illustrative fee reconciliation (Thabiso's worked example, 28 Nov) */}
+      <div className="mt-4 rounded-xl border border-slate-700 bg-slate-900 p-4">
+        <h2 className="text-sm font-semibold text-slate-100">Fee reconciliation · worked example</h2>
+        <p className="text-xs text-slate-400 mt-1">Illustrative sample figures, separate from the live ledger above. Each field is computed, never typed.</p>
+        <dl className="mt-3 space-y-2 text-[13px]">
+          <div className="flex justify-between gap-3"><dt className="text-slate-300">Fee base (protected value)</dt><dd className="font-semibold text-slate-100 shrink-0">{formatZar(feeExample.base)}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-slate-300">Fee rate</dt><dd className="font-semibold text-slate-100 shrink-0">15%</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-slate-300">Expected fee (base × 15%)</dt><dd className="font-semibold text-slate-100 shrink-0">{formatZar(feeExample.expected)}</dd></div>
+          <div className="flex justify-between gap-3"><dt className="text-slate-300">Previously reconciled fee</dt><dd className="font-semibold text-slate-100 shrink-0">{formatZar(feeExample.reconciled)}</dd></div>
+          <div className="flex justify-between gap-3 border-t border-slate-700 pt-2"><dt className="text-slate-300">Variance to review</dt><dd className="font-semibold text-amber-300 shrink-0">{formatZar(feeExample.variance)}</dd></div>
+        </dl>
+        <p className="text-xs text-slate-400 mt-2">A variance is a review item, never an accusation. Nothing is settled in this sample.</p>
       </div>
 
       {/* Transaction ledger */}
