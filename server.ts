@@ -4,6 +4,7 @@ import {intakeRoutes} from './server/insurerIntake';
 import {authRoutes, requireAuth} from './server/auth';
 import {recoveryRoutes} from './server/recoveryApi';
 import {workspaceApiRoutes} from './server/workspaceApi';
+import {incidentControlRoutes} from './server/incidentControl';
 import {reviewerGate} from './server/reviewerGate';
 import {workspaceIsolation} from './server/workspaceIsolation';
 import {insuranceTeamRoutes} from './server/insuranceTeam';
@@ -156,6 +157,7 @@ async function startServer() {
   app.use('/api/workforce', workforce);
   app.use('/api/v1/recovery-cases', recoveryRoutes());
   app.use('/api/v1', workspaceApiRoutes());
+  app.use('/api/ops', incidentControlRoutes());
   // Synthetic test inbox: in-memory, no external sends. Auth = the shared private reviewer session; no header-based roles.
   const synthChat = new SynthChat({
     sink: (e) => store.logAudit({ actor_role: 'head_of_forensics', actor_id: e.actor_id, action: e.action, object_type: 'claim', object_id: e.object_id, details: e.details }),
