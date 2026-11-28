@@ -175,11 +175,18 @@ async function startServer() {
   app.post('/api/demo-view-audit',async(req,res)=>{const role=String(req.body?.role||'');if(!VALID_ROLES.has(role as RoleId))return res.status(400).json({error:'Unknown sample view'});await store.logAudit({actor_role:'head_of_forensics',actor_id:'demo-view-session',action:'DEMO_VIEW_FILTER_CHANGED_NOT_AUTHORITY',object_type:'claim',object_id:'SYN-DEMO-VIEW',details:{selected_view:role,permission_changed:false}});res.json({ok:true,permission_changed:false})});
 
   // Health endpoint for Render & monitoring
+  let buildId = '';
+  try {
+    const idx = readFileSync(path.resolve(__dirname, 'dist', 'index.html'), 'utf8');
+    buildId = idx.match(/index-([A-Za-z0-9_-]+)\.js/)?.[1] || '';
+  } catch { /* dev mode: no dist */ }
   app.get('/api/health', (_req, res) => {
     const snap = store.getSnapshot();
+    res.setHeader('Cache-Control', 'no-store');
     res.json({
       status: 'ok',
       service: 'nahashield',
+      build_id: buildId,
       db_mode: snap.db_mode,
       vault_valid: snap.vault_verification.valid,
       psi_phase3_unlocked: snap.psi_phase3_unlocked,

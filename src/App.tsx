@@ -90,6 +90,7 @@ function parseRouteFromLocation(): NavRoute {
 }
 
 export default function App() {
+  React.useEffect(()=>{fetch('/api/health',{cache:'no-store'}).then(r=>r.json()).then(j=>{const mine=document.querySelector('script[src*="/assets/index-"]')?.getAttribute('src')?.match(/index-([A-Za-z0-9_-]+)\.js/)?.[1];if(mine&&j.build_id&&j.build_id!==mine&&!sessionStorage.getItem('ct-reloaded')){sessionStorage.setItem('ct-reloaded','1');const u=new URL(location.href);u.searchParams.set('v',j.build_id);location.replace(u.toString())}}).catch(()=>{})},[]);
   const [route, setRoute] = React.useState<NavRoute>(() =>
     parseRouteFromLocation(),
   );
