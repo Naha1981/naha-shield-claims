@@ -33,6 +33,29 @@ const OUT = process.env.RC_OUT || '/tmp/rc-shots';
       await ctx.close();
       continue;
     }
+    if (process.env.RC_ONLY === 'case' || process.env.RC_ONLY === 'case-tabs') {
+      await page.waitForSelector('text=Case workspace · Human decision required', { timeout: 90000 });
+      await page.waitForTimeout(1200);
+      await page.screenshot({ path: `${OUT}/rc-case-overview-${theme}.png` });
+      console.log(`saved rc-case-overview-${theme}.png`);
+      await page.click('button[role="tab"]:text-is("Identity & death")');
+      await page.waitForTimeout(800);
+      await page.locator('td:text-is("DHA death record")').first().scrollIntoViewIfNeeded();
+      await page.waitForTimeout(500);
+      await page.screenshot({ path: `${OUT}/rc-case-identity-${theme}.png` });
+      console.log(`saved rc-case-identity-${theme}.png`);
+      if (process.env.RC_ONLY === 'case-tabs') {
+        await page.click('button[role="tab"]:text-is("SIM / RICA / bank")');
+        await page.waitForTimeout(600);
+        await page.click('button[aria-label^="Inspect evidence"] >> nth=0');
+        await page.waitForTimeout(500);
+        await page.screenshot({ path: `${OUT}/rc-case-inspector-${theme}.png` });
+        console.log(`saved rc-case-inspector-${theme}.png`);
+        console.log('INSPECTOR-OK');
+      }
+      await ctx.close();
+      continue;
+    }
     if (process.env.RC_ONLY === 'needsok') {
       await page.waitForSelector('h1:text-is("Needs Your OK")', { timeout: 90000 });
       await page.waitForTimeout(1200);

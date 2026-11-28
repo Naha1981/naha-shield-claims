@@ -70,6 +70,7 @@ const NAV_GROUPS: Array<{ group: string; items: NavItem[] }> = [
   {
     group: '03 · Investigation Intelligence',
     items: [
+      { route: '/case-workspace', label: 'Case Workspace', sublabel: 'Investigation workbench', icon: FileSearch },
       { route: '/network', label: 'Relationships', sublabel: 'Fictional graph · Review leads', icon: ShieldAlert },
       { route: '/leakage', label: 'Leakage scan', sublabel: 'Past claims · Review leads', icon: FileSearch },
       { route: '/see-worked-case-example', label: 'Example', sublabel: 'Worked case · Sample data', icon: FileSearch },
