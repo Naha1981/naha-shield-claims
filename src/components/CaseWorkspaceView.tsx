@@ -347,7 +347,7 @@ export const CaseWorkspaceView: React.FC<{
               role="tab"
               aria-selected={tab === t.id}
               className={`rounded-lg border px-3 py-2 text-[13px] font-semibold whitespace-nowrap ${
-                tab === t.id ? 'border-sky-500 bg-slate-800 text-slate-100' : 'border-slate-700 bg-transparent text-slate-400'
+                tab === t.id ? 'border-emerald-500 bg-slate-800 text-slate-100' : 'border-slate-700 bg-transparent text-slate-400'
               }`}
               onClick={() => setTab(t.id)}
             >
