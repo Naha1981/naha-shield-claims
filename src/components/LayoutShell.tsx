@@ -16,6 +16,9 @@ import {
   UserCheck,
   Menu,
   X,
+  PanelLeftClose,
+  PanelLeftOpen,
+  ChevronDown,
   Sun,
   Moon,
 } from 'lucide-react';
@@ -460,12 +463,12 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
                 aria-label="Close navigation menu"
-                className="p-1 rounded text-slate-400 hover:text-white"
+                className="-m-1 p-2.5 rounded-md text-slate-400 hover:text-white hover:bg-slate-800/60"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <div>
+            <div className={collapsed?'lg:hidden':''}>
               <p className="text-[13px] font-medium text-slate-400 px-2 mb-2">
                 WORKSPACE
               </p>
@@ -477,7 +480,17 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
               </div>
             </div>
 
-            <button className="hidden lg:block text-sm text-sky-300 underline mb-3" onClick={()=>setCollapsed(!collapsed)} aria-expanded={!collapsed}>{collapsed?'Expand navigation':'Collapse navigation'}</button><nav aria-label="Primary modules" className="space-y-4">
+            <button
+              type="button"
+              onClick={()=>setCollapsed(!collapsed)}
+              aria-expanded={!collapsed}
+              aria-label={collapsed?'Expand navigation':'Collapse navigation'}
+              title={collapsed?'Expand navigation':'Collapse navigation'}
+              className={`hidden lg:flex items-center gap-3 w-full min-h-[44px] px-3 py-2.5 mb-3 rounded-md border border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 hover:border-slate-700 transition-colors ${collapsed?'lg:justify-center lg:px-0':''}`}
+            >
+              {collapsed?<PanelLeftOpen className="w-5 h-5 shrink-0"/>:<PanelLeftClose className="w-5 h-5 shrink-0"/>}
+              <span className={`text-sm font-medium ${collapsed?'lg:hidden':''}`}>Collapse navigation</span>
+            </button><nav aria-label="Primary modules" className="space-y-4">
               {NAV_GROUPS.map((section) => (
                 <div key={section.group}>
                   <p className={`text-[11px] font-semibold tracking-widest uppercase text-slate-500 px-2 mb-1 ${collapsed?'lg:hidden':''}`}>
@@ -521,7 +534,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
             </nav><a href="/map-preview" className="mt-3 flex rounded-lg border border-emerald-700 bg-emerald-800 px-4 py-3 font-semibold text-white">Maps &amp; address evidence</a>
 
             {/* Vault Integrity & Phase 3 Locked Status */}
-            <details><summary className="text-sm cursor-pointer">Evidence & safeguards</summary><div className="pt-4 border-t border-slate-800 space-y-3">
+            <details className="group"><summary className="flex items-center justify-between gap-2 text-sm font-medium text-slate-400 cursor-pointer rounded-md px-3 min-h-[44px] hover:bg-slate-800/60 hover:text-slate-200 transition-colors [&::-webkit-details-marker]:hidden list-none">Evidence &amp; safeguards<ChevronDown className="w-4 h-4 shrink-0 transition-transform group-open:rotate-180"/></summary><div className="pt-4 border-t border-slate-800 space-y-3">
               <div className="px-3 py-2.5 rounded-md bg-slate-900/80 border border-slate-800">
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-400">Evidence hash chain</span>

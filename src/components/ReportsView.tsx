@@ -57,7 +57,7 @@ export const ReportsView: React.FC<{
   };
 
   const Source: React.FC<{ label: string; route: import('../routes').NavRoute }> = ({ label, route }) => (
-    <button className="text-xs text-sky-300 underline ml-2 whitespace-nowrap" onClick={() => onNavigate(route)}>Source: {label}</button>
+    <button type="button" className="inline-flex items-center gap-1 ml-2 whitespace-nowrap rounded-md border border-slate-700 bg-slate-800/60 px-2.5 py-1.5 text-xs font-medium text-sky-300 hover:bg-slate-800 hover:border-sky-700 transition-colors" onClick={() => onNavigate(route)}>Source: {label}</button>
   );
 
   const flagged = claims.filter((c) => c.avs_r_status === 'MISMATCH' || c.agent_churn_flag || c.living_person_signal || c.dha_office_outlier || c.bi1663_box24_word_of_mouth);

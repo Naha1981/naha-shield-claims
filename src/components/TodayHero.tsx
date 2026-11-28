@@ -223,8 +223,8 @@ export const TodayHero: React.FC<TodayHeroProps> = ({
 
       <form className="today-cmd" onSubmit={handleCommandSubmit}>
         <input
-          aria-label="Ask Shield anything"
-          placeholder="Ask Shield anything…"
+          aria-label="Ask ClaimTrace anything"
+          placeholder="Ask ClaimTrace anything…"
           value={command}
           onChange={(e) => setCommand(e.target.value)}
           maxLength={200}

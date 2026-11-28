@@ -280,7 +280,7 @@ export function buildSeedAgentTelemetry(params: {
         {
           status: 'approved',
           reviewedAt: '2026-11-26T20:28:00.000Z',
-          note: 'AgentShield broker churn telemetry archived under POPIA s71.',
+          note: 'Broker churn telemetry archived under POPIA s71.',
           committedRef: 'EVD-SEED-CLM004',
         },
       ],

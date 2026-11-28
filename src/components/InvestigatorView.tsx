@@ -1,4 +1,5 @@
 import React from 'react';
+import { ChevronLeft } from 'lucide-react';
 import {formatZar, formatZarCompact} from '../utils/format';
 import type {RoleId} from '../lib/engine/types';
 
@@ -109,7 +110,7 @@ export function InvestigatorView({activeRole,onOpenExample}:{activeRole:RoleId;o
   const c=selected;
   return(
    <div className="space-y-4 p-4">
-    <button className="text-sm underline" onClick={()=>{setSelected(null);setDraft(null);}}>Back to queue</button>
+    <button type="button" className="inline-flex items-center gap-1.5 min-h-[44px] px-3 -ml-3 rounded-md text-sm font-medium text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition-colors" onClick={()=>{setSelected(null);setDraft(null);}}><ChevronLeft className="w-4 h-4"/>Back to queue</button>
     {/* ClaimHeader */}
     <div className="rounded-2xl border border-slate-200 bg-white ns-light-surface p-4">
      <div className="flex items-baseline justify-between">

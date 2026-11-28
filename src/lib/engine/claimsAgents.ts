@@ -92,7 +92,7 @@ export const CLAIM_AGENT_REGISTRY: ClaimAgentDefinition[] = [
     role_title: 'AVS-R, Churn & Rule 2A.10 Specialist',
     phase: 'Phase 1 / Core',
     scope_summary:
-      'Reviews AVS-R pre-EFT matches, inception-to-death intervals, AgentShield churn indicators, and voluntary Rule 2A.10 parlour elections.',
+      'Reviews AVS-R pre-EFT matches, inception-to-death intervals, agent churn indicators, and voluntary Rule 2A.10 parlour elections.',
   },
   {
     id: 'tool_integration_auditor',
@@ -446,7 +446,7 @@ export function buildDeterministicClaimAnalysis(
       findings.push({
         finding_id: `FND-${claim.claim_id}-TIME`,
         reason_code: 'EARLY_CLAIM_OR_INTERMEDIARY_CHURN',
-        summary: `Policy-to-claim interval is ${claim.inception_to_death_days} days (${claim.agent_churn_flag ? 'AgentShield intermediary churn indicator flagged; ' : ''}parlour: ${claim.parlour_name}, ${claim.voluntary_parlour_elected ? 'voluntary Rule 2A.10 elected' : 'cash payout'}).`,
+        summary: `Policy-to-claim interval is ${claim.inception_to_death_days} days (${claim.agent_churn_flag ? 'intermediary churn indicator flagged; ' : ''}parlour: ${claim.parlour_name}, ${claim.voluntary_parlour_elected ? 'voluntary Rule 2A.10 elected' : 'cash payout'}).`,
         evidence_tag: 'Inference',
         source_ref: `claim:${claim.claim_id}`,
         evidence_type: 'Policy & Intermediary Telemetry',

@@ -6,6 +6,7 @@
 // asks for: authorised inputs, tools, sources, output, evidence, limitations,
 // human-review requirement, outcome. CPU/latency stays in a collapsed technical
 // panel. Tokens: project scale only; tables scroll horizontally on phone.
+import { InlineNavLink } from './InlineNavLink';
 import React from 'react';
 import type {
   ClaimAgentProposalRecord,
@@ -65,7 +66,7 @@ export const AiOperationsView: React.FC<{
             ))}
           </ul>
         )}
-        <p className="text-xs text-slate-400 mt-2">{agentProposals.length} proposals on record. Decisions are recorded by deciding roles in <button className="text-sky-300 underline" onClick={() => onNavigate('/needs-ok')}>Needs Your OK</button>.</p>
+        <p className="text-xs text-slate-400 mt-2">{agentProposals.length} proposals on record. Decisions are recorded by deciding roles in <InlineNavLink onClick={() => onNavigate('/needs-ok')}>Needs Your OK</InlineNavLink>.</p>
       </div>
 
       {/* Execution queue / run history / investigation runs */}

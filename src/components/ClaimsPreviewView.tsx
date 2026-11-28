@@ -182,7 +182,7 @@ export const ClaimsPreviewView: React.FC<ClaimsPreviewViewProps> = ({
                             )}
                             {clm.agent_churn_flag && (
                               <span className="px-1.5 py-0.5 rounded border border-amber-500/40 bg-amber-950/40 text-amber-200 whitespace-nowrap">
-                                AgentShield
+                                Agent churn
                               </span>
                             )}
                             {!clm.living_person_signal &&

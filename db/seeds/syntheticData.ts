@@ -759,7 +759,7 @@ export const SYNTHETIC_LEDGER_ENTRIES: LedgerEntryInput[] = [
     case_ref: 'AGT-SYN-104',
     basis: 'Live',
     event_type: 'Commission held/clawed back',
-    description: 'AgentShield early-lapse churn hold on 6 linked funeral policies pre-settlement',
+    description: 'Early-lapse churn hold on 6 linked funeral policies pre-settlement',
     amount_at_stake: 92000,
     legal_costs: 0,
     flagged_before_payout: true,
@@ -1060,7 +1060,7 @@ export const SYNTHETIC_CLAIMS_PREVIEW: ClaimPreviewRecord[] = [
     has_dispute_notice: false,
     dispute_opened_at: null,
     dispute_reason: null,
-    status: 'AgentShield Review',
+    status: 'Agent Churn Review',
   },
   {
     claim_id: 'SYN-CLM-005',

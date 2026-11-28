@@ -7,6 +7,7 @@
 // applicability follows verification policy, permissions and case circumstances.
 // The Evidence Inspector opens contextually from any tab. Tokens: project scale
 // only, two weights, three text colours; tabs scroll horizontally on phone.
+import { InlineNavLink } from './InlineNavLink';
 import React from 'react';
 import type {
   AuditLogRecord,
@@ -195,7 +196,8 @@ export const CaseWorkspaceView: React.FC<{
       <div className="flex flex-col items-end gap-2 shrink-0">
         <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${stateTone(record.state)}`}>{record.state}</span>
         <button
-          className="text-xs text-sky-300 underline"
+          type="button"
+          className="rounded-md border border-slate-600 px-2.5 py-2 min-h-[36px] text-xs font-medium text-sky-300 hover:bg-slate-800 hover:border-sky-700 transition-colors"
           onClick={() => openInspector(record)}
           aria-label={`Inspect evidence: ${record.title}`}
         >
@@ -419,14 +421,14 @@ export const CaseWorkspaceView: React.FC<{
         {tab === 'relationships' && (
           <ul className="space-y-2">
             {relationshipRecords.map((r) => <Record key={r.id} record={r} />)}
-            <li className="text-xs text-slate-400 pt-1">Full fictional entity graph: <button className="text-sky-300 underline" onClick={() => onNavigate('/network')}>open Relationships</button>.</li>
+            <li className="text-xs text-slate-400 pt-1">Full fictional entity graph: <InlineNavLink onClick={() => onNavigate('/network')}>open Relationships</InlineNavLink>.</li>
           </ul>
         )}
 
         {tab === 'geospatial' && (
           <ul className="space-y-2">
             {geoRecords.map((r) => <Record key={r.id} record={r} />)}
-            <li className="text-xs text-slate-400 pt-1">Physical address checking: <a className="text-sky-300 underline" href="/map-preview">open the maps checker</a>.</li>
+            <li className="text-xs text-slate-400 pt-1">Physical address checking: <a className="font-medium text-sky-400 underline decoration-sky-500/40 underline-offset-2 rounded-sm transition-colors hover:text-sky-300 hover:decoration-sky-300" href="/map-preview">open the maps checker</a>.</li>
           </ul>
         )}
 
@@ -437,21 +439,21 @@ export const CaseWorkspaceView: React.FC<{
         {tab === 'documents' && (
           <ul className="space-y-2">
             {docRecords.map((r) => <Record key={r.id} record={r} />)}
-            <li className="text-xs text-slate-400 pt-1">Full custody history: <button className="text-sky-300 underline" onClick={() => onNavigate('/vault')}>open the evidence vault</button>. {evidenceItems.length} evidence items sit in this sample workspace.</li>
+            <li className="text-xs text-slate-400 pt-1">Full custody history: <InlineNavLink onClick={() => onNavigate('/vault')}>open the evidence vault</InlineNavLink>. {evidenceItems.length} evidence items sit in this sample workspace.</li>
           </ul>
         )}
 
         {tab === 'ai' && (
           <ul className="space-y-2">
             {aiFindings.map((r) => <Record key={r.id} record={r} />)}
-            <li className="text-xs text-slate-400 pt-1">Run detail, inputs, tools and limitations: <button className="text-sky-300 underline" onClick={() => onNavigate('/workforce')}>open the AI workforce console</button>.</li>
+            <li className="text-xs text-slate-400 pt-1">Run detail, inputs, tools and limitations: <InlineNavLink onClick={() => onNavigate('/workforce')}>open the AI workforce console</InlineNavLink>.</li>
           </ul>
         )}
 
         {tab === 'decisions' && (
           <div className="space-y-2">
             {caseDecisions.length === 0 ? (
-              <p className="rounded-lg border border-slate-700 bg-slate-900 p-4 text-[13px] text-slate-300">No human decisions recorded on this case yet. Decisions are recorded in <button className="text-sky-300 underline" onClick={() => onNavigate('/needs-ok')}>Needs Your OK</button> after the five-step inspection sequence.</p>
+              <p className="rounded-lg border border-slate-700 bg-slate-900 p-4 text-[13px] text-slate-300">No human decisions recorded on this case yet. Decisions are recorded in <InlineNavLink onClick={() => onNavigate('/needs-ok')}>Needs Your OK</InlineNavLink> after the five-step inspection sequence.</p>
             ) : (
               caseDecisions.map((d) => (
                 <div key={d.decision_id} className="rounded-lg border border-slate-700 bg-slate-900 p-3">
@@ -476,7 +478,7 @@ export const CaseWorkspaceView: React.FC<{
                 </div>
               ))
             )}
-            <p className="text-xs text-slate-400">Full audit trail: <button className="text-sky-300 underline" onClick={() => onNavigate('/compliance')}>open Audit &amp; assurance</button>.</p>
+            <p className="text-xs text-slate-400">Full audit trail: <InlineNavLink onClick={() => onNavigate('/compliance')}>open Audit &amp; assurance</InlineNavLink>.</p>
           </div>
         )}
       </div>

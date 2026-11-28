@@ -6,6 +6,7 @@
 // outcome. Rand found is the vault-sealed, archived statement of countable value,
 // with amounts in exact cents and a logged PDF export. Tokens: project scale only,
 // two weights, three text colours; tables scroll horizontally on phone.
+import { InlineNavLink } from './InlineNavLink';
 import React from 'react';
 import type { LedgerEntryInput, RecoveryCaseInput, RoleId } from '../lib/engine/types';
 import { evaluateLedgerEntry, summarizeLedger } from '../lib/engine/ledger';
@@ -152,7 +153,7 @@ export const SavingsLedgerView: React.FC<{
             ))}
           </ul>
         </details>
-        <p className="text-xs text-slate-400 mt-3">Sign-off and recovery actions: <button className="text-sky-300 underline" onClick={() => onNavigate('/recovery')}>open Recovery desk</button>. Signed in as {ROLE_LABELS[activeRole]} (sample view).</p>
+        <p className="text-xs text-slate-400 mt-3">Sign-off and recovery actions: <InlineNavLink onClick={() => onNavigate('/recovery')}>open Recovery desk</InlineNavLink>. Signed in as {ROLE_LABELS[activeRole]} (sample view).</p>
       </div>
     </section>
   );

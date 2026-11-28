@@ -382,7 +382,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
             Litigation halted on PTO / nulla bona targets
           </div>
         </div>
-      </section><aside className="insights-rail"><div className="context-label">Review insights</div><h3>Financial evidence first</h3><p>{entries.length} sample entries. Values remain separate by evidence and review state.</p><dl><div><dt>Source basis</dt><dd>Seeded ledger and case records</dd></div><div><dt>Required control</dt><dd>Finance and forensic sign-off</dd></div><div><dt>Actual cash collected by this app</dt><dd className="insight-value">R 0</dd></div></dl><a href="#financial-ledger" className="text-sky-300 underline">Inspect underlying records ↓</a></aside></div>
+      </section><aside className="insights-rail"><div className="context-label">Review insights</div><h3>Financial evidence first</h3><p>{entries.length} sample entries. Values remain separate by evidence and review state.</p><dl><div><dt>Source basis</dt><dd>Seeded ledger and case records</dd></div><div><dt>Required control</dt><dd>Finance and forensic sign-off</dd></div><div><dt>Actual cash collected by this app</dt><dd className="insight-value">R 0</dd></div></dl><a href="#financial-ledger" className="inline-flex items-center gap-1 font-medium text-sky-400 underline decoration-sky-500/40 underline-offset-2 rounded-sm transition-colors hover:text-sky-300 hover:decoration-sky-300">Inspect underlying records ↓</a></aside></div>
 
       {/* Non-Cash & Friction Separation Strip */}
       <section aria-label="Non-cash and operational metrics" className="grid grid-cols-1 sm:grid-cols-3 gap-4">
