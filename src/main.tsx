@@ -10,8 +10,8 @@ try { const theme=localStorage.getItem('nahashield-theme')==='dark'?'dark':'ligh
 async function mount(){
 await fetch('/api/workspace');
 createRoot(document.getElementById('root')!).render(
-  <ErrorBoundary><WorkspaceNotice/>
-    {location.pathname.startsWith('/review')?<PublicReview module={location.pathname.split('/')[2]||'workforce'}/>:location.pathname==='/map-preview'?<PublicMapPreview/>:<App/>}
+  <ErrorBoundary>
+    {location.pathname.startsWith('/review')?<><WorkspaceNotice/><PublicReview module={location.pathname.split('/')[2]||'workforce'}/></>:location.pathname==='/map-preview'?<><WorkspaceNotice/><PublicMapPreview/></>:<App/>}
   </ErrorBoundary>,
 );
 

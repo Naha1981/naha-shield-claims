@@ -1,4 +1,5 @@
 import {ScreenGuide} from './ScreenGuide';
+import {WorkspaceNotice} from './WorkspaceNotice';
 import React from 'react';
 import {
   AlertTriangle,
@@ -171,6 +172,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
 
   return (
     <div className="min-h-screen bg-[#0B1120] text-slate-100 flex flex-col overflow-x-hidden">
+      <WorkspaceNotice />
       {/* Environment marker: one honest pill, approved Screen Designs borrow (28 Nov) */}
 
       {/* Top Bar (Strict 3-Zone Contract) */}
@@ -209,12 +211,12 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
             className="demo-pill"
             title="Sample workspace: synthetic data only, no live actions or payments"
           >
-            SAMPLE · fictional data
+            SAMPLE<span className="hidden sm:inline"> · fictional data</span>
           </span>
         </div>
 
         {/* Zone 2: Sample RBAC Role Switcher */}
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 justify-end sm:flex-initial basis-full order-last sm:order-none sm:basis-auto">
+        <div className="hidden sm:flex items-center gap-2 sm:gap-3 min-w-0 flex-1 justify-end sm:flex-initial sm:basis-auto">
           <label
             htmlFor="role-switcher"
             className="hidden md:inline text-xs text-slate-400 whitespace-nowrap"
@@ -404,10 +406,9 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
             type="button"
             onClick={onOpenReadout}
             hidden={activeRoute==='/network'}
-            className="px-2 sm:px-4 py-1 sm:py-1.5 text-[13px] sm:text-xs font-semibold rounded-md bg-emerald-600 hover:bg-emerald-500 text-white transition-colors whitespace-nowrap shrink-0"
+            className="hidden sm:inline-flex px-2 sm:px-4 py-1 sm:py-1.5 text-[13px] sm:text-xs font-semibold rounded-md bg-emerald-600 hover:bg-emerald-500 text-white transition-colors whitespace-nowrap shrink-0"
           >
-            <span className="sm:hidden">Export</span>
-            <span className="hidden sm:inline">Export overview</span>
+            <span>Export overview</span>
           </button>
         </div>
       </header>
@@ -429,6 +430,31 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
           } lg:block lg:static ${collapsed?'lg:w-24':'lg:w-60'} ns-sidebar w-64 shrink-0 bg-[#0F172A] border-r border-slate-800 flex flex-col justify-between`}
         >
           <div className="p-4 space-y-6">
+            <div className="lg:hidden pb-3 mb-3 border-b border-slate-800 space-y-3">
+              <label className="block text-xs text-slate-400" htmlFor="role-switcher-mobile">Sample view</label>
+              <select
+                id="role-switcher-mobile"
+                aria-label="Sample role view, not account permissions"
+                value={activeRole}
+                onChange={(e) => {const role=e.target.value as RoleId;void fetch('/api/demo-view-audit',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({role})});onChangeRole(role)}}
+                className="w-full truncate bg-slate-900 border border-slate-700 text-slate-100 text-[13px] font-medium rounded-md px-1.5 py-1 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              >
+                {(Object.keys(ROLE_LABELS) as RoleId[]).map((roleKey) => (
+                  <option key={roleKey} value={roleKey}>
+                    {ROLE_LABELS[roleKey]}
+                  </option>
+                ))}
+              </select>
+              {activeRoute!=='/network' && (
+                <button
+                  type="button"
+                  onClick={() => { setMobileMenuOpen(false); onOpenReadout(); }}
+                  className="w-full px-3 py-2 text-[13px] font-semibold rounded-md bg-emerald-600 hover:bg-emerald-500 text-white transition-colors"
+                >
+                  Export overview
+                </button>
+              )}
+            </div>
             <div className="flex items-center justify-between lg:hidden pb-3 border-b border-slate-800">
               <span className="font-display text-sm font-bold text-white">
                 ClaimTrace Navigation
