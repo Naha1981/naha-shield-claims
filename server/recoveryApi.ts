@@ -1,8 +1,8 @@
 // Recovery action API from Thabiso's spec 1 section 1 (16 endpoints).
 // In-memory, synthetic data only. Auth: when NAHASHIELD_LOGIN=on the global
 // /api middleware has already required a bearer token and we use its role;
-// with login off (Lawrence's demo) the demo-role header maps through
-// DEMO_ROLE_MAP so the demo keeps working.
+// with login off (Lawrence's sample) the demo-role header maps through
+// DEMO_ROLE_MAP so the sample keeps working.
 // Hard rules from the spec: Idempotency-Key on every mutation, X-Request-ID
 // correlation on every response, object-level tenant authorisation, cash is
 // recognised only after reconciliation clears it, and nothing here ever

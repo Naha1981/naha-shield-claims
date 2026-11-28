@@ -144,7 +144,7 @@ export function workedExampleRoutes(): express.Router {
 }
 
 // Spec 7 API payloads: GET /worked-cases and /worked-cases/:caseId.
-// Cents in the API, fictional demo data, insurer name a placeholder variable.
+// Cents in the API, fictional sample data, insurer name a placeholder variable.
 import { listPayload, detailPayload } from '../src/lib/demo/workedCases';
 
 export function workedCasesRoutes(): express.Router {

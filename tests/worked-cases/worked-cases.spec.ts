@@ -86,7 +86,7 @@ test('API serves list and both case details with cents amounts', async () => {
       const res = await fetch(`http://127.0.0.1:${port}/api/v1/worked-cases/${id}`);
       assert.equal(res.status, 200);
       const p = await res.json();
-      assert.equal(p.meta.data_type, 'fictional_demo');
+      assert.equal(p.meta.data_type, 'fictional_sample');
       assert.equal(p.data.insurer, INSURER_PLACEHOLDER);
       assert.equal(typeof p.data.amount_claimed, 'number');
       assert.ok(p.data.amount_claimed > 1000, 'amounts are in cents, not rands');

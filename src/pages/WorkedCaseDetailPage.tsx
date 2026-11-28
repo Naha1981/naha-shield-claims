@@ -43,7 +43,7 @@ export function WorkedCaseDetailPage({ caseId, onBack }: { caseId: string; onBac
       <div style={card}><ValuePanel value={workedCase.value} /></div>
       <div style={card}><ShieldExplainer explanation={workedCase.shield_explanation} /></div>
       <p style={{ fontSize: 12, color: '#94a3b8', textAlign: 'center' }}>
-        Fictional demo data. Sample rands. Nothing is sent to anyone.
+        Fictional sample data. Sample rands. Nothing is sent to anyone.
       </p>
     </div>
   );

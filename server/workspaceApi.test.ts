@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import express from 'express';
 import { workspaceApiRoutes, resetWorkspaceStore } from './workspaceApi';
 
-// Spec 2 sections 2-6. Synthetic data, demo mode (login off).
+// Spec 2 sections 2-6. Synthetic data, sample mode (login off).
 
 let base = '';
 async function withServer(fn: () => Promise<void>) {

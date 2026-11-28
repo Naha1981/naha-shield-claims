@@ -37,7 +37,7 @@ export function WorkedCaseLanding({ onOpenCase, onSeed }: { onOpenCase: (caseId:
     <div style={{ maxWidth: 720, margin: '0 auto', padding: '16px 12px 48px', color: '#0f172a' }}>
       <h1 style={{ fontSize: 22, margin: '4px 0 2px' }}>See worked-out case example<span style={badge}>SAMPLE DATA</span></h1>
       <p style={{ fontSize: 14, color: '#475569', margin: '0 0 12px' }}>
-        Explore how NahaShield protects revenue, prevents fraud, and pays valid claims quickly. Fictional demo data. Nothing is sent to anyone.
+        Explore how NahaShield protects revenue, prevents fraud, and pays valid claims quickly. Fictional sample data. Nothing is sent to anyone.
       </p>
 
       <label style={{ ...lab, display: 'block', marginBottom: 4 }}>Insurer name (fills the example)</label>

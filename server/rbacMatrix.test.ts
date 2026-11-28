@@ -61,7 +61,7 @@ test('tenant isolation: no cross-tenant access for any role', () => {
   assert.equal(canAccessObject('claims_manager', 'view_recovery_case', obj, { tenant_id: 'ten_insurer_a' }), true);
 });
 
-test('demo roles map onto spec roles so Lawrence test flow keeps working', () => {
+test('sample roles map onto spec roles so Lawrence test flow keeps working', () => {
   assert.equal(DEMO_ROLE_MAP.head_of_forensics, 'investigator');
   assert.equal(DEMO_ROLE_MAP.legal_recoveries, 'head_of_recoveries');
   assert.equal(DEMO_ROLE_MAP.finance_cfo, 'finance');

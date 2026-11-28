@@ -143,7 +143,7 @@ export function canAccessObject(
   return accessOf(role, capability) !== 'no';
 }
 
-// The demo roles Lawrence tests with, mapped to the nearest spec role. Demo
+// The sample roles Lawrence tests with, mapped to the nearest spec role. Sample
 // mode keeps working exactly as before; this mapping is only used so the new
 // spec endpoints answer consistently while auth is off.
 export const DEMO_ROLE_MAP: Record<string, SpecRole> = {

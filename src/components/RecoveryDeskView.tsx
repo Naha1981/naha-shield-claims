@@ -191,7 +191,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
       .filter(Boolean);
 
     if (!reviewerId.trim()) {
-      setDecisionError('A named human reviewer ID is required by this demo control.');
+      setDecisionError('A named human reviewer ID is required by this sample control.');
       return;
     }
     if (reasons.length === 0) {

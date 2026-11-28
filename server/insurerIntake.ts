@@ -296,7 +296,7 @@ export function intakeRoutes() {
         claims: result.report.rows_used,
         findings: result.analysis.summary.findings_count,
         flagged_zar: result.analysis.summary.flagged_paid_zar,
-        message: `Webhook push: ${result.report.rows_used} claim(s) received${expectedSecret ? '' : ' (no secret configured: demo mode)'}.`,
+        message: `Webhook push: ${result.report.rows_used} claim(s) received${expectedSecret ? '' : ' (no secret configured: sample mode)'}.`,
       });
       res.json(resultPayload(result, `${profile.label} webhook`, false, 'webhook'));
     } catch (e) {

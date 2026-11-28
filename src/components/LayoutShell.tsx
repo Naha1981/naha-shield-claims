@@ -205,21 +205,21 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
             className="demo-pill"
             title="Demonstration workspace: synthetic data only, no live actions or payments"
           >
-            DEMO · fictional data
+            SAMPLE · fictional data
           </span>
         </div>
 
-        {/* Zone 2: Demo RBAC Role Switcher */}
+        {/* Zone 2: Sample RBAC Role Switcher */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 justify-end sm:flex-initial basis-full order-last sm:order-none sm:basis-auto">
           <label
             htmlFor="role-switcher"
             className="hidden md:inline text-xs text-slate-400 whitespace-nowrap"
           >
-            Demo view
+            Sample view
           </label>
           <select
             id="role-switcher"
-            aria-label="Demo role view, not account permissions"
+            aria-label="Sample role view, not account permissions"
             value={activeRole}
             onChange={(e) => {const role=e.target.value as RoleId;void fetch('/api/demo-view-audit',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({role})});onChangeRole(role)}}
             className="w-full max-w-[240px] sm:max-w-none sm:w-auto truncate bg-slate-900 border border-slate-700 text-slate-100 text-[13px] sm:text-xs font-medium rounded-md px-1.5 sm:px-3 py-1 sm:py-1.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -505,7 +505,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
                   <span>Phase 3 Cross-Insurer PSI</span>
                 </div>
                 <p className="text-[13px] text-slate-400 mt-1 leading-relaxed">
-                  LOCKED. Owner: designated compliance/legal reviewer, not assigned in this demo. Activation requires case-specific legal review of POPIA s57/58, lawful basis, agreements and tested security controls. No authorisation is recorded.
+                  LOCKED. Owner: designated compliance/legal reviewer, not assigned in this sample. Activation requires case-specific legal review of POPIA s57/58, lawful basis, agreements and tested security controls. No authorisation is recorded.
                 </p>
               </div>
             </div></details>
@@ -518,7 +518,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
 
         {/* Main Viewport */}
         <main className="ns-main flex-1 min-w-0 p-4 lg:p-8 max-w-[1840px]">
-          <div className="flex flex-wrap items-start justify-between gap-3 mb-4"><div><p className="text-sm text-slate-400">NahaShield / {currentTitle}</p><h1 className="text-2xl font-semibold text-slate-100 mt-1">{currentTitle}</h1></div><details className="rounded border border-slate-700 p-3 text-sm text-slate-200"><summary className="cursor-pointer">Workspace and account</summary><p className="mt-2 max-w-sm">{orgName}. Named reviewer sign-in is under Documents or Messages. The role selector is a demo view, not account access.</p><p className="mt-2 max-w-sm">No account invitation, password reset or company onboarding is provided here. Do not enter real claimant data.</p></details></div><a href="/map-preview" className="inline-flex items-center rounded-lg border border-emerald-700 bg-emerald-800 text-white px-4 py-3 mb-4 font-semibold">Maps · Check a physical address</a><ScreenGuide route={activeRoute}/>{children}
+          <div className="flex flex-wrap items-start justify-between gap-3 mb-4"><div><p className="text-sm text-slate-400">NahaShield / {currentTitle}</p><h1 className="text-2xl font-semibold text-slate-100 mt-1">{currentTitle}</h1></div><details className="rounded border border-slate-700 p-3 text-sm text-slate-200"><summary className="cursor-pointer">Workspace and account</summary><p className="mt-2 max-w-sm">{orgName}. Named reviewer sign-in is under Documents or Messages. The role selector is a sample view, not account access.</p><p className="mt-2 max-w-sm">No account invitation, password reset or company onboarding is provided here. Do not enter real claimant data.</p></details></div><a href="/map-preview" className="inline-flex items-center rounded-lg border border-emerald-700 bg-emerald-800 text-white px-4 py-3 mb-4 font-semibold">Maps · Check a physical address</a><ScreenGuide route={activeRoute}/>{children}
         </main>
       </div>
     </div>

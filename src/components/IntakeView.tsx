@@ -119,7 +119,7 @@ export function IntakeView({onNavigate,activeRole}:{onNavigate?:(route:NavRoute)
  <label>Endpoint<input aria-label={`Endpoint for ${p.label}`} value={baseUrls[p.id]??''} onChange={e=>setBaseUrls(prev=>({...prev,[p.id]:e.target.value}))}/></label>
  <p><button type="button" className="network-cta" disabled={busy==='test-'+p.id} onClick={()=>testConnection(p)}>{busy==='test-'+p.id?'Testing...':'Test connection'}</button>{' '}<button type="button" disabled={busy==='pull-'+p.id} onClick={()=>pull(p)}>{busy==='pull-'+p.id?'Pulling...':'Pull claims'}</button>{' '}<button type="button" disabled={busy==='push-'+p.id} onClick={()=>testPush(p)}>{busy==='push-'+p.id?'Pushing...':'Test a webhook push'}</button></p>
  {testResults[p.id]&&<p role="status">{testResults[p.id]}</p>}
- <details className="network-info"><summary>Webhook and sign-in details</summary><p className="network-muted">Insurers push claims to <code>{p.webhook_path}</code>. {p.webhook_secret_configured?'A shared secret is configured; pushes without it are rejected.':'No shared secret is configured yet (demo mode).'} {p.notes}</p></details>
+ <details className="network-info"><summary>Webhook and sign-in details</summary><p className="network-muted">Insurers push claims to <code>{p.webhook_path}</code>. {p.webhook_secret_configured?'A shared secret is configured; pushes without it are rejected.':'No shared secret is configured yet (sample mode).'} {p.notes}</p></details>
  </article>)}
  <details className="network-info"><summary>Add an insurer by configuration</summary>
  <div className="network-controls">

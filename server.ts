@@ -172,7 +172,7 @@ async function startServer() {
   // Original reviewer records require the named authenticated principal, never a role header.
   app.use('/api',reviewerGate(isolation.current,workforce.principal));
 
-  app.post('/api/demo-view-audit',async(req,res)=>{const role=String(req.body?.role||'');if(!VALID_ROLES.has(role as RoleId))return res.status(400).json({error:'Unknown demo view'});await store.logAudit({actor_role:'head_of_forensics',actor_id:'demo-view-session',action:'DEMO_VIEW_FILTER_CHANGED_NOT_AUTHORITY',object_type:'claim',object_id:'SYN-DEMO-VIEW',details:{selected_view:role,permission_changed:false}});res.json({ok:true,permission_changed:false})});
+  app.post('/api/demo-view-audit',async(req,res)=>{const role=String(req.body?.role||'');if(!VALID_ROLES.has(role as RoleId))return res.status(400).json({error:'Unknown sample view'});await store.logAudit({actor_role:'head_of_forensics',actor_id:'demo-view-session',action:'DEMO_VIEW_FILTER_CHANGED_NOT_AUTHORITY',object_type:'claim',object_id:'SYN-DEMO-VIEW',details:{selected_view:role,permission_changed:false}});res.json({ok:true,permission_changed:false})});
 
   // Health endpoint for Render & monitoring
   app.get('/api/health', (_req, res) => {

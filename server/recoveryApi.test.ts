@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import express from 'express';
 import { recoveryRoutes, resetRecoveryStore } from './recoveryApi';
 
-// Spec 1 section 1: 16 recovery endpoints. Synthetic data, demo mode (login off).
+// Spec 1 section 1: 16 recovery endpoints. Synthetic data, sample mode (login off).
 
 function app() {
   const a = express();

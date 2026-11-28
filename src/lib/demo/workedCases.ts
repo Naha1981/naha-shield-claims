@@ -1,5 +1,5 @@
 // Worked-case data (Thabiso's spec 7 API shapes, spec 6 content).
-// All fictional demo data. Insurer and person names are variables/neutral
+// All fictional sample data. Insurer and person names are variables/neutral
 // roles - never a real insurer or person. Amounts are CENTS here (API shape);
 // screens format them as rands. Every figure is a sample figure.
 
@@ -146,7 +146,7 @@ export const detailPayload = (caseId: string) => {
   const c = WORKED_CASES.find((w) => w.case_id === caseId);
   if (!c) return null;
   const { case_decision, ...rest } = c;
-  return { data: { ...rest, decision: c.decision, case_decision }, meta: { generated_at: new Date().toISOString(), data_type: 'fictional_demo' } };
+  return { data: { ...rest, decision: c.decision, case_decision }, meta: { generated_at: new Date().toISOString(), data_type: 'fictional_sample' } };
 };
 
 export const fmtCents = (cents: number): string =>
