@@ -1,0 +1,78 @@
+const ORIGIN = 'https://naha-shield-claims-production.up.railway.app';
+const shieldFrontdoor = {
+  async fetch(request) {
+    const incoming = new URL(request.url);
+    const target = new URL(incoming.pathname + incoming.search, ORIGIN);
+    const headers = new Headers(request.headers);
+    headers.delete('host');
+    headers.delete('x-forwarded-host');
+    headers.delete('forwarded');
+    headers.set('x-forwarded-proto', 'https');
+    const origin = headers.get('origin');
+    // Translate only a genuinely same-origin request. Never bless a foreign Origin.
+    if (origin === incoming.origin) headers.set('origin', ORIGIN);
+    const referrer = headers.get('referer');
+    if (referrer) {
+      try {
+        const r = new URL(referrer);
+        if (r.origin === incoming.origin) headers.set('referer', ORIGIN + r.pathname + r.search);
+      } catch {}
+    }
+    const response = await fetch(new Request(target, {
+      method: request.method, headers,
+      body: ['GET', 'HEAD'].includes(request.method) ? undefined : request.body,
+      redirect: 'manual', duplex: 'half',
+    }), {cf: {cacheTtl: 0, cacheEverything: false}});
+    const outgoing = new Headers(response.headers);
+    const location = outgoing.get('location');
+    if (location) {
+      const dest = new URL(location, target);
+      if (dest.origin === ORIGIN) outgoing.set('location', incoming.origin + dest.pathname + dest.search + dest.hash);
+    }
+    if (incoming.pathname.startsWith('/api/') || outgoing.has('set-cookie')) outgoing.set('cache-control', 'no-store');
+    outgoing.set('x-nahashield-frontdoor', 'v1');
+    return new Response(response.body, {status: response.status, statusText: response.statusText, headers: outgoing});
+  }
+};
+
+const MAP = {
+  'cargoiq.nahalabs.co.za': 'https://cargo-iq.lovable.app',
+  'nutri.nahalabs.co.za': 'https://nutri-tummies.lovable.app',
+  'bankbook.nahalabs.co.za': 'https://bankbook-tax.lovable.app',
+  'railwatch.nahalabs.co.za': 'https://naha-railwatch.onrender.com',
+};
+const HIDE = '<style>[class*="lovab"],[id*="lovab"]{display:none!important}</style>';
+export default {
+  async fetch(req) {
+    const url = new URL(req.url);
+    if (["nahashield.nahalabs.co.za", "shield.nahalabs.co.za"].includes(url.hostname)) return shieldFrontdoor.fetch(req);
+    const up = MAP[url.hostname];
+    if (!up) return new Response('Not found', { status: 404 });
+    const target = new URL(up + url.pathname + url.search);
+    const h = new Headers(req.headers);
+    h.delete('host'); h.set('x-forwarded-host', url.hostname);
+    h.delete('cf-connecting-ip');
+    const r = await fetch(target, { method: req.method, headers: h, body: ['GET','HEAD'].includes(req.method) ? undefined : req.body, redirect: 'manual' });
+    const out = new Headers(r.headers);
+    out.delete('x-frame-options');
+    out.set('content-security-policy-report-only', '');
+    out.delete('content-security-policy-report-only');
+    const sc = out.get('set-cookie');
+    if (sc) out.set('set-cookie', sc.replace(/;\s*Domain=[^;]+/i, ''));
+    const loc = out.get('location');
+    if (loc) out.set('location', loc.replace(up, 'https://' + url.hostname));
+    const ct = out.get('content-type') || '';
+    if (ct.includes('text/html')) {
+      let buf = ''; let sbuf = '';
+      return new HTMLRewriter()
+        .on('script[src^="/__l5e"]', { element(e) { e.remove(); } })
+        .on('script[src^="/~flock"]', { element(e) { e.remove(); } })
+        .on('style', { text(t) { buf += t.text; t.remove(); if (t.lastInTextNode) { if (!/lovable/i.test(buf)) t.replace(buf, {html:true}); buf = ''; } } })
+        .on('#lovable-badge', { element(e) { e.remove(); } })
+        .on('script', { text(t) { sbuf += t.text; t.remove(); if (t.lastInTextNode) { if (!/lovable/i.test(sbuf)) t.replace(sbuf, {html:true}); sbuf = ''; } } })
+        .on('head', { element(e) { e.append(HIDE, { html: true }); } })
+        .transform(new Response(r.body, { status: r.status, headers: out }));
+    }
+    return new Response(r.body, { status: r.status, headers: out });
+  },
+};
