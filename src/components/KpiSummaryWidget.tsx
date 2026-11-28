@@ -284,7 +284,7 @@ export const KpiSummaryWidget: React.FC<KpiSummaryWidgetProps> = ({
           </p>
         </div>
         <span className="text-[11px] font-mono text-slate-400 whitespace-nowrap">
-          SYNTHETIC ENGINE VIEW · NOT BOOKED CASH
+          SAMPLE ENGINE VIEW · NOT BOOKED CASH
         </span>
       </div>
 

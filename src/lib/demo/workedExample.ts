@@ -1,5 +1,5 @@
 // Worked example constants (Thabiso's spec 6 + worked-example order).
-// Everything here is SYNTHETIC SAMPLE DATA for Lawrence's walkthrough.
+// Everything here is SAMPLE DATA for Lawrence's walkthrough.
 // Insurer name is always a variable, never hardcoded. All rand figures are
 // sample figures, not insurer or bank proof. Fees/ROI are sample pricing,
 // not an offer. Person names are fictional placeholders.

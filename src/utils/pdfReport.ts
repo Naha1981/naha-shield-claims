@@ -179,7 +179,7 @@ export function generateAndDownloadPopiaPdf(input: PopiaPdfReportInput): string 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
   doc.text(
-    'CONFIDENTIAL — POPIA s19 SAFEGUARDS · DE-IDENTIFIED / SYNTHETIC DATA ONLY · SINGLE-TENANT ISOLATION',
+    'CONFIDENTIAL — POPIA s19 SAFEGUARDS · DE-IDENTIFIED / SAMPLE DATA ONLY · SINGLE-TENANT ISOLATION',
     margin + 3,
     cursorY + 5,
   );
