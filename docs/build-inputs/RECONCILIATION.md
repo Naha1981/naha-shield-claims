@@ -61,3 +61,24 @@ Where specs conflicted, the stricter value was kept and the conflict is listed h
   full_name_search column, never plaintext. Duplicate-match tenant indexes already existed.
 - Local engine: added trigramSimilarity() mirroring pg_trgm similarity() and use it next to the
   Levenshtein check for fuzzy name matching (docs and engine now use the same operator).
+
+## Spec 6 (worked example content) - number reconciliations (28 Nov 2026)
+
+- S6-1 Board "claims reviewed 12,480" vs scenario "12,000" -> 12,000 everywhere.
+- S6-2 Board "claims paid 11,730" -> 11,940 (12,000 reviewed minus 60 declined), consistent with the scenario.
+- S6-3 Board "claims cleared 11,410" vs scenario "claims cleared 120" -> they were two different counts. Now labelled distinctly: "cleared as legitimate (total) 11,940" (11,680 never flagged + 140 flagged not held + 120 held then cleared) and "held then cleared after review 120".
+- S6-4 Board "claims declined 95" vs scenario "declined or reduced 60" -> 60 everywhere. Saved cases 95 -> 60; attribution classes 58/27/10 -> 37/17/6 (same proportions, sums to 60). All rand amounts unchanged; the fee table keys off rands, not counts.
+- S6-5 Board "claims recovered 45" vs drill-down "recovered cases 18" -> 45 is wrongful payments FOUND; 18 is recovered cases (cash cleared the bank). Labels fixed.
+- S6-6 ROI shown as both "5.34x" and "434%" -> same ratio two ways: net benefit R2,818,500 / fee R527,500 = 5.34x, which is a 434% return over the fee. Shown together with the relationship spelled out.
+- S6-7 ASISA figures (R80.8m, 2,282 funeral claims in 2020, about R35,400 per case) verified against the cited ASISA media release page on 28 Nov 2026; shown with the source link.
+- S6-8 Insurer "Pride Life SA" and all person names removed; insurer is a viewer-typed variable, people are neutral fictional roles. Fees/ROI labelled sample pricing, not an offer.
+
+## Spec 7 (worked-case build artefacts) - adaptations (28 Nov 2026)
+
+- S7-1 Next.js snippets adapted to this repo's Vite + internal state router; component names kept (WorkedCaseLanding, WorkedCaseSelector, ExecutiveValueBoard, CaseHeader, CaseTimeline, IndicatorPanel, EvidencePanel, DecisionPanel, ValuePanel, ShieldExplainer, WorkedCaseDetailPage). Routes kept as /see-worked-case-example and /see-worked-case-example/:caseId within the internal router.
+- S7-2 His vitest + testing-library spec does not run in this repo (runner is tsx --test; no testing-library installed). Rewritten as node:test at his path tests/worked-cases/worked-cases.spec.ts, asserting the same things against the shared data module and the live API router; package.json test glob extended.
+- S7-3 Case 2 decision date: spec 7 said 2026-06-09; spec 6 says declined after 5 business days from 5 June -> 2026-06-12 kept (stricter/more accurate).
+- S7-4 Case 2 relationship: spec 7 "sister" vs spec 6 "claimant not immediate family" -> "cousin (not immediate family)" kept so the indicator is consistent.
+- S7-5 Indicator "submitted one day after death" vs spec 6 dates (death 3 June, submitted 5 June) -> "within two days of death".
+- S7-6 Indicator set is the union: spec 7's 8 plus spec 6's "claimant not immediate family" = 9.
+- S7-7 All approver/person names replaced with neutral roles; insurer placeholder "Sample Insurer" served by the API; viewer-typed name only fills the landing page heading locally.

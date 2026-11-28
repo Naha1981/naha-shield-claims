@@ -1,6 +1,9 @@
 import {RelationshipGraph} from './components/RelationshipGraph';
 import {RetrospectiveLeakageView} from './components/RetrospectiveLeakageView';
 import {IntakeView} from './components/IntakeView';
+import {InvestigatorView} from './components/InvestigatorView';
+import {WorkedCaseLanding} from './pages/WorkedCaseLanding';
+import {WorkedCaseDetailPage} from './pages/WorkedCaseDetailPage';
 import { SYNTHETIC_RECOVERY_CASES } from '../db/seeds/syntheticData';
 import './network.css';
 import {WorkforceView} from './components/WorkforceView';
@@ -273,6 +276,9 @@ export default function App() {
   if(route==='/recovery'&&import.meta.env.VITE_STATIC_PREVIEW)return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Synthetic recovery preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RecoveryDeskView cases={SYNTHETIC_RECOVERY_CASES} decisions={[]} activeRole={activeRole} activeActorName="Synthetic reviewer" onCaseAdded={async()=>{}} onDecisionRecorded={async()=>{}}/></LayoutShell>;
   if(route==='/leakage')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Synthetic leakage preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RetrospectiveLeakageView onNavigate={navigate} activeRole={activeRole}/></LayoutShell>;
   if(route==='/intake')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Insurer intake" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><IntakeView onNavigate={navigate} activeRole={activeRole}/></LayoutShell>;
+  if(route==='/investigator')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Claims investigation" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><InvestigatorView activeRole={activeRole} onOpenExample={()=>navigate('/see-worked-case-example')}/></LayoutShell>;
+  if(route==='/see-worked-case-example')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Worked example" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><WorkedCaseLanding onOpenCase={(id)=>navigate(`/see-worked-case-example/${id}` as NavRoute)} onSeed={()=>navigate('/investigator')}/></LayoutShell>;
+  if(route.startsWith('/see-worked-case-example/'))return <LayoutShell activeRoute={'/see-worked-case-example'} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Worked example" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><WorkedCaseDetailPage caseId={route.split('/').pop() ?? ''} onBack={()=>navigate('/see-worked-case-example')}/></LayoutShell>;
   if (loading && !data) {
     return (
       <div className="min-h-screen bg-[#0B1120] text-slate-300 flex items-center justify-center p-6 text-sm font-mono">
