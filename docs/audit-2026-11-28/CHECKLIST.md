@@ -50,3 +50,9 @@ Status legend: DONE (with proof) / IN PROGRESS / NOT DONE. Every DONE links to p
 - Cold phone-width (400px) first frames, light and dark, attached to the report.
 - Old-name grep on pre-boot HTML/meta/titles/static pages: NahaShield, sandbox, Demo.
 - Free/open-source only; SAMPLE labels; live connectors off; no real data.
+
+## Additions from 12:03 review (parent-relayed, Thabiso 12:03)
+- [ ] Per-claim Class A/B/C tag in the live ledger (today: only in the worked-example fee model) — free/open-source, SAMPLE labels
+- [ ] Exportable FSCA compliance report (PDF) from the compliance screen
+- [x] Approval gate wording kept as is (decision: no change)
+- Rule: never claim WORM or Merkle unless actually built (vault = SHA-256 hash chain, SQLite-backed)
