@@ -459,7 +459,7 @@ export const EvidenceIngestion: React.FC<EvidenceIngestionProps> = ({
             </h2>
           </div>
           <p className="text-xs text-slate-400">
-            Securely drop insurance documents / claim records or capture physical evidence via camera · Verified magic bytes, POPIA s19 PII masking, and SHA-256 chain sealing.
+            Drop claim documents or capture evidence with the camera. Files are checked, personal details masked, and fingerprinted into the chain.
           </p>
         </div>
 

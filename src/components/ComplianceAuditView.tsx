@@ -96,11 +96,15 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
           <Lock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
           <div>
             <div className="text-sm font-semibold text-white">
-              Phase 3 Cross-Insurer Private Set Intersection (PSI) — LOCKED
+              Cross-insurer matching - locked
             </div>
             <p className="text-xs text-slate-300 mt-0.5">
-              No cross-insurer matching or tenant joins are enabled. Owner unassigned. Activation needs case-specific legal review, required authorisations, agreements and security testing. No authority is recorded.
+              Off. No matching between insurers is possible here.
             </p>
+            <details className="text-xs text-slate-400 mt-1">
+              <summary className="cursor-pointer hover:text-slate-200">Details</summary>
+              <p className="mt-1">Phase 3 Cross-Insurer Private Set Intersection (PSI). No cross-insurer matching or tenant joins are enabled. Owner unassigned. Activation needs case-specific legal review, required authorisations, agreements and security testing. No authority is recorded.</p>
+            </details>
           </div>
         </div>
         <span className="px-3 py-1 rounded border border-amber-500/40 bg-amber-950/40 text-amber-300 font-mono text-xs font-semibold whitespace-nowrap shrink-0">

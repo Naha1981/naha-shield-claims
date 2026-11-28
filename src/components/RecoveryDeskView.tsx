@@ -502,9 +502,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
                 <h3 className="text-xs font-semibold text-slate-200">
                   8-Layer Asset & Tenure Profile
                 </h3>
-                <span className="text-[13px] font-mono text-slate-400">
-                  SIMULATED ADAPTER (WinDeed / CIPC)
-                </span>
+<span className="rounded-full border border-slate-600 px-2.5 py-1 text-[11px] font-semibold text-slate-300" title="Simulated adapter: WinDeed / CIPC">Simulated checks · not live</span>
               </div>
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div className="p-2.5 rounded bg-slate-900/80 border border-slate-800">

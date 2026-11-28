@@ -136,7 +136,7 @@ export const EvidenceVaultView: React.FC<EvidenceVaultViewProps> = ({
             Evidence records & chain of custody
           </h2>
           <p className="text-sm text-slate-400 mt-1">
-            SHA-256 checks detect changes to stored content or links. This sample local store is not an independently immutable evidence system.
+            Every record is fingerprinted, so any change to a stored file shows up. This is a sample store, not a legal evidence system.
           </p>
         </div>
 
@@ -192,18 +192,18 @@ export const EvidenceVaultView: React.FC<EvidenceVaultViewProps> = ({
           <div>
             <div className="text-sm font-semibold">
               {verification.valid
-                ? `HASH CHAIN VALID — ${verification.checked_count} of ${items.length} records sealed`
-                : `TAMPER DETECTED (FAILED CLOSED) — ${verification.failed_evidence_id}`}
+                ? `All ${verification.checked_count} of ${items.length} records intact`
+                : `Change detected - record quarantined (${verification.failed_evidence_id})`}
             </div>
             <div className="text-xs opacity-90 mt-0.5">
               {verification.valid
-                ? 'Every content_hash and prev_chain_hash link matches cryptographic SHA-256 chain.'
+                ? 'Fingerprints match the chain. Details: every content_hash and prev_chain_hash link matches the cryptographic SHA-256 chain.'
                 : verification.reason}
             </div>
           </div>
         </div>
         <div className="font-mono text-xs shrink-0">
-          Status: {verification.valid ? 'INTEGRITY CHECK PASSED · not legal admissibility' : 'QUARANTINED'}
+          Status: {verification.valid ? 'Check passed · not legal admissibility' : 'QUARANTINED'}
         </div>
       </div>
 

@@ -147,15 +147,19 @@ export const ConsentDeskView: React.FC<ConsentDeskViewProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
           <h2 className="font-display text-2xl font-bold text-white tracking-tight">
-            Consent & Cover Integrity Desk (M2)
+            Consent & cover checks
           </h2>
           <p className="text-sm text-slate-400 mt-1">
-            Independent out-of-band proof that the life assured consented to third-party cover. PEPUDA-compliant: consent tiers never inspect age.
+            Checks that the insured person agreed to the cover, confirmed on a separate channel. You review the gaps.
           </p>
         </div>
-        <span className="text-[13px] font-mono text-slate-400 shrink-0">
-          SIMULATED ADAPTER (WhatsApp / USSD Gateway · KYC Contact Lookup)
-        </span>
+        <div className="shrink-0 flex flex-col items-start sm:items-end gap-1">
+          <span className="rounded-full border border-slate-600 px-2.5 py-1 text-[11px] font-semibold text-slate-300">Simulated connector · no real messages</span>
+          <details className="text-[13px] text-slate-400">
+            <summary className="cursor-pointer hover:text-slate-200">Details</summary>
+            <p className="mt-1 max-w-xs">Simulated adapter (WhatsApp / USSD gateway, KYC contact lookup). Consent tiers never inspect age (PEPUDA).</p>
+          </details>
+        </div>
       </div>
 
       {/* Audit KPI Strip */}

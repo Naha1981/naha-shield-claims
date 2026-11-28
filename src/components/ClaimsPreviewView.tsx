@@ -93,9 +93,7 @@ export const ClaimsPreviewView: React.FC<ClaimsPreviewViewProps> = ({
           </p>
           <p className="text-xs text-slate-400 mt-1">Ranked by deadline, then rands.</p>
         </div>
-        <span className="text-[13px] font-mono text-slate-400 shrink-0">
-          SIMULATED ADAPTER (DHA / VerifyNow · AVS-R · XTND / Astute)
-        </span>
+<span className="self-start rounded-full border border-slate-600 px-2.5 py-1 text-[11px] font-semibold text-slate-300 shrink-0" title="Simulated adapter: DHA / VerifyNow · AVS-R · XTND / Astute">Simulated checks · not live</span>
       </div>
 
       <section aria-label="Claims portfolio metrics" className="claims-metrics grid sm:grid-cols-3 gap-4"><article><p className="context-label">Claims in review</p><p className="metric-value">{claims.length}</p><p className="text-sm text-slate-400">Sample queue · select a record below</p></article><article><p className="context-label">Selected exposure</p><p className="metric-value">{formatZar(selectedClaim?.claim_amount||0)}</p><p className="text-sm text-slate-400">Illustrative claim amount, not authorised</p></article><article><p className="context-label">Payments released</p><p className="metric-value">R 0</p><p className="text-sm text-slate-400">No live payment connector</p></article></section>

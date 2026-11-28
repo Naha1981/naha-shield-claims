@@ -43,7 +43,7 @@
   background: #475569;
 }
 
-/* NahaShield semantic appearance system: navy identity, quiet surfaces, clear actions. */
+/* Semantic appearance system: logo-green identity, quiet surfaces, clear actions. */
 :root { --ns-ground:#0b1120; --ns-surface:#101b30; --ns-ink:#eef3fb; --ns-secondary:#bac8dc; --ns-rule:#2b3a51; --ns-accent:#087864; }
 body { font-size:15px; line-height:1.6; -webkit-font-smoothing:antialiased; }
 h1,h2,h3,h4 { color:var(--ns-ink); letter-spacing:-.025em; font-weight:650; }
@@ -172,32 +172,32 @@ html[data-theme="light"] .ns-sidebar .text-slate-500{color:#78716c!important}
 html[data-theme="light"] .ns-sidebar nav[aria-label="Primary modules"] button{background:transparent!important;color:#44403c!important;box-shadow:none}
 html[data-theme="light"] .ns-sidebar nav[aria-label="Primary modules"] button *{color:inherit}
 html[data-theme="light"] .ns-sidebar nav[aria-label="Primary modules"] button:hover{background:#f5f4f0!important}
-html[data-theme="light"] .ns-sidebar nav[aria-label="Primary modules"] button[class*="bg-emerald-"]{background:#e0e7ff!important;color:#1e3a8a!important;box-shadow:inset 3px 0 #1e3a8a}
-html[data-theme="light"] .ns-sidebar nav[aria-label="Primary modules"] button[class*="bg-emerald-"] *{color:#1e3a8a!important}
+html[data-theme="light"] .ns-sidebar nav[aria-label="Primary modules"] button[class*="bg-emerald-"]{background:#e4f3ed!important;color:#065e4e!important;box-shadow:inset 3px 0 #087864}
+html[data-theme="light"] .ns-sidebar nav[aria-label="Primary modules"] button[class*="bg-emerald-"] *{color:#065e4e!important}
 html[data-theme="light"] .ns-sidebar .visual-nav-icon{background:#f5f4f0!important;color:#57534e!important}
-html[data-theme="light"] .ns-sidebar nav button[class*="bg-emerald-"] .visual-nav-icon{background:#e0e7ff!important;color:#1e3a8a!important}
+html[data-theme="light"] .ns-sidebar nav button[class*="bg-emerald-"] .visual-nav-icon{background:#d9ece3!important;color:#065e4e!important}
 html[data-theme="light"] .ns-sidebar div[class*="bg-slate-900"]{background:#faf9f5!important;color:#1c1917!important;border-color:#e7e4dc!important}
 html[data-theme="light"] .ns-sidebar div[class*="border-t"]{border-color:#e7e4dc!important}
-html[data-theme="light"] .ns-sidebar button[class*="text-sky-"]{color:#1e3a8a!important}
-html[data-theme="light"] button[class*="bg-emerald-5"],html[data-theme="light"] button[class*="bg-emerald-6"],html[data-theme="light"] button[class*="bg-emerald-7"],html[data-theme="light"] button[class*="bg-emerald-8"],html[data-theme="light"] button[class*="bg-sky-7"],html[data-theme="light"] button[class*="bg-sky-8"],html[data-theme="light"] a[class*="bg-sky-8"],html[data-theme="light"] a[href="/map-preview"][class*="bg-emerald-8"]{background-color:#1e3a8a!important;border-color:#1e3a8a!important;color:#fff!important;box-shadow:0 2px 3px #1e3a8a15}
-html[data-theme="light"] button[class*="bg-emerald-"]:enabled:hover,html[data-theme="light"] button[class*="bg-sky-8"]:enabled:hover{background-color:#1e40af!important}
+html[data-theme="light"] .ns-sidebar button[class*="text-sky-"]{color:#065e4e!important}
+html[data-theme="light"] button[class*="bg-emerald-5"],html[data-theme="light"] button[class*="bg-emerald-6"],html[data-theme="light"] button[class*="bg-emerald-7"],html[data-theme="light"] button[class*="bg-emerald-8"],html[data-theme="light"] button[class*="bg-sky-7"],html[data-theme="light"] button[class*="bg-sky-8"],html[data-theme="light"] a[class*="bg-sky-8"],html[data-theme="light"] a[href="/map-preview"][class*="bg-emerald-8"]{background-color:#087864!important;border-color:#087864!important;color:#fff!important;box-shadow:0 2px 3px #08786422}
+html[data-theme="light"] button[class*="bg-emerald-"]:enabled:hover,html[data-theme="light"] button[class*="bg-sky-8"]:enabled:hover{background-color:#065e4e!important}
 
 .today-hero{background:var(--ns-surface);border:1px solid var(--ns-rule);border-radius:14px;padding:18px 16px}
 .today-hero-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px}
 .today-title{font-size:26px;font-weight:800;letter-spacing:-.02em;margin:0}
 .today-sub{font-size:12px;color:var(--ns-secondary);margin-top:2px}
-.today-rule-pill{font-size:10px;font-weight:700;color:#1d4ed8;background:#e0e7ff;border-radius:999px;padding:4px 10px;white-space:nowrap}
+.today-rule-pill{font-size:10px;font-weight:700;color:#065e4e;background:#e4f3ed;border-radius:999px;padding:4px 10px;white-space:nowrap}
 .today-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .today-kpi{background:var(--ns-ground);border:1px solid var(--ns-rule);border-radius:12px;padding:12px}
 .today-kpi-lbl{font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px}
 .today-kpi-lbl i{width:7px;height:7px;border-radius:99px;background:currentColor;display:inline-block}
 .today-kpi-num{font-size:22px;font-weight:800;letter-spacing:-.03em;margin:8px 0 4px;font-variant-numeric:tabular-nums;white-space:nowrap}
 .today-kpi-one{font-size:10.5px;color:var(--ns-secondary);line-height:1.4}
-.today-hero [data-tone="blue"]{color:#1d4ed8}.today-hero [data-tone="green"]{color:#047857}.today-hero [data-tone="purple"]{color:#7c3aed}
+.today-hero [data-tone="blue"]{color:#087864}.today-hero [data-tone="green"]{color:#047857}.today-hero [data-tone="purple"]{color:#92670e}
 .today-kpi-bar{height:5px;border-radius:99px;background:var(--ns-rule);margin-top:8px;overflow:hidden}
-.today-kpi-bar i{display:block;height:100%;background:#7c3aed;border-radius:99px}
+.today-kpi-bar i{display:block;height:100%;background:#087864;border-radius:99px}
 .today-foot{font-size:11px;color:var(--ns-secondary);margin:10px 2px 0}
-.today-foot a{color:#1d4ed8;font-weight:600;text-decoration:none}
+.today-foot a{color:#065e4e;font-weight:600;text-decoration:none}
 .today-plain{background:var(--ns-ground);border:1px solid var(--ns-rule);border-radius:12px;padding:12px 14px;margin-top:12px}
 .today-plain h3{font-size:12px;font-weight:800;margin:0 0 4px}
 .today-plain p{font-size:12.5px;line-height:1.55;margin:0}
@@ -211,7 +211,7 @@ html[data-theme="light"] button[class*="bg-emerald-"]:enabled:hover,html[data-th
 .today-chip.red{background:#fee2e2;color:#b91c1c}
 .today-chip.amber{background:#fef3c7;color:#92400e}
 .today-item-amt{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
-.today-btn{background:#1e3a8a;color:#fff;font-size:11px;font-weight:700;border:none;border-radius:9px;padding:9px 14px;margin-top:6px;min-height:38px}
+.today-btn{background:#087864;color:#fff;font-size:11px;font-weight:700;border:none;border-radius:9px;padding:9px 14px;margin-top:6px;min-height:38px}
 .today-ok{background:var(--ns-ground);border:1px solid var(--ns-rule);border-radius:12px;padding:14px;text-align:center;margin-top:12px}
 .today-ok-label{font-size:12px;font-weight:800;text-align:left}
 .today-ok-n{font-size:26px;font-weight:800;margin-top:6px}
@@ -226,7 +226,7 @@ html[data-theme="light"] button[class*="bg-emerald-"]:enabled:hover,html[data-th
 .dark .today-chip.red{background:#3d1d1d;color:#f87171}
 .dark .today-chip.amber{background:#3a2f14;color:#fbbf24}
 .dark .today-rule-pill{background:#1c2340;color:#93a5fd}
-.dark .today-btn{background:#2b4bd8}
+.dark .today-btn{background:#087864}
 
 /* Light-surface cards keep their light background in both themes, so text inside
    must stay dark and AA-contrasted even when the app is in dark mode. */
@@ -247,7 +247,7 @@ html[data-theme="light"] button[class*="bg-emerald-"]:enabled:hover,html[data-th
 /* Dark-theme AA contrast for the Today hero accents and vault strip. */
 .dark .today-hero [data-tone="blue"]{color:#60a5fa}
 .dark .today-hero [data-tone="green"]{color:#34d399}
-.dark .today-hero [data-tone="purple"]{color:#a78bfa}
+.dark .today-hero [data-tone="purple"]{color:#d3b969}
 .dark .today-foot a{color:#93b8fa}
 .dark .today-vault-t{color:#34d399}
 .dark .today-vault-ring{border-color:#34d399}
