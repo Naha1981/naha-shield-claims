@@ -96,3 +96,25 @@ Where specs conflicted, the stricter value was kept and the conflict is listed h
 - S4-CI: his CI was Python/pytest; rewritten for this repo (npm ci, tsc, npm test incl. fuzz, vite build, generator determinism job). Thresholds kept from 3.3 (p95<1500ms, p99<3000ms, errors<1%, checks>99%) but flagged: they must be baselined from real local runs before tightening.
 - S4-K6: k6 load/stress/soak scripts saved to load/k6/ with a hard guard that refuses any non-local BASE_URL. Local/synthetic only.
 - S4-RPT: report template saved to docs/build-inputs/test-execution-report-template.md with a banner marking every example number a placeholder, never our results.
+
+## 2026-11-28 domain move + connectors (mega release)
+
+- Domain move approved by his "Replace" (09:35): claimtrace.nahalabs.co.za now
+  serves this app via nahalabs-app-proxy; shield.nahalabs.co.za 301-redirects
+  to it; the older ClaimTrace globe project keeps running at
+  claimtrace-frontdoor.naha-thabiso.workers.dev. Record + one-step restore:
+  docs/ops/domain-front-door.md. Railway free blocks custom domains; the
+  Cloudflare account is at the 100-worker free limit, so the move is a
+  one-line edit inside the existing front-door worker.
+- Connectors built (09:22 order): SIM swap, RICA, bank AVS adapters in
+  src/lib/connectors/index.ts - consent gate, append-only audit log, one live
+  switch OFF that throws if flipped, all outputs SIMULATED with innocent
+  explanations, humans decide. Worked-case indicator text now comes from the
+  connectors module. Tests: tests/connectors/connectors.spec.ts (13 cases).
+- Spec 1 + spec 2 message bodies saved verbatim (they were missing):
+  docs/build-inputs/spec1-recovery-api-schema-incident-rbac.md,
+  docs/build-inputs/spec2-apis-templates-components-payloads.md.
+- Executive deck produced: docs/deck/claimtrace-executive-deck.md (spec 7 s2
+  renamed ClaimTrace; insurer/client variables; sample-labelled figures).
+- Test-execution report with measured values:
+  docs/reports/test-execution-report-2026-11-28.md.
