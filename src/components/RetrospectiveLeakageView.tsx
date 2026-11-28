@@ -60,7 +60,7 @@ export function RetrospectiveLeakageView({onNavigate,activeRole}:{onNavigate?:(r
   }
   f.text().then(csv=>{fetch('/api/leakage/analyse',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({csv,file_name:f.name})}).then(async r=>{const body=await r.json().catch(()=>({}));if(!r.ok)throw Error((body as {error?:string}).error||'api unavailable');return body as Analysis;}).then(setData).catch(err=>{try{const ingested=ingestCsvText(csv,f.name,parseCsv);setData({file_name:f.name,synthetic:false,format:'csv',ingest_report:ingested.report,...analyseRows(ingested.rows)})}catch(e2){setError('Could not read this file: '+(err as Error).message)}}).finally(()=>setBusy(false));});
  };
- React.useEffect(()=>{if(window.location.hash==='#sample')sample();},[]);
+ React.useEffect(()=>{if(window.location.hash==='#sample'||window.location.hash==='#demo')sample();},[]);
  // Handoff from the Intake screen: an analysis produced there opens here.
  const[intakeSource,setIntakeSource]=React.useState('');
  React.useEffect(()=>{
