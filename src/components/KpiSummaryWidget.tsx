@@ -280,7 +280,7 @@ export const KpiSummaryWidget: React.FC<KpiSummaryWidgetProps> = ({
             KPI Summary
           </h2>
           <p className="text-xs text-slate-400">
-            Synthetic cross-module calculations from recovery estimates, consent simulation and stored evidence checks.
+            Sample cross-module calculations from recovery estimates, consent simulation and stored evidence checks.
           </p>
         </div>
         <span className="text-[11px] font-mono text-slate-400 whitespace-nowrap">

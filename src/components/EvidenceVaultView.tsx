@@ -136,7 +136,7 @@ export const EvidenceVaultView: React.FC<EvidenceVaultViewProps> = ({
             Evidence records & chain of custody
           </h2>
           <p className="text-sm text-slate-400 mt-1">
-            SHA-256 checks detect changes to stored content or links. This synthetic local store is not an independently immutable evidence system.
+            SHA-256 checks detect changes to stored content or links. This sample local store is not an independently immutable evidence system.
           </p>
         </div>
 

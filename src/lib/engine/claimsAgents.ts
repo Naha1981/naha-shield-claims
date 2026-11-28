@@ -235,7 +235,7 @@ export function buildDeterministicClaimAnalysis(
   const runTools = includeAll || agent.id === 'tool_integration_auditor';
 
   const checksRun: string[] = [
-    `Evaluated synthetic claim ${claim.claim_id} under ClaimTrace deterministic engine (${nowIso}).`,
+    `Evaluated sample claim ${claim.claim_id} under ClaimTrace deterministic engine (${nowIso}).`,
   ];
   if (promptInjectionWarnings.length > 0) {
     checksRun.push(
@@ -461,7 +461,7 @@ export function buildDeterministicClaimAnalysis(
       findings.push({
         finding_id: `FND-${claim.claim_id}-NOMINAL`,
         reason_code: 'GREEN_LANE_CORROBORATION_NOMINAL',
-        summary: `No adverse corroboration flags detected in synthetic intake (${claim.death_to_reg_days}d death-to-reg, AVS-R MATCHED, ${claim.inception_to_death_days}d tenure). Ready for standard human assessor sign-off.`,
+        summary: `No adverse corroboration flags detected in sample intake (${claim.death_to_reg_days}d death-to-reg, AVS-R MATCHED, ${claim.inception_to_death_days}d tenure). Ready for standard human assessor sign-off.`,
         evidence_tag: 'Verified Fact',
         source_ref: `claim:${claim.claim_id}`,
         evidence_type: 'Claims Intake Telemetry',
@@ -479,7 +479,7 @@ export function buildDeterministicClaimAnalysis(
     findings.push({
       finding_id: `FND-${claim.claim_id}-TOOLS`,
       reason_code: 'INTEGRATION_SIMULATED_BOUNDARY',
-      summary: `All ${adapters.length} statutory connectors (${simulatedNames}) are operating in SIMULATED synthetic mode. Live DHA, WinDeed, CIPC, and BankservAfrica APIs have NOT executed.`,
+      summary: `All ${adapters.length} statutory connectors (${simulatedNames}) are operating in SIMULATED sample mode. Live DHA, WinDeed, CIPC, and BankservAfrica APIs have NOT executed.`,
       evidence_tag: 'Verified Fact',
       source_ref: 'ADAPTER_INVENTORY',
       evidence_type: 'Connector Inventory Audit',
@@ -548,7 +548,7 @@ export function buildDeterministicClaimAnalysis(
   }
   if (conflictingOrMissing.length === 0) {
     conflictingOrMissing.push(
-      'No internal contradictions detected across synthetic intake fields; live bureau feeds remain simulated.',
+      'No internal contradictions detected across sample intake fields; live bureau feeds remain simulated.',
     );
   }
 
@@ -571,7 +571,7 @@ export function buildDeterministicClaimAnalysis(
     suggested_next_human_step: nextHumanStep,
     audit_references: Array.from(new Set(auditReferences)),
     advisory_disclaimer: AGENT_ADVISORY_DISCLAIMER,
-    narrative_summary: `${agent.name} completed ${findings.length} evidence-tagged check(s) on synthetic claim ${claim.claim_id}${input.userPrompt?.trim() ? ` addressing officer query: "${input.userPrompt.trim().slice(0, 140)}"` : ''}. ${nextHumanStep}`,
+    narrative_summary: `${agent.name} completed ${findings.length} evidence-tagged check(s) on sample claim ${claim.claim_id}${input.userPrompt?.trim() ? ` addressing officer query: "${input.userPrompt.trim().slice(0, 140)}"` : ''}. ${nextHumanStep}`,
     prompt_injection_warnings: promptInjectionWarnings,
   };
 

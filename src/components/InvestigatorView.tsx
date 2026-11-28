@@ -3,7 +3,7 @@ import {formatZar, formatZarCompact} from '../utils/format';
 import type {RoleId} from '../lib/engine/types';
 
 // Investigator home + case workspace from Thabiso's spec 2 section 9.
-// Synthetic data only. Phone rule: big numbers, one line per note, details
+// Sample data only. Phone rule: big numbers, one line per note, details
 // behind toggles. The screen never takes an adverse action by itself: hold,
 // document requests and call-backs are proposals or drafts a human approves.
 

@@ -103,7 +103,7 @@ export class NahaShieldStore {
     this.state = this.createInitialSeedState();
     if(workspaceId!=='original'){
       this.state=JSON.parse(JSON.stringify(this.state).split(DEFAULT_ORG_ID).join(workspaceId));
-      this.state.org_name='Private synthetic workspace';
+      this.state.org_name='Private sample workspace';
       let prev=GENESIS_CHAIN_HASH;
       for(const item of this.state.evidence_items){item.sha256_content=computeContentHash(item.content_summary);item.prev_chain_hash=prev;item.chain_hash=computeChainHash(item);prev=item.chain_hash;}
 
@@ -132,8 +132,8 @@ export class NahaShieldStore {
 
     return {
       org_id: DEFAULT_ORG_ID,
-      org_name: 'UbuntuShield Life & Funeral (Synthetic Partner)',
-      residency_region: process.env.NAHASHIELD_REGION || 'demo-render-synthetic-only',
+      org_name: 'UbuntuShield Life & Funeral (Sample Partner)',
+      residency_region: process.env.NAHASHIELD_REGION || 'demo-render-sample-only',
       psi_phase3_unlocked: false,
       recovery_cases: structuredClone(SYNTHETIC_RECOVERY_CASES),
       ledger_entries: ledgerEntries,
@@ -305,8 +305,8 @@ export class NahaShieldStore {
        ON CONFLICT (org_id) DO NOTHING`,
       [
         DEFAULT_ORG_ID,
-        'UbuntuShield Life & Funeral (Synthetic Partner)',
-        process.env.NAHASHIELD_REGION || 'demo-render-synthetic-only',
+        'UbuntuShield Life & Funeral (Sample Partner)',
+        process.env.NAHASHIELD_REGION || 'demo-render-sample-only',
       ],
     );
 

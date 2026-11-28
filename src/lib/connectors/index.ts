@@ -1,5 +1,5 @@
 // ClaimTrace connector framework (Thabiso's 09:22 order: SIM swap, RICA, bank
-// adapters; consent gate; audit log; humans decide; synthetic labelled data;
+// adapters; consent gate; audit log; humans decide; sample labelled data;
 // live calls behind one switch that stays OFF).
 //
 // Every connector here is a SIMULATED ADAPTER. No connector makes a network
@@ -15,7 +15,7 @@ import {
 } from '../engine/telecomRisk';
 
 /**
- * THE one switch. While false, every connector returns synthetic labelled
+ * THE one switch. While false, every connector returns sample labelled
  * fixtures and any request for a live call throws LIVE_CONNECTORS_OFF.
  * Flipping this to true also requires real adapter implementations, insurer
  * credentials, and Thabiso's fresh Go+Sure - none of which exist yet.

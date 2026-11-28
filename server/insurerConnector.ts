@@ -39,7 +39,7 @@ function safeBaseUrl(raw: string): string {
   return url.toString().replace(/\/$/, '');
 }
 
-// Mock feeds carry synthetic claims and take no credentials: skip auth for
+// Mock feeds carry sample claims and take no credentials: skip auth for
 // them so every profile can be proven before a real key exists.
 function isMockFeed(url: string): boolean {
   return /\/mock-insurer\//.test(url);

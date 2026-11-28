@@ -85,7 +85,7 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
           Controls, connectors and review history
         </h2>
         <p className="text-sm text-slate-400 mt-1">
-          Recorded synthetic controls and action receipts. Legal references guide review; this is not compliance certification.
+          Recorded sample controls and action receipts. Legal references guide review; this is not compliance certification.
         </p>
       </div>
 
@@ -133,11 +133,11 @@ export const ComplianceAuditView: React.FC<ComplianceAuditViewProps> = ({
                   {g.id} · {g.statute}
                 </span>
                 <span className="text-[13px] font-mono text-slate-300">
-                  Synthetic rule sample
+                  Sample rule sample
                 </span>
               </div>
               <div className="text-xs font-semibold text-white">{g.title}</div>
-              <p className="text-xs text-slate-400 leading-relaxed">{g.id==='CG-03'?'Stored content and links can be checked with SHA-256. Current sample file storage is not an independently immutable evidence system.':g.id==='CG-10'?'Separate synthetic browser workspaces with a named reviewer workspace. Production company identity, tenant RLS and account provisioning are not established by this sample.':g.detail}</p>
+              <p className="text-xs text-slate-400 leading-relaxed">{g.id==='CG-03'?'Stored content and links can be checked with SHA-256. Current sample file storage is not an independently immutable evidence system.':g.id==='CG-10'?'Separate sample browser workspaces with a named reviewer workspace. Production company identity, tenant RLS and account provisioning are not established by this sample.':g.detail}</p>
             </div>
           ))}
         </div>

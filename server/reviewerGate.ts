@@ -1,3 +1,3 @@
 import type express from 'express';
-/** Named authority for original reviewer store; visitor role selection stays a synthetic sample. */
+/** Named authority for original reviewer store; visitor role selection stays a sample sample. */
 export function reviewerGate(current:()=>string,principal:(q:express.Request)=>{id:string;role:string}|null):express.RequestHandler{return(req,res,next)=>{if(current()!=='original'||req.path==='/health')return next();const p=principal(req);if(!p)return res.status(401).json({error:'Named reviewer session expired. Sign in through Documents or Messages. No private record was changed.'});(req as any).namedReviewer=p;req.headers['x-nahashield-role']=p.role;req.headers['x-nahashield-user-id']=p.id;next()}}

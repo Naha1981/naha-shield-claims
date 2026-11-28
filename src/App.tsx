@@ -259,9 +259,9 @@ export default function App() {
     }, 60);
   }
 
-  if(route==='/network')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Synthetic graph preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RelationshipGraph/></LayoutShell>;
-  if(route==='/recovery'&&import.meta.env.VITE_STATIC_PREVIEW)return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Synthetic recovery preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RecoveryDeskView cases={SYNTHETIC_RECOVERY_CASES} decisions={[]} activeRole={activeRole} activeActorName="Synthetic reviewer" onCaseAdded={async()=>{}} onDecisionRecorded={async()=>{}}/></LayoutShell>;
-  if(route==='/leakage')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Synthetic leakage preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RetrospectiveLeakageView onNavigate={navigate} activeRole={activeRole}/></LayoutShell>;
+  if(route==='/network')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Sample graph preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RelationshipGraph/></LayoutShell>;
+  if(route==='/recovery'&&import.meta.env.VITE_STATIC_PREVIEW)return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Sample recovery preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RecoveryDeskView cases={SYNTHETIC_RECOVERY_CASES} decisions={[]} activeRole={activeRole} activeActorName="Sample reviewer" onCaseAdded={async()=>{}} onDecisionRecorded={async()=>{}}/></LayoutShell>;
+  if(route==='/leakage')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Sample leakage preview" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><RetrospectiveLeakageView onNavigate={navigate} activeRole={activeRole}/></LayoutShell>;
   if(route==='/intake')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Insurer intake" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><IntakeView onNavigate={navigate} activeRole={activeRole}/></LayoutShell>;
   if(route==='/investigator')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Claims investigation" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><InvestigatorView activeRole={activeRole} onOpenExample={()=>navigate('/see-worked-case-example')}/></LayoutShell>;
   if(route==='/see-worked-case-example')return <LayoutShell activeRoute={route} onNavigate={navigate} activeRole={activeRole} onChangeRole={handleChangeRole} orgName="Worked example" vaultValid={false} anomalyAlerts={[]} anomalyThresholdPct={75} onAcknowledgeAlert={async()=>{}} onOpenReadout={()=>{}}><WorkedCaseLanding onOpenCase={(id)=>navigate(`/see-worked-case-example/${id}` as NavRoute)} onSeed={()=>navigate('/investigator')}/></LayoutShell>;
@@ -307,7 +307,7 @@ export default function App() {
           className="px-4 py-2 text-xs font-semibold rounded bg-emerald-600 text-white"
         >
           Retry Connection
-        </button><a href="/review" className="underline">Open the public synthetic review</a><div className="w-full max-w-2xl"><WorkforceView onRecorded={()=>void loadState(activeRole)}/></div>
+        </button><a href="/review" className="underline">Open the public sample review</a><div className="w-full max-w-2xl"><WorkforceView onRecorded={()=>void loadState(activeRole)}/></div>
       </div>
     );
   }

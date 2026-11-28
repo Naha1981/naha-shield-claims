@@ -462,7 +462,7 @@ export function buildAgentAnalyticsCsv(params: {
       summary.rejected_proposals,
       summary.pending_proposals,
       summary.manual_override_rate_pct,
-      `${summary.unique_claims_processed}/${summary.total_claims_universe} (${summary.coverage_pct}% portfolio coverage · synthetic only)`,
+      `${summary.unique_claims_processed}/${summary.total_claims_universe} (${summary.coverage_pct}% portfolio coverage · sample only)`,
       exportedAt,
     ],
     [

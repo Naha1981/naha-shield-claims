@@ -1,4 +1,4 @@
-/* Private synthetic-only prototype. No production import, no entitlement decision. */
+/* Private sample-only prototype. No production import, no entitlement decision. */
 export type HistoricalPayment={dataset_label:string,payment_id:string,claim_id:string,supplier_alias:string,invoice_ref:string,invoice_total_cents:number,approved_gross_cents:number,contractual_excess_cents:number,paid_cents:number,payment_date:string,notification_date:string,loss_date:string,required_documents:string,received_documents:string};
 export type Candidate={payment_id:string,claim_id:string,signal:string,candidate_cents:number,related_payment_id?:string,evidence:string[],decision:'HUMAN_REVIEW_REQUIRED',cash_recovered_cents:0};
 export function scanHistoricalPayments(rows:HistoricalPayment[]):{candidates:Candidate[],operational_flags:Candidate[]}{

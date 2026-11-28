@@ -4,7 +4,7 @@ import { lintOutboundMessage } from '../src/lib/engine/lint';
 import { CLAIM_AGENT_REGISTRY } from '../src/lib/engine/claimsAgents';
 
 /**
- * Synthetic messaging transport (test inbox only).
+ * Sample messaging transport (test inbox only).
  * - Channels: whatsapp_sim, email_sim, group_sim. All in-memory. No network I/O of any kind.
  * - Agent replies are DRAFTS. Nothing counts until a joined human approves the exact digest.
  * - "approved" means "approved inside the test inbox". It never means sent or delivered.
@@ -131,7 +131,7 @@ export class SynthChat {
     await this.log('SYNTH_HUMAN_JOINED', t.id, human.id, { role: human.role });
     return t;
   }
-  /** A synthetic claimant message arrives; each agent on the thread drafts a reply (pending approval). */
+  /** A sample claimant message arrives; each agent on the thread drafts a reply (pending approval). */
   async inbound(thread_id: string, i: { text: string; subject?: string }) {
     const t = this.thread(thread_id);
     this.checkText(t, i.text, i.subject);

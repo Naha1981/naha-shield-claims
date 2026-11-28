@@ -144,7 +144,7 @@ export function IntakeView({onNavigate,activeRole}:{onNavigate?:(route:NavRoute)
  {result&&<>
  <section className="network-box"><h3>What came in</h3>
  <div className="network-stats"><span><b>{result.summary.claims_analysed}</b> claims</span><span><b>{formatZar(result.summary.total_paid_zar)}</b> paid</span><span><b>{result.summary.findings_count}</b> findings</span><span><b>{formatZar(result.summary.flagged_paid_zar)}</b> flagged</span></div>
- <p className="network-muted">{result.file_name}{result.synthetic?' (mock feed, synthetic)':''}{result.pages_read?` · ${result.pages_read} page(s) read`:''} · analysed in memory, nothing stored</p>
+ <p className="network-muted">{result.file_name}{result.synthetic?' (mock feed, sample)':''}{result.pages_read?` · ${result.pages_read} page(s) read`:''} · analysed in memory, nothing stored</p>
  <p><button type="button" className="network-cta" onClick={openInLeakage}>Open findings in Leakage check</button></p>
  </section>
  {result.ingest_report&&<FileCheckCard report={result.ingest_report} sheetName={result.sheet_name}/>}

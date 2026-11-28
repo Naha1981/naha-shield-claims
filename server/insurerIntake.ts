@@ -71,7 +71,7 @@ function resultPayload(result: ConnectorPullResult, sourceLabel: string, synthet
   };
 }
 
-// ---- Mock insurer feeds (fully synthetic) proving the profiles work. ----
+// ---- Mock insurer feeds (fully sample) proving the profiles work. ----
 
 function mockLibertyClaims(): Array<Record<string, unknown>> {
   const rows: Array<Record<string, unknown>> = [];
@@ -255,7 +255,7 @@ export function intakeRoutes() {
       const result = profile.protocol === 'file_url'
         ? await pullClaimsFile(profile, baseUrl)
         : await pullClaims(profile, baseUrl);
-      const synthetic = /mock-insurer/.test(baseUrl);
+      const sample = /mock-insurer/.test(baseUrl);
       logIntakeEvent({
         kind: 'api-pull',
         source: profile.label,
@@ -265,7 +265,7 @@ export function intakeRoutes() {
         flagged_zar: result.analysis.summary.flagged_paid_zar,
         message: `Pulled ${result.report.rows_used} claims in ${result.pages_read} page(s) from ${profile.label}.`,
       });
-      res.json(resultPayload(result, `${profile.label} API`, synthetic, profile.protocol));
+      res.json(resultPayload(result, `${profile.label} API`, sample, profile.protocol));
     } catch (e) {
       const message = e instanceof ConnectorError ? e.plain : (e as Error).message;
       if (profile) logIntakeEvent({ kind: 'api-pull', source: profile.label, status: 'error', claims: 0, findings: 0, flagged_zar: 0, message });
@@ -334,7 +334,7 @@ export function intakeRoutes() {
     }
   });
 
-  // Mock insurer feeds, fully synthetic, so every profile can be tested with
+  // Mock insurer feeds, fully sample, so every profile can be tested with
   // no live connection: point base_url at <origin>/api/mock-insurer/<id>.
   const mockRouter = express.Router();
   mockRouter.get('/:profileId/claims', (req, res) => {

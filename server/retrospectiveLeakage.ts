@@ -18,7 +18,7 @@ export function leakageRoutes() {
   const r = express.Router();
 
   r.get('/demo', (_req, res) => {
-    res.json({ file_name: 'synthetic-6-month-claims-demo.csv', synthetic: true, ...analyseLeakage(demoCsv()) });
+    res.json({ file_name: 'sample-6-month-claims.csv', synthetic: true, ...analyseLeakage(demoCsv()) });
   });
 
   r.post('/analyse', (req, res) => {

@@ -1,5 +1,5 @@
 // Kill switch + incident log, executing docs/false-flag-incident-response.md
-// (Thabiso's spec 1 section 3). Synthetic data only. The kill switch disables
+// (Thabiso's spec 1 section 3). Sample data only. The kill switch disables
 // a rule, model, agent or integration in memory; the incident log records the
 // response workflow steps with hash-chained entries. Notifications are
 // recorded, never sent (no external contact).

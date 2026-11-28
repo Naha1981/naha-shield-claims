@@ -1,6 +1,6 @@
 // Worked-example seeder (Thabiso's worked-example order + spec 6).
-// Loads the synthetic sample case into the real claims workspace so Lawrence
-// can click through the actual system with no upload. Synthetic data only,
+// Loads the sample sample case into the real claims workspace so Lawrence
+// can click through the actual system with no upload. Sample data only,
 // clearly labelled sample. Idempotent: re-seeding replaces the sample claims.
 // The duplicate check runs through the REAL engine (crossClaimMatching).
 

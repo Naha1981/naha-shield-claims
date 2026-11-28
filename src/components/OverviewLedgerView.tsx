@@ -73,7 +73,7 @@ type LedgerFilter = 'all' | 'counted' | 'awaiting' | 'excluded' | 'backtest';
 
 const FILTER_LABELS: Record<LedgerFilter, string> = {
   all: 'All Rows',
-  counted: 'Counted (synthetic)',
+  counted: 'Counted (sample)',
   awaiting: 'Awaiting Sign-Off',
   excluded: 'Excluded / Not Money',
   backtest: 'Backtest',
@@ -265,7 +265,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
       <div id="savings-detail" className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-800 pb-4">
         <div>
           <h2 className="font-display text-2xl font-bold text-white tracking-tight">
-            Synthetic financial overview
+            Sample financial overview
           </h2>
           <p className="text-sm text-slate-400 mt-1">
             Arrests, judgments, and repayment promises are excluded from Rand totals. Only bank-reconciled cash and dual-signed incremental saves count.
@@ -282,7 +282,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
             className="px-3.5 py-1.5 text-xs font-semibold rounded-md border border-emerald-500/40 bg-emerald-950/50 hover:bg-emerald-900/60 text-emerald-300 inline-flex items-center gap-2 transition-colors whitespace-nowrap"
           >
             <FileDown className="w-3.5 h-3.5" />
-            {pdfBusy ? 'Generating PDF...' : 'Export synthetic PDF'}
+            {pdfBusy ? 'Generating PDF...' : 'Export sample PDF'}
           </button>
         </div>
       </div>
@@ -295,7 +295,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
         >
           <Check className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
           <div className="flex-1">
-            <span className="font-semibold">Synthetic PDF exported: </span>
+            <span className="font-semibold">Sample PDF exported: </span>
             <span className="font-mono">{pdfConfirmation.filename}</span> (Report ID{' '}
             <span className="font-mono">{pdfConfirmation.reportId}</span>,{' '}
             <span className="font-mono tabular-nums">
@@ -379,7 +379,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
             Litigation halted on PTO / nulla bona targets
           </div>
         </div>
-      </section><aside className="insights-rail"><div className="context-label">Review insights</div><h3>Financial evidence first</h3><p>{entries.length} synthetic entries. Values remain separate by evidence and review state.</p><dl><div><dt>Source basis</dt><dd>Seeded ledger and case records</dd></div><div><dt>Required control</dt><dd>Finance and forensic sign-off</dd></div><div><dt>Actual cash collected by this app</dt><dd className="insight-value">R 0</dd></div></dl><a href="#financial-ledger" className="text-sky-300 underline">Inspect underlying records ↓</a></aside></div>
+      </section><aside className="insights-rail"><div className="context-label">Review insights</div><h3>Financial evidence first</h3><p>{entries.length} sample entries. Values remain separate by evidence and review state.</p><dl><div><dt>Source basis</dt><dd>Seeded ledger and case records</dd></div><div><dt>Required control</dt><dd>Finance and forensic sign-off</dd></div><div><dt>Actual cash collected by this app</dt><dd className="insight-value">R 0</dd></div></dl><a href="#financial-ledger" className="text-sky-300 underline">Inspect underlying records ↓</a></aside></div>
 
       {/* Non-Cash & Friction Separation Strip */}
       <section aria-label="Non-cash and operational metrics" className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -494,7 +494,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
             {(
               [
                 ['all', 'All Rows'],
-                ['counted', 'Counted (synthetic)'],
+                ['counted', 'Counted (sample)'],
                 ['awaiting', `Awaiting Sign-Off (${summary.awaiting_signoff_count})`],
                 ['excluded', 'Excluded / Not Money'],
                 ['backtest', 'Backtest'],
@@ -704,7 +704,7 @@ export const OverviewLedgerView: React.FC<OverviewLedgerViewProps> = ({
                   Phase 0 Executive Readout
                 </h2>
                 <p className="text-xs text-slate-400 mt-1">
-                  De-identified synthetic baseline readout · No unconfirmed ROI projections
+                  De-identified sample baseline readout · No unconfirmed ROI projections
                 </p>
               </div>
               <button

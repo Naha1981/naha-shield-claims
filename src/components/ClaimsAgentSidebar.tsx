@@ -207,7 +207,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
       setContext(res.context);
       setActionFeedback(
         decision === 'approve'
-          ? `Decision recorded for synthetic action "${proposal.title}"${res.proposal.committed_ref ? ` (Ref: ${res.proposal.committed_ref})` : ''}.`
+          ? `Decision recorded for sample action "${proposal.title}"${res.proposal.committed_ref ? ` (Ref: ${res.proposal.committed_ref})` : ''}.`
           : `Returned for revision "${proposal.title}" — logged to claim audit trail.`,
       );
       await onCommittedChange();
@@ -255,7 +255,7 @@ export const ClaimsAgentSidebar: React.FC<ClaimsAgentSidebarProps> = ({
             </div>
             <p className="text-[13px] text-slate-400 mt-0.5">
               {claim
-                ? `${claim.claim_id} · ${claim.policy_ref} · Synthetic Data Only`
+                ? `${claim.claim_id} · ${claim.policy_ref} · Sample Data Only`
                 : 'Select a claim row to inspect'}
             </p>
           </div>

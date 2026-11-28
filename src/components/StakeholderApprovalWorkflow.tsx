@@ -961,7 +961,7 @@ export const StakeholderApprovalWorkflow: React.FC<
                     className="mt-0.5 rounded border-slate-600 bg-slate-900 text-emerald-500 focus:ring-emerald-500"
                   />
                   <span>
-                    I record this synthetic review attestation. This does not establish independent identity verification or immutable storage for{' '}
+                    I record this sample review attestation. This does not establish independent identity verification or immutable storage for{' '}
                     <span className="font-mono text-white">
                       {selectedEntry.entry_id}
                     </span>

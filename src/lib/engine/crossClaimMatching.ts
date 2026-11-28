@@ -1,4 +1,4 @@
-// Cross-claim duplicate matching engine. Synthetic data only.
+// Cross-claim duplicate matching engine. Sample data only.
 // Built to Thabiso's spec 3 (TC-DUP-001 to 050, WhatsApp 07:09). Where the
 // earlier specs' numbers conflicted, the stricter value was kept:
 //   bank account 92 (spec 2 payload said 88), agent duplicate policy 85 (was 82),

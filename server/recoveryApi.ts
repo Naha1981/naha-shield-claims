@@ -1,5 +1,5 @@
 // Recovery action API from Thabiso's spec 1 section 1 (16 endpoints).
-// In-memory, synthetic data only. Auth: when NAHASHIELD_LOGIN=on the global
+// In-memory, sample data only. Auth: when NAHASHIELD_LOGIN=on the global
 // /api middleware has already required a bearer token and we use its role;
 // with login off (Lawrence's sample) the demo-role header maps through
 // DEMO_ROLE_MAP so the sample keeps working.

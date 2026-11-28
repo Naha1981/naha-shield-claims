@@ -38,7 +38,7 @@ export function FileCheckCard({report,sheetName}:{report:IngestReport;sheetName?
 
 export function RetrospectiveLeakageView({onNavigate,activeRole}:{onNavigate?:(route:NavRoute)=>void;activeRole?:RoleId}){
  const[data,setData]=React.useState<Analysis|null>(null),[error,setError]=React.useState(''),[busy,setBusy]=React.useState(false),[ruleFilter,setRuleFilter]=React.useState('all'),[sentCase,setSentCase]=React.useState('');
- const sample=()=>{setBusy(true);setError('');fetch('/api/leakage/demo').then(r=>{if(!r.ok)throw Error('api unavailable');return r.json()}).then(setData).catch(()=>{try{setData({file_name:'synthetic-6-month-claims-demo.csv',synthetic:true,...analyseLeakage(demoCsv())})}catch(e){setError((e as Error).message)}}).finally(()=>setBusy(false));};
+ const sample=()=>{setBusy(true);setError('');fetch('/api/leakage/demo').then(r=>{if(!r.ok)throw Error('api unavailable');return r.json()}).then(setData).catch(()=>{try{setData({file_name:'sample-6-month-claims.csv',synthetic:true,...analyseLeakage(demoCsv())})}catch(e){setError((e as Error).message)}}).finally(()=>setBusy(false));};
  const onFile=(e:React.ChangeEvent<HTMLInputElement>)=>{
   const f=e.target.files?.[0];if(!f)return;
   setBusy(true);setError('');setSentCase('');

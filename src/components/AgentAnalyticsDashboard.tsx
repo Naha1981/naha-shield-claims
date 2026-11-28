@@ -177,7 +177,7 @@ export const AgentAnalyticsDashboard: React.FC<
             </h2>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Synthetic seeded runs plus activity in this workspace. Not real insurer productivity, fraud accuracy or compliance evidence.
+            Sample seeded runs plus activity in this workspace. Not real insurer productivity, fraud accuracy or compliance evidence.
           </p>
         </div>
 

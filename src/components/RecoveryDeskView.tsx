@@ -452,7 +452,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
                   {selectedCase.defendant_alias}
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Synthetic recorded basis: {selectedCase.fraud_basis} · Example payout {formatZar(selectedCase.original_payout)} ({selectedCase.payout_date})
+                  Sample recorded basis: {selectedCase.fraud_basis} · Example payout {formatZar(selectedCase.original_payout)} ({selectedCase.payout_date})
                 </p>
               </div>
               <span className="text-[13px] px-2 py-0.5 rounded border border-slate-700 bg-slate-900 text-slate-300 whitespace-nowrap">
@@ -461,7 +461,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
             </div>
 
             <div role="tablist" aria-label="Recovery case details" className="flex flex-wrap gap-2">{detailTabs.map(([id,label])=><button key={id} type="button" role="tab" id={'recovery-tab-'+id} aria-controls={'recovery-panel-'+id} aria-selected={detailTab===id} className={'rounded-lg border px-3 py-2 text-sm '+(detailTab===id?'bg-emerald-800 text-white border-emerald-700':'border-slate-600')} onClick={()=>setDetailTab(id)}>{label}</button>)}</div>
-            <section id="recovery-panel-overview" role="tabpanel" aria-labelledby="recovery-tab-overview" hidden={detailTab!=='overview'}><h3 className="font-semibold">Recovery overview</h3><dl className="grid sm:grid-cols-2 gap-4 mt-3 text-sm"><div><dt>Illustrative original payout</dt><dd>{formatZar(selectedCase.original_payout)}</dd></div><div><dt>Recommended route, human review required</dt><dd>{liveTriage.recommended_route}</dd></div></dl><p className="text-sm mt-3">This is a synthetic review model, not collectible cash, a court order or authority to contact a defendant. Use Assets & legal for the existing statutory flags, NRV scenarios for assumptions, then draft handover and the named human decision.</p></section>
+            <section id="recovery-panel-overview" role="tabpanel" aria-labelledby="recovery-tab-overview" hidden={detailTab!=='overview'}><h3 className="font-semibold">Recovery overview</h3><dl className="grid sm:grid-cols-2 gap-4 mt-3 text-sm"><div><dt>Illustrative original payout</dt><dd>{formatZar(selectedCase.original_payout)}</dd></div><div><dt>Recommended route, human review required</dt><dd>{liveTriage.recommended_route}</dd></div></dl><p className="text-sm mt-3">This is a sample review model, not collectible cash, a court order or authority to contact a defendant. Use Assets & legal for the existing statutory flags, NRV scenarios for assumptions, then draft handover and the named human decision.</p></section>
             <section id="recovery-panel-assets" role="tabpanel" aria-labelledby="recovery-tab-assets" hidden={detailTab!=='assets'} className="space-y-4">
             {/* Statutory Warning Banners */}
             <div className="space-y-2">
@@ -636,7 +636,7 @@ export const RecoveryDeskView: React.FC<RecoveryDeskViewProps> = ({
                   Attorney / AFU Handover Pack Preview — {selectedCase.case_id}
                 </div>
                 <p className="text-slate-300 leading-relaxed">
-                  <strong>Claimant Insurer:</strong> Synthetic Partner · <strong>Defendant:</strong> {selectedCase.defendant_alias} · <strong>Loss:</strong> {formatZar(selectedCase.original_payout)}
+                  <strong>Claimant Insurer:</strong> Sample Partner · <strong>Defendant:</strong> {selectedCase.defendant_alias} · <strong>Loss:</strong> {formatZar(selectedCase.original_payout)}
                 </p>
                 <p className="text-slate-300 leading-relaxed">
                   <strong>Tenure & Equity:</strong> {selectedCase.title_type} (Bonds: {formatZar(selectedCase.senior_bonds)}, Arrears: {formatZar(selectedCase.municipal_arrears)}). Modelled recoverable: {formatZar(liveTriage.practically_recoverable)}.

@@ -52,7 +52,7 @@ const NAV_ITEMS: Array<{
  {route:'/intake',label:'Intake',sublabel:'Files · APIs · Webhooks',icon:FileSpreadsheet},
  {route:'/investigator',label:'Investigate',sublabel:'Queue · Cases · Decisions',icon:FileSearch},
  {route:'/see-worked-case-example',label:'Example',sublabel:'Worked case · Sample data',icon:FileSearch},
- {route:'/workforce',label:'AI team',sublabel:'Synthetic uploads · Human review',icon:ShieldCheck},
+ {route:'/workforce',label:'AI team',sublabel:'Sample uploads · Human review',icon:ShieldCheck},
   {
     route: '/',
     label: 'Savings',
@@ -198,7 +198,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
           </span>
           <span
             className="demo-pill"
-            title="Sample workspace: synthetic data only, no live actions or payments"
+            title="Sample workspace: sample data only, no live actions or payments"
           >
             SAMPLE<span className="hidden sm:inline"> · fictional data</span>
           </span>
@@ -464,7 +464,7 @@ export const LayoutShell: React.FC<LayoutShellProps> = ({
               <div className="px-2.5 py-2 rounded-md bg-slate-900/90 border border-slate-800 text-xs text-slate-200 leading-snug">
                 <div className="font-medium truncate">{orgName}</div>
                 <div className="text-[13px] text-slate-400 mt-0.5 font-mono">
-                  Synthetic workspace · Server separated
+                  Sample workspace · Server separated
                 </div>
               </div>
             </div>

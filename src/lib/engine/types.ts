@@ -182,7 +182,7 @@ export interface ConsentPolicyInput {
   preferred_language: ConsentLanguage;
   duress_alert: boolean;
   cert_hash?: string | null;
-  /** Optional synthetic attribute strictly ignored by PEPUDA-compliant consent rules */
+  /** Optional sample attribute strictly ignored by PEPUDA-compliant consent rules */
   assured_age_band?: string;
 }
 

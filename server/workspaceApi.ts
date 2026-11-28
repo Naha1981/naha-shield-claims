@@ -1,6 +1,6 @@
 // Claims workspace APIs from Thabiso's spec 2 sections 2-6: claims, duplicate
 // detection, evidence, adverse actions + appeals, and notification drafts.
-// In-memory, synthetic data only. Same conventions as the recovery API:
+// In-memory, sample data only. Same conventions as the recovery API:
 // Idempotency-Key on mutations, X-Request-ID on responses, consistent error
 // envelope, RBAC matrix + tenant object checks. POPIA pattern holds: checks
 // recommend, humans decide; adverse actions need approval; appeals always
@@ -208,7 +208,7 @@ export function workspaceApiRoutes(): express.Router {
     claim_submitted_at: c.submitted_at,
   });
 
-  // 2.7 Run claim checks (synthetic checks; duplicate uses the real engine)
+  // 2.7 Run claim checks (sample checks; duplicate uses the real engine)
   r.post('/claims/:claimId/checks', (req, res) => {
     const got = getClaim(req, res, ['view_claim_indicators']); if (!got) return;
     const { c } = got;
@@ -228,7 +228,7 @@ export function workspaceApiRoutes(): express.Router {
       }
       if (check === 'documents') return { check_type: check, status: c.documents.length > 0 ? 'passed' : 'failed', result: c.documents.length > 0 ? 'documents_present' : 'documents_missing' };
       if (check === 'clock') return { check_type: check, status: 'passed', result: c.clock_status };
-      // identity, death, beneficiary, fraud: synthetic stand-ins until real integrations exist.
+      // identity, death, beneficiary, fraud: sample stand-ins until real integrations exist.
       return { check_type: check, status: 'passed', result: 'synthetic_pass' };
     });
     res.json({ claim_id: c.claim_id, checks: results, synthetic: true, automatic_adverse_action: false });
