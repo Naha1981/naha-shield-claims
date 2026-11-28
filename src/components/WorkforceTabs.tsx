@@ -16,7 +16,7 @@ export function WorkforceTabs({ onRecorded, activeRole }: { onRecorded: () => vo
   const b = (on: boolean) => `px-4 py-2 rounded-t-lg text-sm ${on ? 'bg-slate-900 text-white border border-b-0 border-slate-700' : 'text-slate-400 hover:text-slate-200'}`;
   const tasks = [
     ['docs','Read a file','Try built-in fictional files',FileText,'#e2f2ff'],
-    ['chat','Ask the team','Ask 12 specialist agents',MessageCircle,'#eee8ff'],
+    ['chat','Ask the team','Ask the 6 specialist agents',MessageCircle,'#eee8ff'],
     ['maps','Check an address','Inspect public maps & images',MapPin,'#dcf5ec'],
     ['messages','Review messages','Named reviewer inbox',Mail,'#fff0d9'],
     ['browser','Run a browser task','Named reviewer tool',Globe,'#e1f1ff'],

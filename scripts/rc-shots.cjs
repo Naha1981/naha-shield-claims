@@ -94,6 +94,21 @@ const OUT = process.env.RC_OUT || '/tmp/rc-shots';
       await ctx.close();
       continue;
     }
+    if (process.env.RC_ONLY === 'reports') {
+      await page.waitForSelector('text=Reports from auditable state', { timeout: 90000 });
+      await page.waitForTimeout(1200);
+      await page.screenshot({ path: `${OUT}/rc-reports-${theme}.png` });
+      console.log(`saved rc-reports-${theme}.png`);
+      await page.click('button:has-text("Finance and assurance statement")');
+      await page.waitForTimeout(800);
+      await page.locator('text=Full integer-cents traceability').scrollIntoViewIfNeeded();
+      await page.waitForTimeout(400);
+      await page.screenshot({ path: `${OUT}/rc-reports-finance-${theme}.png` });
+      console.log(`saved rc-reports-finance-${theme}.png`);
+      console.log('REPORTS-OK');
+      await ctx.close();
+      continue;
+    }
     if (process.env.RC_ONLY === 'needsok') {
       await page.waitForSelector('h1:text-is("Needs Your OK")', { timeout: 90000 });
       await page.waitForTimeout(1200);

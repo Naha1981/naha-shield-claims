@@ -5,6 +5,7 @@ export type NavRoute =
   | '/needs-ok'
   | '/case-workspace'
   | '/ai-ops'
+  | '/reports'
   | '/savings-ledger'
   | '/rand-found'
   | '/recovery'
@@ -25,6 +26,7 @@ export const ROUTE_REGISTRY: Array<{ route: NavRoute; prefix?: boolean }> = [
   { route: '/needs-ok' },
   { route: '/case-workspace' },
   { route: '/ai-ops' },
+  { route: '/reports' },
   { route: '/savings-ledger' },
   { route: '/rand-found' },
   { route: '/claims' },

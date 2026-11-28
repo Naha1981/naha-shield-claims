@@ -92,6 +92,7 @@ const NAV_GROUPS: Array<{ group: string; items: NavItem[] }> = [
       { route: '/vault', label: 'Evidence', sublabel: 'Sources and evidence history', icon: FolderLock },
       { route: '/consent', label: 'Consent', sublabel: 'Review consent evidence', icon: UserCheck },
       { route: '/compliance', label: 'Audit', sublabel: 'Review actions and safeguards', icon: ShieldCheck },
+      { route: '/reports', label: 'Reports', sublabel: 'Briefings · Forensic · Finance', icon: FileSpreadsheet },
     ],
   },
 ];
